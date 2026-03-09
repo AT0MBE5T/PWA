@@ -1,0 +1,79 @@
+[data-theme='dark'] {
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    --header-bg: linear-gradient(135deg, #1e293b 0%, #312e81 100%);
+    --header-border: rgba(255, 255, 255, 0.1);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-color: #fbbf24;
+    --nav-hover-bg: rgba(255, 255, 255, 0.05);
+    --control-btn-bg: rgba(255, 255, 255, 0.1);
+    --control-btn-hover: rgba(255, 255, 255, 0.2);
+
+    --input-bg: #1e293b;
+    --input-border: #334155;
+    --input-text: #f1f5f9;
+    --dropdown-bg: #1e293b;
+    --dropdown-shadow: rgba(0, 0, 0, 0.4);
+    --item-hover: #334155;
+
+    --bg-main: #0f172a;
+    --bg-card: #1e293b;
+    --bg-dropdown: #1e293b; 
+    --border-color: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --input-focus: #7a42f4;
+    --overlay-bg: rgba(0, 0, 0, 0.6);    
+}
+
+:root:not([data-theme='dark']) {
+    --bg-gradient: linear-gradient(90deg, hsl(190, 31%, 76%) 0%, hsl(315, 31%, 76%) 100%);
+    --header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --header-border: rgba(0, 0, 0, 0.05);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --accent-color: #ffd580;
+    --nav-hover-bg: rgba(255, 255, 255, 0.15);
+    --control-btn-bg: rgba(255, 255, 255, 0.1);
+    --control-btn-hover: rgba(255, 255, 255, 0.2);
+}
+
+:global(:root) {
+    --header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --text-color: white;
+    --accent-color: #ffd580;
+}
+
+:root {
+    --input-bg: #ffffff;
+    --input-border: #e2e8f0;
+    --input-text: #1e293b;
+    --dropdown-bg: #ffffff;
+    --dropdown-shadow: rgba(0, 0, 0, 0.1);
+    --item-hover: #f8fafc;
+    --sidebar-width: 260px;
+    --accent: #ffd580;
+    --nav-bg: rgba(20, 20, 20, 0.8);
+
+    --filter-bg: #ffffff;
+    --filter-text: #2d3748;
+    --filter-label: #4a5568;
+    --filter-border: #e2e8f0;
+    --filter-input-bg: #ffffff;
+    --filter-footer-bg: #f8fafc;
+    --filter-secondary-btn: #ffffff;
+    --filter-shadow: rgba(0, 0, 0, 0.1);
+    --nav-btn-color: #000000;
+
+    --report-bg: transparent;
+    --card-bg: #ffffff;
+    --card-text: #2d3748;
+    --card-secondary-text: #4a5568;
+    --card-shadow: rgba(0, 0, 0, 0.1);
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
