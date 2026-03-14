@@ -3,9 +3,13 @@
     import { auth, ConfirmModal, Roles, settings, toast, Toast, translations } from '$lib';
     import { format } from 'date-fns';
     import type { PageData } from './$types';
-    import { untrack } from 'svelte';
+    import { onMount, tick, untrack } from 'svelte';
     import createChatState from '$lib/stores/chatStore.svelte';
     import createCommentState from '$lib/stores/commentStore.svelte';
+    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
+    import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte';
+    import offerState from '$lib/stores/offerStore.svelte';
+    import commentState from '$lib/stores/commentStore.svelte';
 
     let { data }: { data: PageData } = $props();
 
@@ -17,6 +21,8 @@
 
     let confirmModal: ConfirmModal;
 
+    let commentContainer: HTMLElement;
+
     async function deleteComment(commentId: string) {
         const confirmed = await confirmModal.ask();
 
@@ -25,33 +31,68 @@
         await commentState.deleteComment(data.id, commentId);
     }
 
-    const commentState = createCommentState();
-
     let allComments = $derived(commentState.comments);
 
     $effect(() => {
         const currentId = data.id;
+        if (!currentId) return;
 
-        untrack(() => {
-            if (currentId) {
-                commentState.setComments(data.initialComments);
-                commentState.initSignalR(data.id, data.user!.name!);
+        const userName = untrack(() => data.user?.name || 'Guest');
+
+        async function setupChat() {
+            try {
+                const response = await fetch(`http://localhost:5118/api/Comment/get-comments-by-announcement-id/${currentId}`);
+                if (response.ok) {
+                    const initialComments = await response.json();
+                    offerFullStore.setComments(currentId, initialComments);
+                    commentState.setComments(initialComments);
+                }
+            } catch (e) {
+                await offerFullStore.loadComments(currentId);
+                const pendingComments = await offerFullStore.getPendingComments();
+                let arrToAdd = offerFullStore.comments[currentId].concat(pendingComments);
+
+                const sortedArr = [...arrToAdd].sort((a, b) => {
+                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                });
+
+                commentState.setComments(sortedArr);
+            } finally {
+                await commentState.initSignalR(currentId, userName);
             }
-        });
+        }
+
+        setupChat();
 
         return () => {
-            untrack(() => {
-                commentState.stopSignalR();
-            });
+            commentState.stopSignalR();
         };
     });
 
     async function addComment() {
         if (!commentText.trim()) return;
-        await commentState.leaveComment(data.id, commentText);
+        await commentState.leaveComment(`${$auth.personName} ${$auth.personSurname}`, data.id, commentText);
         commentText = "";
     }
 
+    $effect(() => {
+        if (commentState.comments && commentContainer) {
+            tick().then(() => {
+                commentContainer.scrollTo({
+                    top: commentContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    });
+
+    const handleKeydown = (e: KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+
+            addComment();
+        }
+    };
 
 const t = $derived(translations[settings.lang]);
 
@@ -61,7 +102,7 @@ const t = $derived(translations[settings.lang]);
 
 <div class="comments__block">
     <h2 class="comments__title">💬 {t.offers.comments}</h2>
-    <div class="comments__block__container">
+    <div class="comments__block__container" bind:this={commentContainer}>
         {#each allComments as i}
             <div class="comments__item">
                 {#if auth.hasRole(Roles.Admin)}
@@ -78,6 +119,9 @@ const t = $derived(translations[settings.lang]);
                         ➖
                     </div>
                 {/if}
+                {#if i.isPending}
+                    🔃
+                {/if}
                 ⌚ {format(i.createdAt, 'dd.MM.yyyy HH:mm')} | 🦰 {i.author}: {i.text}
             </div>
         {/each}
@@ -86,7 +130,8 @@ const t = $derived(translations[settings.lang]);
         <div class="comments__block__comment">
             <textarea
                     placeholder={t.offers.leaveComment}
-                    bind:value={commentText}>
+                    bind:value={commentText}
+                    onkeydown={handleKeydown}>
             </textarea>
         </div>
         {#if $auth.isAuthenticated}
@@ -117,6 +162,7 @@ const t = $derived(translations[settings.lang]);
         border-radius: 6px;
         outline: none;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        resize: none;
     }
 
     textarea:focus {

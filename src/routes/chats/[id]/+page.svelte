@@ -1,37 +1,56 @@
 <script lang='ts'>
     import { format } from 'date-fns';
-    import { auth, ConfirmModal, settings, translations } from '$lib';
-    import { tick, untrack } from 'svelte';
+    import { auth, ConfirmModal, settings, translations, type Message } from '$lib';
+    import { onMount, tick, untrack } from 'svelte';
     import createChatState from '$lib/stores/chatStore.svelte.js';
+    import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
+    import chatState from '$lib/stores/chatStore.svelte.js';
 
     let { data } = $props();
     let textInput = $state<string>('');
     let messageContainer: HTMLElement;
 
-    const chatState = createChatState();
-
     let allMessages = $derived(chatState.messages);
 
     $effect(() => {
-        const currentId = data.chatId;
+        const chatId = data.chatId;
 
-        untrack(() => {
-            if (currentId) {
-                chatState.setMessages(data.initialMessages);
-                chatState.initSignalR(data.chatId, data.user!.name!);
+        (async () => {
+            try {
+                const response = await fetch(`http://localhost:5118/api/Chat/get-messages-by-chat-id/${chatId}`);
+                if (response.ok) {
+                    const initialMessages = await response.json() as Message[];
+                    chatOfflineState.setMessages(chatId, initialMessages);
+                }
+            } catch {
+                console.log('Оффлайн сообщения берём с кеша');
+            } finally {
+                await chatOfflineState.loadMessages(chatId);
             }
-        });
-
-        return () => {
-            untrack(() => {
-                chatState.stopSignalR();
-            });
-        };
+        })();
     });
+
+$effect(() => {
+    const chatId = data.chatId;
+    const userName = data.user?.name;
+
+    if (!chatId || !userName) return;
+
+    const offlineMessages = chatOfflineState.messages[chatId];
+    if (offlineMessages) {
+        chatState.setMessages(offlineMessages);
+    }
+
+    chatState.initSignalR(chatId, userName);
+
+    return () => {
+        chatState.stopSignalR();
+    };
+});
 
     async function sendMessage() {
         if (!textInput.trim()) return;
-        await chatState.sendMessage(data.chatId, textInput);
+        await chatState.sendMessage($auth.id!, $auth.name!, data.chatId, textInput);
         textInput = "";
     }
 
@@ -49,7 +68,7 @@
     };
 
     $effect(() => {
-        if (data.initialMessages && messageContainer) {
+        if (chatOfflineState.messages[data.chatId] && messageContainer) {
             tick().then(() => {
                 messageContainer.scrollTo({
                     top: messageContainer.scrollHeight,

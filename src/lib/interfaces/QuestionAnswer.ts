@@ -7,4 +7,7 @@ export interface QuestionAnswer {
     createdByAnswer: string | null;
     textAnswer: string | null;
     textQuestion: string;
+    isQuestionPending: boolean;
+    isAnswerPending: boolean | null;
+    announcementId: string;
 }

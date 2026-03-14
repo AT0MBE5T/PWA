@@ -8,20 +8,20 @@ export const load: PageServerLoad = async ({ url, locals, fetch }) => {
     const page = Number(url.searchParams.get('page')) || 1;
     const tab = url.searchParams.get('tab') || 'Favorite';
 
-    const fetchers = {
-        'Sold': getSold,
-        'Placed': getPlaced,
-        'Bought': getBought,
-        'Favorite': getFavorites
-    };
+    // const fetchers = {
+    //     'Sold': getSold,
+    //     'Placed': getPlaced,
+    //     'Bought': getBought,
+    //     'Favorite': getFavorites
+    // };
 
-    const fetchFn = fetchers[tab as keyof typeof fetchers] || getFavorites;
-    const result = await fetchFn(userId, page, fetch);
+    // const fetchFn = fetchers[tab as keyof typeof fetchers] || getFavorites;
+    // const result = await fetchFn(userId, page, fetch);
 
     return {
-        items: result?.data,
-        totalPages: result?.totalPages,
-        currentPage: page,
+        // items: result?.data,
+        // totalPages: result?.totalPages,
+        // currentPage: page,
         currentTab: tab
     };
 };

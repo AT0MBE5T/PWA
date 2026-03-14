@@ -9,6 +9,8 @@ declare global {
                 name: string | null;
                 roles: string[];
 				avatarUrl: string | null;
+				personName: string | null;
+				personSurname: string | null;
             } | null;
 
 			token: string;

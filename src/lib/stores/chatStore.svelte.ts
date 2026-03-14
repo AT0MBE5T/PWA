@@ -1,19 +1,31 @@
 import type { Chat } from "$lib";
 import type { Message } from "$lib";
 import * as signalR from "@microsoft/signalr";
+import { chatOfflineState } from "./ChatOfflineStore.svelte";
 
-export default function createChatState() {
+const chatState = createChatState();
+export default chatState;
+
+function createChatState() {
     let messages = $state<Message[]>([]);
     let chats = $state<Chat[]>([]);
     let connection = $state<signalR.HubConnection | null>(null);
+    let isConnecting = false;
 
-async function initSignalR(chatId: string, userName: string) {
-    await stopSignalR();
+    async function initSignalR(chatId: string, userName: string) {
+        if (isConnecting) return;
+        
+        if (connection && connection.state !== signalR.HubConnectionState.Disconnected) {
+            return;
+        }
 
-    const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl("http://localhost:5118/messageHub", { withCredentials: true })
-        .withAutomaticReconnect()
-        .build();
+        isConnecting = true;
+        await stopSignalR();
+
+        const newConnection = new signalR.HubConnectionBuilder()
+            .withUrl("http://localhost:5118/messageHub", { withCredentials: true })
+            .withAutomaticReconnect()
+            .build();
 
     newConnection.on("ReceiveMessage", (uId, uName, content, chatId) => {
         messages.push({
@@ -23,7 +35,8 @@ async function initSignalR(chatId: string, userName: string) {
             senderName: uName,
             content,
             createdAt: new Date().toISOString(),
-            isRead: false
+            isRead: false,
+            isPending: false
         });
     });
 
@@ -53,48 +66,53 @@ async function initSignalR(chatId: string, userName: string) {
         }
     });
 
+    newConnection.onreconnected(async () => {
+        if (newConnection !== connection) return;
+
+        console.log("Связь восстановлена, синхронизируем...");
+
+        try {
+            await newConnection.invoke("JoinChat", {
+                ChatRoom: chatId,
+                UserName: userName
+            });
+
+            const pending = await chatOfflineState.getPendingMessages();
+
+            for (const msg of pending) {
+                await newConnection.invoke("SendMessage", msg.chatId, msg.content);
+                await chatOfflineState.removePendingMessage(msg.id);
+            }
+
+            messages = messages.filter(x => !x.isPending);
+        } catch (e) {
+            console.error("Sync error:", e);
+        }
+    });
+
     try {
-        await newConnection.start();
-
-        if (newConnection.state !== signalR.HubConnectionState.Connected) return;
-
-        connection = newConnection;
-
-        await connection.invoke("JoinChat", { 
-            ChatRoom: chatId, 
-            UserName: userName
-        });
-    } catch (err: any) {
-        const ignoredErrors = [
-            "Invocation canceled due to the underlying connection being closed",
-            "Connection disconnected",
-            "Connection lost"
-        ];
-
-        const errorMessage = err?.message || String(err);
-        const isIgnored = ignoredErrors.some(msg => errorMessage.includes(msg));
-
-        if (!isIgnored) {
-            console.error("SignalR Critical Error:", err);
-        } else {
-            console.warn("SignalR: Connection closed during initialization (expected on nav).");
+            await newConnection.start();
+            connection = newConnection;
+            
+            await connection.invoke("JoinChat", { ChatRoom: chatId, UserName: userName });
+        } catch (err) {
+            console.error("SignalR Start Error:", err);
+        } finally {
+            isConnecting = false; 
         }
     }
-}
 
 async function stopSignalR() {
-    if (connection) {
-        const oldConn = connection;
-        connection = null;
-        
-        try {
-            oldConn.off("ReceiveMessage");
-            await oldConn.stop();
-        } catch (e) {
-
+        if (connection) {
+            const oldConn = connection;
+            connection = null;
+            try {
+                oldConn.off("ReceiveMessage");
+                oldConn.off("UpdateChatList");
+                await oldConn.stop();
+            } catch (e) {}
         }
     }
-}
 
     return {
         get messages() { return messages; },
@@ -103,9 +121,31 @@ async function stopSignalR() {
         setChats: (data: Chat[]) => chats = data,
         initSignalR,
         stopSignalR,
-        sendMessage: async (chatId: string, text: string) => {
-            if (connection) {
-                await connection.invoke("SendMessage", chatId, text);
+        sendMessage: async (userId: string, userName: string, chatId: string, text: string) => {
+            const tempId = crypto.randomUUID();
+            const pendingMsg: Message = {
+                id: tempId,
+                chatId: chatId,
+                senderId: userId,
+                content: text,
+                createdAt: new Date().toISOString(),
+                isRead: false,
+                senderName: userName,
+                isPending: true
+            };
+
+            messages = [...messages, pendingMsg]; 
+
+            if (connection?.state === signalR.HubConnectionState.Connected) {
+                try {
+                    await connection.invoke("SendMessage", chatId, text);
+                } catch (e) {
+                    console.error("Ошибка отправки, сохраняем в outbox", e);
+                    await chatOfflineState.savePendingMessage(pendingMsg);
+                }
+            } else {
+                console.log("Оффлайн: сохраняем в очередь");
+                await chatOfflineState.savePendingMessage(pendingMsg);
             }
         },
         leaveComment: async (chatId: string, text: string) => {

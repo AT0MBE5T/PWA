@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { Modal, auth, settings, toast, translations } from '$lib';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte';
 
     let loginInput = $state<string>('');
     let passwordInput = $state<string>('');
@@ -51,6 +52,7 @@
 
             switch(response.status){
                 case 200:
+                    await personalStore.clearAllData();
                     const res = await response.json() as { id: string, login: string, accessToken: string };
                     auth.login(res.accessToken);
                     toast.show('Success', 'success');
@@ -260,7 +262,7 @@
     }
 
     :global([data-theme="dark"]) .login__form-container {
-        background: #1e293b; /* Slate 800 */
+        background: #1e293b;
         border: 1px solid #334155;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         padding: 2.5rem;
@@ -273,6 +275,11 @@
     }
 
     :global([data-theme="dark"]) .login__form label {
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    :global([data-theme="dark"]) p {
         color: #94a3b8;
         font-weight: 500;
     }

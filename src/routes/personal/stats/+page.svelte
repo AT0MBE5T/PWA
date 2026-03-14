@@ -1,9 +1,16 @@
 <script lang='ts'>
-    import { settings, translations } from '$lib';
+    import { auth, settings, translations } from '$lib';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
+    import { onMount } from 'svelte';
 
     let { data } = $props();
 
-    const userStats = $derived(data.stats);
+    onMount(async () => {
+        await personalStore.loadUserStatsDto($auth.id!);
+    });
+
+    // const userStats = $derived(data.stats);
+    const userStats = $derived(personalStore.userStatsModel);
 
 const t = $derived(translations[settings.lang]);
 </script>

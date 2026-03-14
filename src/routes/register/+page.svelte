@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { Modal, auth, toast, translations, settings } from '$lib';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte';
 
     const t = $derived(translations[settings.lang]);
 
@@ -166,6 +167,7 @@
             });
 
             if(response.ok){
+                await personalStore.clearAllData();
                 const res = await response.json() as { id: string, login: string, accessToken: string };
                 auth.login(res.accessToken);
                 successCallback();

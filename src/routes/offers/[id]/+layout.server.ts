@@ -2,18 +2,28 @@ import type { AnnouncementFull } from '$lib';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ params, locals, fetch }) => {
-  const { id } = params;
-  const userId = locals.user?.id ?? null;
+      const { id } = params;
+      const userId = locals.user?.id ?? null;
 
-  if (userId)
-    await addViewer(id, userId, fetch);
+      let authorId = '';
+  
+  try{
+      if (userId)
+        await addViewer(id, userId, fetch);
 
-  const offer = await getAnnouncementFullInfoById(id, userId, fetch);
+      const offer = await getAnnouncementFullInfoById(id, userId, fetch);
 
-  return {
-    id,
-    offer
-  };
+      authorId = offer?.authorId ?? '';
+  }catch(error){
+
+  }
+  finally{
+      return {
+        id,
+        authorId: authorId
+        //offer
+      };
+  }
 };
 
 const getAnnouncementFullInfoById = async (

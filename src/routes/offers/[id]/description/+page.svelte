@@ -6,10 +6,15 @@
     import { fade, fly } from 'svelte/transition';
     import { goto } from '$app/navigation';
     import Modal from '$lib/modals/Modal.svelte';
+    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
+    import { onMount } from 'svelte';
 
     let { data }: { data: PageData } = $props();
-    // svelte-ignore state_referenced_locally
-        let offer = $state(data.offer);
+    let offer = $derived(offerFullStore.offerDetails[data.id!]);
+
+    onMount(async () => {
+        await offerFullStore.loadDetails(data.id!);
+    });
 
     const t = $derived(translations[settings.lang]);
 
@@ -110,16 +115,21 @@ const onFavoriteClick = async (isAdd: boolean) => {
 
         if(!response.ok){
             toast.show(t.offers.deletingError, 'error');
+            goto('/offers');
             return;
         }
 
+        offerFullStore.removeOffer(data.id);
+        offerFullStore.removeOfferFull(data.id);
+
         toast.show(t.offers.deletedSuccessfully, 'success');
+        goto('/offers');
     };
 
 let currentIndex = $state(0);
     let isLightboxOpen = $state(false);
     
-    const photos = $derived(offer?.photosUrl ?? []);
+    const photos = $derived(offer?.photos.map(x => x.url) ?? []);
 
     function nextPhoto(e?: Event) {
         e?.stopPropagation();
@@ -361,7 +371,10 @@ let currentIndex = $state(0);
                 <div class="shop__item__description__block__item item__description">📄 {t.offers.description}: {offer?.description}</div>
                 <div class="footer__container__publisher_info_block">
                     <div class="shop__item__description__block__item">🦰 {t.offers.author}: {offer?.author}</div>
-                    <div class="shop__item__description__block__item">⌚ {t.offers.createdAt}: {format(offer?.createdAt ?? '', 'dd.MM.yyyy HH:mm')}</div>
+                    <div class="shop__item__description__block__item">
+                        ⌚ {t.offers.createdAt}: 
+                        {offer?.createdAt ? format(offer.createdAt, 'dd.MM.yyyy HH:mm') : ''}
+                    </div>
                 </div>
                 {#if $auth.isAuthenticated}
                     <div class="footer__container__buy">
@@ -371,7 +384,7 @@ let currentIndex = $state(0);
                         <button onclick={() => showComplaint = true}>💢 {t.offers.complain}</button>
                     </div>
                 {/if}
-                {#if auth.hasRole(Roles.Admin) || $auth.id === data.offer?.authorId}
+                {#if auth.hasRole(Roles.Admin) || $auth.id === data.authorId}
                     <div class="footer__container__edit">
                         <button onclick={() => goto(`/offers/${data.id}/edit`)}>✏️ {t.offers.edit}</button>
                     </div>

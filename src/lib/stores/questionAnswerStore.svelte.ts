@@ -1,31 +1,68 @@
 import type { QuestionAnswer } from "$lib/interfaces/QuestionAnswer";
 import * as signalR from "@microsoft/signalr";
+import { offerFullStore } from "./OfferFullStore.svelte";
+import type { CommentInterface } from "$lib/interfaces/CommentInterface";
+import offerState from "./offerStore.svelte";
 
-export default function createQuestionAnswerState() {
+const questionAnswerState = createQuestionAnswerState();
+export default questionAnswerState;
+
+function createQuestionAnswerState() {
     let questionAnswerData = $state<QuestionAnswer[]>([]);
     let connection = $state<signalR.HubConnection | null>(null);
+    let currentChatId = $state<string | null>(null);
+    let isConnecting = false;
+    let isSyncing = false;
 
 async function initSignalR(chatId: string, userName: string) {
+    if ((connection || isConnecting) && currentChatId === chatId) {
+        return;
+    }
+
+    isConnecting = true;
     await stopSignalR();
+    currentChatId = chatId;
 
     const newConnection = new signalR.HubConnectionBuilder()
         .withUrl("http://localhost:5118/messageHub", { withCredentials: true })
         .withAutomaticReconnect()
         .build();
 
-    newConnection.on("ReceiveQuestion", (questionId, userName, message) => {
-        questionAnswerData.push({
-            questionId: questionId,
-            createdAtQuestion: new Date().toISOString(),
-            createdByQuestion: userName,
-            textQuestion: message,
+newConnection.on("ReceiveQuestion", (announcementId, questionId, userName, message) => {
 
-            answerId: null,
-            createdAtAnswer: null,
-            createdByAnswer: null,
-            textAnswer: null
-        });
-    });
+    const pendingIndex = questionAnswerData.findIndex(
+        x => x.isQuestionPending && x.textQuestion === message && x.createdByQuestion === userName
+    );
+
+    if (pendingIndex !== -1) {
+        questionAnswerData = questionAnswerData.map((x, i) =>
+            i === pendingIndex
+                ? {
+                    ...x,
+                    questionId,
+                    isQuestionPending: false
+                }
+                : x
+        );
+    } else {
+        questionAnswerData = [
+            ...questionAnswerData,
+            {
+                questionId,
+                createdAtQuestion: new Date().toISOString(),
+                createdByQuestion: userName,
+                textQuestion: message,
+                answerId: null,
+                createdAtAnswer: null,
+                createdByAnswer: null,
+                textAnswer: null,
+                isQuestionPending: false,
+                isAnswerPending: null,
+                announcementId
+            }
+        ];
+    }
+});
 
     newConnection.on("ReceiveAnswer", (answerId, questionId, userName, message) => {
         const existData = questionAnswerData.find(x => x.questionId === questionId);
@@ -33,10 +70,18 @@ async function initSignalR(chatId: string, userName: string) {
         if (existData === undefined)
             return;
 
-        existData.answerId = answerId;
-        existData.createdAtAnswer = new Date().toISOString();
-        existData.createdByAnswer = userName;
-        existData.textAnswer = message;
+questionAnswerData = questionAnswerData.map(x =>
+    x.questionId === questionId
+        ? {
+            ...x,
+            answerId,
+            createdAtAnswer: new Date().toISOString(),
+            createdByAnswer: userName,
+            textAnswer: message,
+            isAnswerPending: false
+        }
+        : x
+);
     });
 
     newConnection.on("DeleteQuestion", (questionId) => {
@@ -45,8 +90,7 @@ async function initSignalR(chatId: string, userName: string) {
         if (existData === undefined)
             return;
 
-        const index = questionAnswerData.indexOf(existData);
-        questionAnswerData.splice(index, 1);
+        questionAnswerData = questionAnswerData.filter(x => x.questionId !== questionId);
     });
 
     newConnection.on("DeleteAnswer", (answerId) => {
@@ -55,21 +99,76 @@ async function initSignalR(chatId: string, userName: string) {
         if (existData === undefined)
             return;
 
-        const index = questionAnswerData.indexOf(existData);
-        questionAnswerData.splice(index, 1);
+        existData.answerId = null;
+        existData.createdAtAnswer = null;
+        existData.createdByAnswer = null;
+        existData.textAnswer = null;
     });
 
+    newConnection.onreconnected(async () => {
+    if (newConnection !== connection) return;
+    if (isSyncing) return;
+
+    isSyncing = true;
+
     try {
-        await newConnection.start();
-        
-        if (newConnection.state !== signalR.HubConnectionState.Connected) return;
+        await newConnection.invoke("JoinQuestionAnswerChat", {
+            ChatRoom: chatId,
+            UserName: userName
+        });
+
+        const pending = await offerFullStore.getPendingQuestions();
+
+        for (const msg of pending) {
+            if (msg.answerId === null){
+                await newConnection.invoke("SendQuestion", chatId, msg.textQuestion, userName);
+            } else {
+                await newConnection.invoke("SendAnswer", chatId, msg.questionId, msg.textAnswer, userName);
+            }
+
+            await offerFullStore.removePendingQuestion(msg.questionId);
+        }
+
+        questionAnswerData = questionAnswerData.filter(x => !x.isQuestionPending);
+    } finally {
+        isSyncing = false;
+    }
+});
+
+    try {
+        if (currentChatId !== chatId) {
+            await newConnection.stop();
+            return;
+        }
 
         connection = newConnection;
+        await newConnection.start();
 
         await connection.invoke("JoinQuestionAnswerChat", { 
             ChatRoom: chatId, 
             UserName: userName
         });
+
+        const pending = await offerFullStore.getPendingQuestions();
+
+        const sortedPending = [...pending].sort((a, b) => {
+            return new Date(a.createdAtQuestion).getTime() - new Date(b.createdAtQuestion).getTime();
+        });
+
+        for (const msg of sortedPending) {
+            if (msg.answerId === null){
+                await newConnection.invoke("SendQuestion", chatId, msg.textQuestion, userName);
+            } else {
+                await newConnection.invoke("SendAnswer", chatId, msg.questionId, msg.textAnswer, userName);
+            }
+
+            await offerFullStore.removePendingQuestion(msg.questionId);
+            const index = questionAnswerData.findIndex(x => x.textQuestion === msg.textQuestion);
+            questionAnswerData[index].isAnswerPending = false;
+            questionAnswerData[index].isQuestionPending = false;
+        }
+
+        questionAnswerData = questionAnswerData.filter(x => !x.isQuestionPending);
     } catch (err: any) {
         const ignoredErrors = [
             "Invocation canceled due to the underlying connection being closed",
@@ -86,9 +185,13 @@ async function initSignalR(chatId: string, userName: string) {
             console.warn("SignalR: Connection closed during initialization (expected on nav).");
         }
     }
+    finally{
+        isConnecting = false;
+    }
 }
 
 async function stopSignalR() {
+    currentChatId = null;
     if (connection) {
         const oldConn = connection;
         connection = null;
@@ -110,14 +213,76 @@ async function stopSignalR() {
         setData: (data: QuestionAnswer[]) => questionAnswerData = data,
         initSignalR,
         stopSignalR,
-        sendQuestion: async (chatId: string, text: string) => {
-            if (connection) {
-                await connection.invoke("SendQuestion", chatId, text);
+        sendQuestion: async (userName: string, chatId: string, text: string) => {
+            const tempId = crypto.randomUUID();
+            const pendingQuestion: QuestionAnswer = {
+                questionId: tempId,
+                textQuestion: text,
+                createdAtQuestion: new Date().toISOString(),
+                isAnswerPending: null,
+                isQuestionPending: true,
+                createdByQuestion: userName,
+                answerId: null,
+                createdAtAnswer: null,
+                createdByAnswer: null,
+                textAnswer: null,
+                announcementId: chatId
+            };
+            
+            questionAnswerData = [...questionAnswerData, pendingQuestion];
+
+            if (connection?.state === signalR.HubConnectionState.Connected) {
+                try {
+                    await connection.invoke("SendQuestion", chatId, text, userName);
+                } catch (e) {
+                    console.error("Ошибка отправки, сохраняем в outbox", e);
+                    await offerFullStore.savePendingQuestion(pendingQuestion);
+                }
+            } else {
+                console.log("Оффлайн: сохраняем в очередь");
+                await offerFullStore.savePendingQuestion(pendingQuestion);
             }
         },
-        sendAnswer: async (chatId: string, questionId: string, text: string) => {
-            if (connection) {
-                await connection.invoke("SendAnswer", chatId, questionId, text);
+        sendAnswer: async (userName: string, chatId: string, text: string, questionId: string) => {
+            const question = questionAnswerData.find(x => x.questionId === questionId);
+            if (!question)
+                return;
+
+            const tempId = crypto.randomUUID();
+            const pendingAnswer: QuestionAnswer = {
+                questionId: questionId,
+                textQuestion: question.textQuestion,
+                createdAtQuestion: question.createdAtQuestion,
+                isAnswerPending: true,
+                isQuestionPending: question.isQuestionPending,
+                createdByQuestion: question.createdByQuestion,
+                answerId: tempId,
+                createdAtAnswer: new Date().toISOString(),
+                createdByAnswer: userName,
+                textAnswer: text,
+                announcementId: chatId
+            };
+
+            const exist = questionAnswerData.find(x => x.questionId === questionId);
+
+            if (exist) {
+                exist.answerId = tempId;
+                exist.textAnswer = text;
+                exist.createdAtAnswer = new Date().toISOString();
+                exist.createdByAnswer = userName;
+                exist.isAnswerPending = true;
+            }
+
+            if (connection?.state === signalR.HubConnectionState.Connected) {
+                try {
+                    await connection.invoke("SendAnswer", chatId, questionId, text, userName);
+                } catch (e) {
+                    console.error("Ошибка отправки, сохраняем в outbox", e);
+                    await offerFullStore.savePendingQuestion(pendingAnswer);
+                }
+            } else {
+                console.log("Оффлайн: сохраняем в очередь");
+                await offerFullStore.savePendingQuestion(pendingAnswer);
             }
         },
         deleteQuestion: async (chatId: string, questionId: string) => {

@@ -5,4 +5,6 @@ export interface AuthState {
     roles: string[];
     isAuthenticated: boolean;
     accessToken: string | null;
+    personName: string | null;
+    personSurname: string | null;
 }

@@ -36,11 +36,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     if (token) {
         const decoded = jwtDecode<JwtPayload>(token);
+        const userDto = await getUserDto(token);
         event.locals.user = {
             id: decoded.sub,
             name: decoded.name ?? null,
             roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.roles],
-            avatarUrl: await getAvatarUrl(decoded.sub)
+            avatarUrl: userDto?.avatarUrl ?? null,
+            personName: decoded.name,
+            personSurname: decoded.surname
         };
         event.locals.token = token;
     } else {
@@ -74,13 +77,20 @@ async function tryServerRefresh(svelteFetch: typeof fetch) {
     return data.token as string;
 }
 
-const getAvatarUrl = async (userId: string): Promise<string | null> => {
-    const response = await fetch('http://localhost:5118/api/Account/get-user-dto-by-id', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userId)
-        });
+const getUserDto = async (token: string): Promise<UserDto | null> => {
+    try{
+        const response = await fetch('http://localhost:5118/api/Account/get-user-dto-by-id', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-    const userData = response.ok ? await response.json() as UserDto : null;
-    return userData?.avatarUrl ?? null;
+        const userData = response.ok ? await response.json() as UserDto : null;
+        return userData;
+    }catch(error){
+
+    }
+    return null;
 }

@@ -122,7 +122,6 @@
         position: absolute;
         right: 1rem;
         font-size: 1.5rem;
-        z-index: 1;
     }
 
         .shop__item__description__block__favoriting{

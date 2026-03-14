@@ -6,4 +6,5 @@ export interface Message {
     content: string;
     createdAt: string;
     isRead: boolean;
+    isPending: boolean;
 }

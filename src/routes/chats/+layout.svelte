@@ -1,22 +1,57 @@
 <script lang='ts'>
     import { page } from '$app/state';
-    import { auth, settings, translations } from '$lib';
+    import { auth, settings, translations, type Chat } from '$lib';
+    import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
+    import chatState from '$lib/stores/chatStore.svelte.js';
     import createChatState from '$lib/stores/chatStore.svelte.js';
     import { format } from 'date-fns';
-    import { untrack } from 'svelte';
+    import { onMount, untrack } from 'svelte';
     const { data, children } = $props();
-
-    const chatState = createChatState();
 
     let allChats = $derived(chatState.chats);
 
+    onMount(async () => {
+        try{
+            const response = await fetch('http://localhost:5118/api/Chat/my-chats', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });      
+            if (response.ok) {
+                const chats = await response.json() as Chat[];
+                await chatOfflineState.setChats($auth.id!, chats);
+
+                chatOfflineState.chats[$auth.id!].forEach(async i => {
+                    const messages = await getMessages(i.chatId);
+                    await chatOfflineState.setMessages(i.chatId, messages);
+                });
+
+                console.log('Онлайн чаты установлены');
+            }
+        }catch(error){
+            console.log('Оффлайн берём с кеша');
+        }finally{
+            await chatOfflineState.loadChats($auth.id!);
+        }
+    });
+
+    const getMessages = async (chatId: string) => {
+        const response = await fetch(`http://localhost:5118/api/Chat/get-messages-by-chat-id/${chatId}`);        
+        if (response.ok) {
+            const initialMessages = await response.json();
+            return initialMessages;
+        }
+    };
+
     $effect(() => {
-        const currentId = $auth.id;
+        const chats = chatOfflineState.chats[$auth.id!];
 
         untrack(() => {
-            if (currentId) {
-                chatState.setChats(data.chats);
-                chatState.initSignalR(currentId, data.user!.name!);
+            if (chats) {
+                chatState.setChats(chats);
+                chatState.initSignalR($auth.id!, data.user!.name!);
             }
         });
 

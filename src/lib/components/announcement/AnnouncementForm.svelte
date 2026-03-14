@@ -6,10 +6,21 @@
         AnnouncementEditResponse,
         ValidationErrors,
         LookupItem,
-        ImageItem
+        ImageItem,
+
+        AnnouncementShort,
+
+        AnnouncementAddModel,
+
+        AnnouncementUpdateModel
+
+
+
     } from '$lib';
     import { Modal, Toast, auth, settings, translations } from '$lib';
     import { goto } from '$app/navigation';
+    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
+    import offerState from '$lib/stores/offerStore.svelte';
 
     let { isUpdate, announcementId }: { isUpdate: boolean, announcementId: string } = $props();
 
@@ -62,9 +73,81 @@
         filteredStatementTypes = statementTypes;
     })
 
+    // const getDataForEdit = async () => {
+    //     try{
+    //         const response = await fetch('http://localhost:5118/api/Announcement/get-announcement-for-edit', {
+    //             method: 'Post',
+    //             body: JSON.stringify(announcementId),
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 "Authorization": `Bearer ${$auth.accessToken}`
+    //             },
+    //         });
+
+    //         if(!response.ok){
+    //             return;
+    //         }
+
+    //         const data = await response.json() as AnnouncementEditResponse;
+
+    //         propertyTypeSearch = (propertyTypes.find((type: LookupItem) =>
+    //             type.id === data.propertyTypeId
+    //         ))!.name;
+
+    //         statementTypeSearch = (statementTypes.find((type: LookupItem) =>
+    //             type.id === data.statementTypeId
+    //         ))!.name;
+
+    //         propertyTypeId = data.propertyTypeId;
+    //         statementTypeId = data.statementTypeId;
+    //         areaInput = data.area;
+    //         contentInput = data.content;
+    //         descriptionInput = data.description;
+    //         floorsInput = data.floors;
+    //         locationInput = data.location;
+    //         priceInput = data.price;
+    //         roomsInput = data.rooms;
+    //         titleInput = data.title;
+
+    //         images = data.photos.map(p => ({
+    //             type: 'existing',
+    //             id: p.id,
+    //             url: p.url
+    //         }));
+    //     }catch{
+    //         const data = await offerFullStore.getPendingOffersUpdate();
+
+    //         propertyTypeSearch = (propertyTypes.find((type: LookupItem) =>
+    //             type.id === data
+    //         ))!.name;
+
+    //         statementTypeSearch = (statementTypes.find((type: LookupItem) =>
+    //             type.id === data.statementTypeId
+    //         ))!.name;
+
+    //         propertyTypeId = data.propertyTypeId;
+    //         statementTypeId = data.statementTypeId;
+    //         areaInput = data.area;
+    //         contentInput = data.content;
+    //         descriptionInput = data.description;
+    //         floorsInput = data.floors;
+    //         locationInput = data.location;
+    //         priceInput = data.price;
+    //         roomsInput = data.rooms;
+    //         titleInput = data.title;
+
+    //         images = data.photos.map(p => ({
+    //             type: 'existing',
+    //             id: p.id,
+    //             url: p.url
+    //         }));
+    //     }
+    // };
+
     const getDataForEdit = async () => {
+    try {
         const response = await fetch('http://localhost:5118/api/Announcement/get-announcement-for-edit', {
-            method: 'Post',
+            method: 'POST',
             body: JSON.stringify(announcementId),
             headers: {
                 'Content-Type': 'application/json',
@@ -72,66 +155,117 @@
             },
         });
 
-        if(!response.ok){
-            return;
-        }
+        if (!response.ok) throw new Error("Server error");
 
         const data = await response.json() as AnnouncementEditResponse;
-
-        propertyTypeSearch = (propertyTypes.find((type: LookupItem) =>
-            type.id === data.propertyTypeId
-        ))!.name;
-
-        statementTypeSearch = (statementTypes.find((type: LookupItem) =>
-            type.id === data.statementTypeId
-        ))!.name;
-
-        propertyTypeId = data.propertyTypeId;
-        statementTypeId = data.statementTypeId;
-        areaInput = data.area;
-        contentInput = data.content;
-        descriptionInput = data.description;
-        floorsInput = data.floors;
-        locationInput = data.location;
-        priceInput = data.price;
-        roomsInput = data.rooms;
-        titleInput = data.title;
 
         images = data.photos.map(p => ({
             type: 'existing',
             id: p.id,
             url: p.url
         }));
+
+        applyDataToForm(data);
+
+    } catch (error) {
+        console.warn("Offline mode: loading from IndexedDB");
+        
+        const offlineData = offerFullStore.offerDetails[announcementId];
+
+if (offlineData) {
+    // 1. Находим ID типов по их именам из справочников
+    const propType = propertyTypes.find(t => t.name === offlineData.propertyTypeName);
+    const statType = statementTypes.find(t => t.name === offlineData.statementTypeName);
+
+    const mappedData: AnnouncementEditResponse = {
+        // Копируем примитивы
+        title: offlineData.title,
+        location: offlineData.location,
+        area: offlineData.area,
+        floors: offlineData.floors,
+        rooms: offlineData.rooms,
+        price: offlineData.price,
+        content: offlineData.content,
+        description: offlineData.description,
+        
+        // Мапим ID (если не нашли, ставим пустую строку или дефолт)
+        propertyTypeId: propType?.id ?? "",
+        statementTypeId: statType?.id ?? "",
+        userId: offlineData.authorId,
+
+        // Преобразуем массив строк photosUrl в массив объектов PhotoInterface
+        // Так как в просмотре обычно нет ID конкретных фото, 
+        // используем URL как ID или индекс (для существующих фото это допустимо)
+        photos: offlineData.photos
     };
 
+    applyDataToForm(mappedData);
+}
+    }
+};
+
+// Хелпер для заполнения реактивных переменных
+function applyDataToForm(data: AnnouncementEditResponse) {
+    propertyTypeId = data.propertyTypeId;
+    statementTypeId = data.statementTypeId;
+    
+    // Обновляем строковые значения для поисковых инпутов
+    propertyTypeSearch = propertyTypes.find(t => t.id === data.propertyTypeId)?.name ?? "";
+    statementTypeSearch = statementTypes.find(t => t.id === data.statementTypeId)?.name ?? "";
+
+    areaInput = data.area;
+    contentInput = data.content;
+    descriptionInput = data.description;
+    floorsInput = data.floors;
+    locationInput = data.location;
+    priceInput = data.price;
+    roomsInput = data.rooms;
+    titleInput = data.title;
+
+    // Важно: мапим в ImageItem для UI компонента загрузки фото
+    images = data.photos.map(p => ({
+        type: 'existing',
+        id: p.id,
+        url: p.url
+    }));
+}
+
     const getPropertyTypes = async () => {
-        const response = await fetch('http://localhost:5118/api/PropertyType/get-property-types', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+        try{
+            const response = await fetch('http://localhost:5118/api/PropertyType/get-property-types', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if(!response.ok){
+                return;
             }
-        });
 
-        if(!response.ok){
-            return;
+            propertyTypes = await response.json() as LookupItem[];
+        }catch{
+            propertyTypes = await offerFullStore.getPropertyTypes();
         }
-
-        propertyTypes = await response.json() as LookupItem[];
     };
 
     const getStatementTypes = async () => {
-        const response = await fetch('http://localhost:5118/api/StatementType/get-statement-types', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+        try{
+            const response = await fetch('http://localhost:5118/api/StatementType/get-statement-types', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if(!response.ok){
+                return;
             }
-        });
 
-        if(!response.ok){
-            return;
+            statementTypes = await response.json() as LookupItem[];
+        }catch{
+            statementTypes = await offerFullStore.getStatementTypes();
         }
-
-        statementTypes = await response.json() as LookupItem[];
     };
 
     let propertyTypeSearch = $state<string>('');
@@ -370,11 +504,11 @@
     async function confirmClicked(): Promise<void> {
         if (validateForm()) {
             const formData = new FormData();
-    images
-        .filter(i => i.type === 'new')
-        .forEach(img => {
-            formData.append("Photos", img.file);
-        });
+            images
+                .filter(i => i.type === 'new')
+                .forEach(img => {
+                    formData.append("Photos", img.file);
+                });
             formData.append("PropertyType", propertyTypeId);
             formData.append("StatementType", statementTypeId);
             formData.append("Location", locationInput);
@@ -387,28 +521,50 @@
             formData.append("Description", descriptionInput);
             formData.append("UserId", $auth.id!);
 
-            const response = await fetch('http://localhost:5118/api/Announcement/add-announcement', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    "Authorization": `Bearer ${$auth.accessToken}`
-                },
-                credentials: "include"
-            });
+            try{
+                const response = await fetch('http://localhost:5118/api/Announcement/add-announcement', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        "Authorization": `Bearer ${$auth.accessToken}`
+                    },
+                    credentials: "include"
+                });
 
-            if(response.ok) {
-                toastType = 'success';
-                toastText = t.system.addedSuccessfully;
-                showToast = true;
-            }
-            else{
-                toastType = 'error';
-                toastText = t.system.errorOccurred;
-                showToast = true;
-            }
+                if(response.ok) {
+                    toastType = 'success';
+                    toastText = t.system.addedSuccessfully;
+                    showToast = true;
+                }
+                else{
+                    toastType = 'error';
+                    toastText = t.system.errorOccurred;
+                    showToast = true;
+                }
 
-            goto('/offers');
-            
+                goto('/offers');
+            }catch{
+                const dataToAdd: AnnouncementAddModel = {
+                    propertyTypeId: propertyTypeId,
+                    statementTypeId: statementTypeId,
+                    area: areaInput.toString(),
+                    location: locationInput,
+                    floors: floorsInput?.toString() ?? 0,
+                    rooms: roomsInput?.toString() ?? 0,
+                    title: titleInput,
+                    price: priceInput.toString(),
+                    content: contentInput,
+                    description: descriptionInput,
+                    userId: $auth.id!,
+                    images: images,
+                    id: crypto.randomUUID().toString()
+                }
+                await offerFullStore.savePendingOffer(dataToAdd);
+                await offerState.addOffer(dataToAdd);
+                await offerState.addFullOffer(dataToAdd, $auth.id!, `${$auth.name} ${$auth.personSurname}`);
+
+                goto('/offers');
+            }
         } else {
             toastType = 'error';
             toastText = t.system.validationError;
@@ -437,7 +593,7 @@
                     formData.append("ExistingImageOrder", 'new');
                 }
             });
-            
+
             formData.append("PropertyType", propertyTypeId);
             formData.append("StatementType", statementTypeId);
             formData.append("Location", locationInput);
@@ -450,26 +606,49 @@
             formData.append("Description", descriptionInput);
             formData.append("AnnouncementId", announcementId);
 
-            const response = await fetch('http://localhost:5118/api/Announcement/update-announcement', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    "Authorization": `Bearer ${$auth.accessToken}`
-                },
-                credentials: "include"
-            });
+            try{
+                const response = await fetch('http://localhost:5118/api/Announcement/update-announcement', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        "Authorization": `Bearer ${$auth.accessToken}`
+                    },
+                    credentials: "include"
+                });
 
-            if(response.ok) {
-                toastType = 'success';
-                toastText = t.system.updatedSuccessfully;
-                showToast = true;
+                if(response.ok) {
+                    toastType = 'success';
+                    toastText = t.system.updatedSuccessfully;
+                    showToast = true;
+                }
+                else{
+                    toastType = 'error';
+                    toastText = t.system.errorOccurred;
+                    showToast = true;
+                }
+                goto('/offers');
+            }catch{
+                const dataToUpdate: AnnouncementUpdateModel = {
+                    propertyTypeId: propertyTypeId,
+                    statementTypeId: statementTypeId,
+                    area: areaInput.toString(),
+                    location: locationInput,
+                    floors: floorsInput?.toString() ?? 0,
+                    rooms: roomsInput?.toString() ?? 0,
+                    title: titleInput,
+                    price: priceInput.toString(),
+                    content: contentInput,
+                    description: descriptionInput,
+                    userId: $auth.id!,
+                    images: images,
+                    deletedImageIds: deletedImageIds,
+                    id: announcementId
+                }
+                await offerFullStore.savePendingOfferUpdate(dataToUpdate);
+                await offerState.updateOffer(dataToUpdate);
+
+                goto('/offers');
             }
-            else{
-                toastType = 'error';
-                toastText = t.system.errorOccurred;
-                showToast = true;
-            }
-            goto('/offers');
         } else {
             toastType = 'error';
             toastText = t.system.validationError;
@@ -995,13 +1174,25 @@
         text-transform: uppercase;
     }
 
-        :global([data-theme="dark"]) .image-upload-button{
+    :global([data-theme="dark"]) .image-upload-button{
         background-color: #0f172a;
         border: 1px solid #334155;
         color: #f1f5f9;
         padding: 0.75rem;
         border-radius: 8px;
         transition: all 0.2s ease;
+    }
+
+    :global([data-theme="dark"]) .lookup-item:hover {
+        background-color: rgba(122, 66, 244, 0.1);
+
+    }
+
+    :global([data-theme="dark"]) .lookup-dropdown {
+        background-color: rgba(30, 41, 59, 0.9);
+        backdrop-filter: blur(12px);
+        border-color: var(--border-color);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
     :global([data-theme="dark"]) .announcement__wrapper {

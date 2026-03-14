@@ -5,26 +5,34 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
     const { id } = params;
     const userId = locals.user?.id ?? null;
 
+    let authorId = '';
+
     if (userId === null)
       return {
         id: '',
-        authorId: '',
-        initialData: []
+        authorId: ''//,
+        //initialData: []
     };
+
+    try{
 
     const response = await fetch(`http://localhost:5118/api/Question/get-all-by-announcement-id/${id}`);
     const authorResponse = await getAnnouncementFullInfoById(id, userId, fetch);
 
     if (response.ok && authorResponse !== undefined) {
         const initialData = await response.json() as QuestionAnswer[];
-        return { 
-            id,
-            authorId: authorResponse?.authorId,
-            initialData 
-        };
+        authorId = authorResponse?.authorId;
     }
-
-    return { id, authorId: authorResponse?.authorId, initialData: [] };
+  }catch(error){
+    console.log(error);
+  }
+  finally{
+            return { 
+            id,
+            authorId: authorId
+            //initialData 
+        };
+  }
 };
 
 const getAnnouncementFullInfoById = async (

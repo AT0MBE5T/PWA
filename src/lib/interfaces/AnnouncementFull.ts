@@ -1,3 +1,5 @@
+import type { PhotoInterface } from "./PhotoInterface";
+
 export type AnnouncementFull = {
     id: string;
     title: string;
@@ -6,7 +8,7 @@ export type AnnouncementFull = {
     price: number;
     location: string;
     area: number;
-    photosUrl: string[];
+    photos: PhotoInterface[];
     content: string;
     createdAt: string;
     floors: number;

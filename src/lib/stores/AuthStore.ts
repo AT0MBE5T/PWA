@@ -9,7 +9,9 @@ function createAuthStore() {
         avatarUrl: null,
         roles: [],
         isAuthenticated: false,
-        accessToken: null
+        accessToken: null,
+        personName: null,
+        personSurname: null
     };
 
     const { subscribe, set, update } = writable<AuthState>(initialState);
@@ -27,7 +29,7 @@ function createAuthStore() {
             return currentRoles.includes(role);
         },
         
-        sync: (user: { id: string | null, name: string | null, avatarUrl: string | null, roles: string[] } | null, token: string | null) => {
+        sync: (user: { id: string | null, name: string | null, avatarUrl: string | null, roles: string[], personName: string | null, personSurname: string | null } | null, token: string | null) => {
             if (user && token) {
                 set({
                     id: user.id,
@@ -35,7 +37,9 @@ function createAuthStore() {
                     avatarUrl: user.avatarUrl,
                     roles: user.roles,
                     isAuthenticated: true,
-                    accessToken: token
+                    accessToken: token,
+                    personName: user.personName,
+                    personSurname: user.personSurname
                 });
             } else {
                 set(initialState);

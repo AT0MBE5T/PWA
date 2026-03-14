@@ -1,0 +1,220 @@
+import { browser } from '$app/environment';
+import type { AnnouncementFull } from '$lib/interfaces/AnnouncementFull';
+import type { CommentInterface } from '$lib/interfaces/CommentInterface';
+import type { QuestionAnswer } from '$lib/interfaces/QuestionAnswer';
+import { openDB } from 'idb';
+import { auth } from './AuthStore';
+import type { AnnouncementShort } from '$lib/interfaces/AnnouncementShort';
+import type { AnnouncementAddModel } from '$lib/interfaces/AnnouncementAddModel';
+import type { PropertyTypeInterface } from '$lib/interfaces/PropertyTypeInterface';
+import type { StatementTypeInterface } from '$lib/interfaces/StatementTypeInterface';
+import type { AnnouncementUpdateModel } from '$lib/interfaces/AnnouncementUpdateModel';
+
+class OfferState {
+    offerDetails = $state<Record<string, AnnouncementFull>>({});
+    comments = $state<Record<string, CommentInterface[]>>({});
+    questions = $state<Record<string, QuestionAnswer[]>>({});
+
+    DB_NAME = 'OffersDB';
+    DB_VERSION = 1;
+
+    async setOfferDetails(data: AnnouncementFull[]) {
+        const detailsMap = data.reduce((acc, item) => {
+            acc[item.id] = item;
+            return acc;
+        }, { ...this.offerDetails });
+
+        this.offerDetails = detailsMap;
+    }
+
+    async setComments(announcementId: string, data: any[]) {
+        this.comments[announcementId] = data;
+        const db = await this.getDB();
+        const tx = db.transaction('comments', 'readwrite');
+        for (const comment of data) {
+            await tx.store.put(comment);
+        }
+        await tx.done;
+    }
+
+    async setQuestions(announcementId: string, data: any[]) {
+        this.questions[announcementId] = data;
+        const db = await this.getDB();
+        const tx = db.transaction('questions', 'readwrite');
+        for (const question of data) {
+            await tx.store.put(question);
+        }
+        await tx.done;
+    }
+
+    getDB = async () => {
+        return await openDB(this.DB_NAME, this.DB_VERSION, {
+            upgrade(db) {
+                if (!db.objectStoreNames.contains('page')) {
+                    db.createObjectStore('page');
+                }
+                if (!db.objectStoreNames.contains('statementTypes')) {
+                    db.createObjectStore('statementTypes', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('propertyTypes')) {
+                    db.createObjectStore('propertyTypes', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('announcements')) {
+                    db.createObjectStore('announcements', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('announcementDetails')) {
+                    db.createObjectStore('announcementDetails', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('outboxQuestions')) {
+                    db.createObjectStore('outboxQuestions', { keyPath: 'questionId' });
+                }
+                if (!db.objectStoreNames.contains('outboxComments')) {
+                    db.createObjectStore('outboxComments', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('questions')) {
+                    const store = db.createObjectStore('questions', { keyPath: 'questionId' });
+                    store.createIndex('announcementId', 'announcementId', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('comments')) {
+                    const store = db.createObjectStore('comments', { keyPath: 'id' });
+                    store.createIndex('announcementId', 'announcementId', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('outboxOffers')) {
+                    db.createObjectStore('outboxOffers', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('outboxOffersUpdate')) {
+                    db.createObjectStore('outboxOffersUpdate', { keyPath: 'id' });
+                }
+            },
+        });
+    };
+
+    async getPropertyTypes(): Promise<PropertyTypeInterface[]> {
+        const db = await this.getDB();
+        return await db.getAll('propertyTypes');
+    }
+
+    async getStatementTypes(): Promise<StatementTypeInterface[]> {
+        const db = await this.getDB();
+        return await db.getAll('statementTypes');
+    }
+
+    async savePendingOffer(data: AnnouncementAddModel) {
+        const db = await this.getDB();
+        const cleanData = $state.snapshot(data);
+        await db.put('outboxOffers', cleanData);
+    }
+
+    async addNewShortOffer(data: AnnouncementShort) {
+        const db = await this.getDB();
+        const cleanData = $state.snapshot(data);
+        await db.put('announcements', cleanData);
+    }
+
+    async addNewFullOffer(data: AnnouncementFull) {
+        const db = await this.getDB();
+        await db.put('announcementDetails', $state.snapshot(data));
+    }
+
+    async removeOffer(id: string) {
+        const db = await this.getDB();
+        await db.delete('announcements', id);
+    }
+
+    async removeOfferFull(id: string) {
+        const db = await this.getDB();
+        await db.delete('announcementDetails', id);
+    }
+
+    async savePendingOfferUpdate(data: AnnouncementUpdateModel) {
+        const db = await this.getDB();
+        const cleanData = $state.snapshot(data);
+        await db.put('outboxOffersUpdate', cleanData);
+    }
+
+    async getPendingOffers(): Promise<AnnouncementAddModel[]> {
+        const db = await this.getDB();
+        return await db.getAll('outboxOffers');
+    }
+
+    async getPendingOffersUpdate(): Promise<AnnouncementUpdateModel[]> {
+        const db = await this.getDB();
+        return await db.getAll('outboxOffersUpdate');
+    }
+
+    async removePendingOffers(tempId: string) {
+        const db = await this.getDB();
+        await db.delete('outboxOffers', tempId);
+    }
+
+    async removePendingOffersUpdate(tempId: string) {
+        const db = await this.getDB();
+        await db.delete('outboxOffersUpdate', tempId);
+    }
+
+    async savePendingComment(msg: CommentInterface) {
+        const db = await this.getDB();
+        await db.put('outboxComments', msg);
+    }
+
+    async getPendingComments(): Promise<CommentInterface[]> {
+        const db = await this.getDB();
+        return await db.getAll('outboxComments');
+    }
+
+    async removePendingComment(tempId: string) {
+        const db = await this.getDB();
+        await db.delete('outboxComments', tempId);
+    }
+
+    async savePendingQuestion(msg: QuestionAnswer) {
+        const db = await this.getDB();
+        await db.put('outboxQuestions', msg);
+    }
+
+    async getPendingQuestions(): Promise<QuestionAnswer[]> {
+        const db = await this.getDB();
+        return await db.getAll('outboxQuestions');
+    }
+
+    async removePendingQuestion(tempId: string) {
+        const db = await this.getDB();
+        await db.delete('outboxQuestions', tempId);
+    }
+
+    async loadDetails(id: string) {
+        if (this.offerDetails[id]) return;
+
+        const db = await this.getDB();
+        const cached = await db.get('announcementDetails', id);
+        
+        if (cached) {
+            this.offerDetails[id] = cached;
+            console.log("Дані підтягнуто з IndexedDB:", cached);
+        }
+    }
+
+    async loadComments(id: string) {
+        if (this.comments[id]) return;
+
+        const db = await this.getDB();
+        const cached = await db.getAllFromIndex('comments', 'announcementId', id);
+        if (cached) {
+            this.comments[id] = cached;
+            console.log("Дані підтягнуто з IndexedDB:", cached);
+        }
+    }
+
+    async loadQuestions(id: string) {
+        if (this.questions[id]) return;
+
+        const db = await this.getDB();
+        const cached = await db.getAllFromIndex('questions', 'announcementId', id);
+        if (cached) {
+            this.questions[id] = cached;
+            console.log("Дані підтягнуто з IndexedDB:", cached);
+        }
+    }
+}
+
+export const offerFullStore = new OfferState();

@@ -10,4 +10,5 @@ export type AnnouncementShort = {
     isVerified: boolean;
     isFavorite: boolean;
     viewsCnt: number;
+    isPending: boolean;
 };

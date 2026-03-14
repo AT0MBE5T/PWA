@@ -6,11 +6,19 @@
         ChangePasswordResponse,
         ChangePhoneRequest} from '$lib';
     import { auth, Modal, settings, toast, translations } from '$lib';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
     import {format} from 'date-fns';
+    import { onMount } from 'svelte';
 
     let { data } = $props();
 
-    let userInfo = $derived(data.userInfo);
+    onMount(async () => {
+        await personalStore.loadUserDto($auth.id!);
+    });
+
+    // let userInfo = $derived(data.userInfo);
+
+    let userInfo = $derived(personalStore.userDto);
 
     const changeEmailClick = () => {
         switchEmailModal(true);
@@ -361,7 +369,11 @@ const t = $derived(translations[settings.lang]);
                     <div class="info-icon">⌚</div>
                     <div class="info-content">
                         <h3 class="info-title">{t.personal.registerDate}</h3>
-                        <p class="info-value">{format(userInfo!.createdAt, 'dd.MM.yyyy')}</p>
+                        <!-- <p class="info-value">{format(userInfo!.createdAt, 'dd.MM.yyyy')}</p> -->
+                        <div class="info-value">
+                            ⌚ {t.offers.createdAt}: 
+                            {userInfo?.createdAt ? format(userInfo.createdAt, 'dd.MM.yyyy HH:mm') : ''}
+                        </div>
                     </div>
                 </div>
             {/if}

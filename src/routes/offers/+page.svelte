@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, untrack } from 'svelte';
-    import { AnnouncementItem, auth, getItemsPerPage, settings, translations, type LookupItem } from '$lib';
+    import { AnnouncementItem, auth, getItemsPerPage, settings, translations, type AnnouncementFull, type CommentInterface, type LookupItem, type QuestionAnswer } from '$lib';
     import {
         type AnnouncementShort,
         type SearchRequestInterface,
@@ -11,6 +11,9 @@
     import { fade, fly } from 'svelte/transition';
     import { cubicOut } from 'svelte/easing';
     import offerState from '$lib/stores/offerStore.svelte';
+    import { openDB } from 'idb';
+    import { browser } from '$app/environment';
+    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
 
     let searchInput = $state<string>('');
     let filtrationDropdownOpen = $state<boolean>(false);
@@ -26,55 +29,172 @@
 
     let checkedSortId = $state<number>(0);
 
-    const t = $derived(translations[settings.lang]);
-
-    const getPropertyTypes = async () => {
-        const response = await fetch('http://localhost:5118/api/PropertyType/get-property-types', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if(!response.ok){
-            return;
-        }
-
-        propertyTypes = await response.json() as LookupItem[];
-    };
-
-    const getStatementTypes = async () => {
-        const response = await fetch('http://localhost:5118/api/StatementType/get-statement-types', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if(!response.ok){
-            return;
-        }
-
-        statementTypes = await response.json() as LookupItem[];
-    };
-
     let limit = $state(getItemsPerPage());
     let currentPage = $state(1);
     let totalPages = $state<number>(0);
 
-    const getPages = async () => {
-        const response = await fetch('http://localhost:5118/api/Announcement/get-pages', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+    const t = $derived(translations[settings.lang]);
+
+    const DB_NAME = 'OffersDB';
+    const DB_VERSION = 1;
+
+    const getDB = async () => {
+        return await openDB(DB_NAME, DB_VERSION, {
+            upgrade(db) {
+                if (!db.objectStoreNames.contains('page')) {
+                    db.createObjectStore('page');
+                }
+                if (!db.objectStoreNames.contains('statementTypes')) {
+                    db.createObjectStore('statementTypes', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('propertyTypes')) {
+                    db.createObjectStore('propertyTypes', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('announcements')) {
+                    db.createObjectStore('announcements', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('announcementDetails')) {
+                    db.createObjectStore('announcementDetails', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('questions')) {
+                    const store = db.createObjectStore('questions', { keyPath: 'questionId' });
+                    store.createIndex('announcementId', 'announcementId', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('comments')) {
+                    const store = db.createObjectStore('comments', { keyPath: 'id' });
+                    store.createIndex('announcementId', 'announcementId', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('outboxQuestions')) {
+                    db.createObjectStore('outboxQuestions', { keyPath: 'questionId' });
+                }
+                if (!db.objectStoreNames.contains('outboxComments')) {
+                    db.createObjectStore('outboxComments', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('outboxOffers')) {
+                    db.createObjectStore('outboxOffers', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('outboxOffersUpdate')) {
+                    db.createObjectStore('outboxOffersUpdate', { keyPath: 'id' });
+                }
+            },
+        });
+    };
+
+    const searchTransferData = async (searchData: SearchRequestInterface) => {
+        if (!browser) return;
+        try {
+            const response = await fetch('http://localhost:5118/api/Announcement/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(searchData)
+            });
+            if (response.ok) {
+                const data = await response.json() as AnnouncementsResponse;
+                const db = await getDB();
+                const tx = db.transaction('announcements', 'readwrite');
+                await Promise.all([...data.data.map(item => tx.store.put(item)), tx.done]);
+                offerState.setOffers(data.data);
+
+                offerState.offers.forEach(async i => {
+                    const responseDescription = await fetch(`http://localhost:5118/api/Announcement/get-announcement-full-by-id/${i.id}`);
+
+                    const responseComments = await fetch(`http://localhost:5118/api/Comment/get-comments-by-announcement-id/${i.id}`);
+
+                    const responseQuestions = await fetch(`http://localhost:5118/api/Question/get-all-by-announcement-id/${i.id}`);
+
+                    if (!responseDescription.ok) return;
+                    let descriptionData = await responseDescription.json() as AnnouncementFull;
+
+                    if (!responseComments.ok) return;
+                    let commentsData = await responseComments.json() as CommentInterface[];
+
+                    if (!responseQuestions.ok) return;
+                    let questionsData = await responseQuestions.json() as QuestionAnswer[];
+
+                    const db = await getDB();
+                    const tx = db.transaction('announcementDetails', 'readwrite');
+                    tx.store.put(descriptionData);
+
+                    const tx2 = db.transaction('comments', 'readwrite');
+                    for (const comment of commentsData) {
+                        await tx2.store.put(comment);
+                    }
+                    offerFullStore.setComments(i.id, commentsData);
+                    await tx2.done;
+
+                    const tx3 = db.transaction('questions', 'readwrite');
+                    for (const question of questionsData) {
+                        await tx3.store.put(question);
+                    }
+                    offerFullStore.setQuestions(i.id, questionsData);
+                    await tx3.done;
+                });
+                return;
             }
+        } catch (e) { console.warn("Offline: announcements"); }
+
+        const db = await getDB();
+
+        const cachedAnnouncements = await db.getAll('announcements');
+        
+        const sortedArr = [...cachedAnnouncements].sort((a, b) => {
+            return b.viewsCnt - a.viewsCnt;
         });
 
-        if(!response.ok){
-            return;
-        }
+        offerState.setOffers(sortedArr);
+    };
 
-        totalPages = await response.json() as number;
+    const getPropertyTypes = async () => {
+        if (!browser) return;
+        try {
+            const response = await fetch('http://localhost:5118/api/PropertyType/get-property-types');
+            if (response.ok) {
+                const data = await response.json() as LookupItem[];
+                const db = await getDB();
+                const tx = db.transaction('propertyTypes', 'readwrite');
+                await Promise.all([...data.map(item => tx.store.put(item)), tx.done]);
+                statementTypes = data;
+                return;
+            }
+        } catch (e) { console.warn("Offline: property types"); }
+
+        const db = await getDB();
+        propertyTypes = await db.getAll('propertyTypes');
+    };
+
+    const getStatementTypes = async () => {
+        if (!browser) return;
+        try {
+            const response = await fetch('http://localhost:5118/api/StatementType/get-statement-types');
+            if (response.ok) {
+                const data = await response.json() as LookupItem[];
+                const db = await getDB();
+                const tx = db.transaction('statementTypes', 'readwrite');
+                await Promise.all([...data.map(item => tx.store.put(item)), tx.done]);
+                statementTypes = data;
+                return;
+            }
+        } catch (e) { console.warn("Offline: types"); }
+
+        const db = await getDB();
+        statementTypes = await db.getAll('statementTypes');
+    };
+
+    const getPages = async () => {
+        if (!browser) return;
+        try {
+            const response = await fetch('http://localhost:5118/api/Announcement/get-pages');
+            if (response.ok) {
+                const count = await response.json() as number;
+                const db = await getDB();
+                await db.put('page', count, 'totalPages');
+                totalPages = count;
+                return;
+            }
+        } catch (e) { console.warn("Offline: pages"); }
+
+        const db = await getDB();
+        totalPages = /*await db.get('page', 'totalPages') || */0;
     };
 
     onMount(async () => {
@@ -170,24 +290,6 @@
         filtrationDropdownOpen = false;
         sortingDropdownOpen = false;
     }
-
-    const searchTransferData = async (searchData: SearchRequestInterface) => {
-        const response = await fetch('http://localhost:5118/api/Announcement/search', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(searchData)
-        });
-
-        if(!response.ok){
-            return;
-        }
-
-        const responseData = await response.json() as AnnouncementsResponse;
-        offerState.setOffers(responseData.data);
-        totalPages = responseData.totalPages;
-    };
 
     function switchFull(id: string) {
         goto(`/offers/${id}/description`);

@@ -1,6 +1,8 @@
 <script lang='ts'>
     import { auth, settings, translations } from '$lib';
     import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte';
 
 const t = $derived(translations[settings.lang]);
 
@@ -22,7 +24,7 @@ const t = $derived(translations[settings.lang]);
             <div class="welcome-section">
                 <div class="welcome-content">
                     <h2 class="welcome-message">
-                        {t.authorized.hello} <span class="user-name">{$auth.name}</span>!
+                        {t.authorized.hello} <span class="user-name">{$auth.personName}</span>!
                         <span class="welcome-emoji">🎉</span>
                     </h2>
                     <p class="welcome-subtitle">{t.authorized.welcome}</p>

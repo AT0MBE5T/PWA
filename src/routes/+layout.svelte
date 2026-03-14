@@ -1,10 +1,12 @@
 <script lang="ts">
-    import { auth, Roles, toast, Toast, translations } from '$lib';
+    import { auth, Roles, toast, Toast, translations, type AnnouncementsResponse, type AnnouncementStatRequest, type UserDto, type UserStatsModel } from '$lib';
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
     import { browser } from '$app/environment';
     import { settings } from '$lib';
     import '../app.css';
+    import { onMount } from 'svelte';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte';
 
     let { data, children } = $props();
 
@@ -34,9 +36,113 @@
     // svelte-ignore state_referenced_locally
         auth.sync(data.user, data.token);
 
-    const logout = () => {
+    const logout = async () => {
+        await personalStore.clearAllData();
         auth.logout();
         goto('/login');
+    };
+
+    onMount(async () => {
+        if (!$auth.isAuthenticated)
+            return;
+
+        try{
+            const sold = await getSold(1);
+            const bought = await getBought(1);
+            const favorite = await getFavorites(1);
+            const placed = await getPlaced(1);
+            const userDto = await getUserDto();
+            const userStats = await getUserStats();
+
+            personalStore.setBought($auth.id!, bought?.data ?? []);
+            personalStore.setPlaced($auth.id!, placed?.data ?? []);
+            personalStore.setFavorite($auth.id!, favorite?.data ?? []);
+            personalStore.setSold($auth.id!, sold?.data ?? []);
+            personalStore.setUserDto(userDto!);
+            personalStore.setUserStatsModel(userStats!);
+        }catch(error){
+
+        }
+    });
+
+    const getUserDto = async () => {
+        const response = await fetch('http://localhost:5118/api/Account/get-user-dto-by-id', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${$auth.accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const userData = response.ok ? await response.json() as UserDto : null;
+        return userData;
+    };
+
+    const getUserStats = async () => {
+        const response = await fetch('http://localhost:5118/api/Account/get-stats-by-user-id', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${$auth.accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const userData = response.ok ? await response.json() as UserStatsModel : null;
+        return userData;
+    };
+
+    const getSold = async (
+        page: number
+    ): Promise<AnnouncementsResponse | null> => {
+        const response = await fetch(`http://localhost:5118/api/Announcement/get-sold-by-user-id/${page}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${$auth.accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) return null;
+        return await response.json() as AnnouncementsResponse;
+    };
+
+    const getFavorites = async (
+        page: number
+    ): Promise<AnnouncementsResponse | null> => {
+        const response = await fetch(`http://localhost:5118/api/Favorite/get-favorites-by-user-id/${page}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${$auth.accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) return null;
+        return await response.json() as AnnouncementsResponse;
+    };
+
+    const getPlaced = async (
+        page: number
+    ): Promise<AnnouncementsResponse | null> => {
+        const response = await fetch(`http://localhost:5118/api/Announcement/get-placed-by-user-id/${page}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${$auth.accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) return null;
+        return await response.json() as AnnouncementsResponse;
+    };
+
+    const getBought = async (
+        page: number
+    ): Promise<AnnouncementsResponse | null> => {
+        const response = await fetch(`http://localhost:5118/api/Announcement/get-bought-by-user-id/${page}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${$auth.accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) return null;
+        return await response.json() as AnnouncementsResponse;
     };
 
     const t = $derived(translations[settings.lang]);

@@ -1,8 +1,28 @@
 <script lang='ts'>
     import { goto } from '$app/navigation';
     import { AnnouncementItem, auth, translations, settings, Roles } from '$lib';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
+    import { onMount } from 'svelte';
 
     const { data } = $props();
+
+    onMount(async () => {
+        await personalStore.loadBought($auth.id!);
+        await personalStore.loadPlaced($auth.id!);
+        await personalStore.loadSold($auth.id!);
+        await personalStore.loadFavorite($auth.id!);
+    });
+
+    let offers = $derived(data.currentTab === 'Sold' ? personalStore.sold :
+                            data.currentTab === 'Bought' ? personalStore.bought :
+                            data.currentTab === 'Placed' ? personalStore.placed :
+                            personalStore.favorite);
+
+    $effect(() => {
+        console.log(personalStore.placed);
+    });
+
+    //let currentAction = $derived(data.currentTab);
     let currentAction = $derived(data.currentTab);
 
     async function pageClicked(tabName: string) {
@@ -30,12 +50,12 @@
     let announcementId = $state<string>('');
 
     const goToPage = (page: number) => {
-        if (data.totalPages !== undefined && page >= 1 && page <= data.totalPages) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('page', page.toString());
+        // if (data.totalPages !== undefined && page >= 1 && page <= data.totalPages) {
+        // const url = new URL(window.location.href);
+        // url.searchParams.set('page', page.toString());
         
-        goto(url.toString(), { keepFocus: true, noScroll: true });
-        }
+        // goto(url.toString(), { keepFocus: true, noScroll: true });
+        // }
     };
 
     const offerClicked = async (id: string) => {
@@ -84,7 +104,7 @@ const t = $derived(translations[settings.lang]);
     </nav>
     <div class="main__shop shop">
         <div class="shop__items">
-            {#each data.items as i}
+            {#each offers[$auth.id!] as i}
                 <AnnouncementItem item={i}>
                     {#snippet btn_ok_name()}
                         <button class="shop__item__button__block__buy_button" onclick={() => offerClicked(i.id)}>{t.personal.edit}</button>
@@ -96,7 +116,7 @@ const t = $derived(translations[settings.lang]);
             <button
                     class="pagination-btn"
                     onclick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1 || data.items?.length === 0}
+                    disabled={currentPage === 1 || offers[$auth.id!].length === 0}
             >
                 ⬅️
             </button>
@@ -111,7 +131,7 @@ const t = $derived(translations[settings.lang]);
             <button
                     class="pagination-btn"
                     onclick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages || data.items?.length === 0}
+                    disabled={currentPage === totalPages || offers[$auth.id!]?.length === 0}
             >
                 ➡️
             </button>

@@ -1,44 +1,102 @@
 <script lang='ts'>
     import { format } from 'date-fns';
-    import { auth, ConfirmModal, Roles, settings, translations } from '$lib';
-    import createQuestionAnswerState from '$lib/stores/questionAnswerStore.svelte';
-    import { untrack } from 'svelte';
+    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte.js';
+    import questionAnswerState from '$lib/stores/questionAnswerStore.svelte';
+    import ConfirmModal from '$lib/modals/ConfirmModal.svelte';
+    import { auth, Roles, settings, translations } from '$lib';
+    import { tick, untrack } from 'svelte';
+    import offerState from '$lib/stores/offerStore.svelte.js';
 
     let { data } = $props();
 
-    const questAnsState = createQuestionAnswerState();
+    let questionContainer: HTMLElement;
 
-    let questionAnswers = $derived(questAnsState.questionAnswerData);
+    //let questionAnswers = $derived(offerState.questions);
 
     let confirmModal: ConfirmModal;
 
+    // $effect(() => {
+    //     const currentId = data.id;
+    //     if (!currentId) return;
 
-    $effect(() => {
-        const currentId = data.id;
+    //     async function setupChat() {
+    //         try {
+    //             const response = await fetch(`http://localhost:5118/api/Question/get-all-by-announcement-id/${currentId}`);
+    //             if (response.ok) {
+    //                 const initialComments = await response.json();
+    //                 offerFullStore.setQuestions(currentId, initialComments);
+    //                 questionAnswerState.setData(initialComments);
+    //             }
+    //         } catch (e) {
+    //             console.log('Оффлайн сообщения берём с кеша');
+    //             await offerFullStore.loadQuestions(currentId);
+    //         } finally {
+    //             questionAnswerState.initSignalR(currentId, data.user?.name || 'Guest');
+    //         }
+    //     }
 
-        untrack(() => {
-            if (currentId) {
-                questAnsState.setData(data.initialData);
-                questAnsState.initSignalR(currentId, $auth.name!);
-            }
+    //     setupChat();
+
+    //     return () => {
+    //         questionAnswerState.stopSignalR();
+    //     };
+    // });
+
+let questionAnswers = $derived(questionAnswerState.questionAnswerData);
+
+$effect(() => {
+    const currentId = data.id;
+    if (!currentId) return;
+
+    setupChat(currentId);
+
+    return () => {
+        questionAnswerState.stopSignalR();
+    };
+});
+
+async function setupChat(currentId: string) {
+    try {
+        const response = await fetch(
+            `http://localhost:5118/api/Question/get-all-by-announcement-id/${currentId}`
+        );
+
+        if (response.ok) {
+            const initialQuestions = await response.json();
+
+            offerFullStore.setQuestions(currentId, initialQuestions);
+            offerState.setQuestions(initialQuestions);
+            questionAnswerState.setData(initialQuestions);
+        }
+    } catch {
+        console.log("Оффлайн сообщения берём с кеша");
+        await offerFullStore.loadQuestions(currentId);
+        const pendingQuestions = await offerFullStore.getPendingQuestions();
+        let arrToAdd = offerFullStore.questions[currentId].concat(pendingQuestions);
+
+        const sortedArr = [...arrToAdd].sort((a, b) => {
+            return new Date(a.createdAtQuestion).getTime() - new Date(b.createdAtQuestion).getTime();
         });
 
-        return () => {
-            untrack(() => {
-                questAnsState.stopSignalR();
-            });
-        };
-    });
+        questionAnswerState.setData(sortedArr);
+        offerState.setQuestions(sortedArr);
+    } finally {
+        questionAnswerState.initSignalR(
+            currentId,
+            data.user?.name || "Guest"
+        );
+    }
+}
 
     async function addQuestion() {
         if (!textInput.trim()) return;
-        await questAnsState.sendQuestion(data.id, textInput);
+        await questionAnswerState.sendQuestion(`${$auth.personName} ${$auth.personSurname}`, data.id!, textInput);
         textInput = "";
     }
 
     async function addAnswer() {
         if (!textInput.trim()) return;
-        await questAnsState.sendAnswer(data.id, currentQuestionId, textInput);
+        await questionAnswerState.sendAnswer(`${$auth.personName} ${$auth.personSurname}`, data.id!, textInput, currentQuestionId);
         textInput = "";
     }
 
@@ -48,7 +106,7 @@
         if(!confirmed){
             return;
         }
-        await questAnsState.deleteAnswer(data.id, answerId!);
+        await questionAnswerState.deleteAnswer(data.id!, answerId!);
     }
 
     async function deleteQuestion(questionId: string) {
@@ -57,7 +115,7 @@
         if(!confirmed){
             return;
         }
-        await questAnsState.deleteQuestion(data.id, questionId);
+        await questionAnswerState.deleteQuestion(data.id!, questionId);
     }
 
     const answerValidation = () => {
@@ -84,6 +142,27 @@
         isAnswering = false;
     };
 
+    $effect(() => {
+        if (questionAnswerState.questionAnswerData && questionContainer) {
+            tick().then(() => {
+                questionContainer.scrollTo({
+                    top: questionContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    });
+
+    const handleKeydown = (e: KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+
+            isAnswering
+                ? addAnswer()
+                : addQuestion();
+        }
+    };
+
     const t = $derived(translations[settings.lang]);
 
 </script>
@@ -92,11 +171,17 @@
 
 <div class="question_answer__block">
     <h2 class="question_answer">❓ {t.offers.questions}</h2>
-    <div class="question__answer__container">
+    <div class="question__answer__container" bind:this={questionContainer}>
         {#each questionAnswers as i}
             <div class="question_answer__item">
-                <div class="question_answer__item__question ">
+                <!-- <div class="question_answer__item__question">
                     ⌚ {format(i.createdAtQuestion, 'dd.MM.yyyy HH:mm')} | 🦰 {i.createdByQuestion}: {i.textQuestion}
+                </div> -->
+                <div class="question_answer__item__question">
+                    {#if i.isQuestionPending}
+                        🔃
+                    {/if}
+                    ⌚ {i.createdAtQuestion ? format(i.createdAtQuestion, 'dd.MM.yyyy HH:mm') : ''} | 🦰 {i.createdByQuestion}: {i.textQuestion}
                 </div>
                 {#if auth.hasRole(Roles.Admin)}
                     <div role="button"
@@ -120,6 +205,9 @@
                         </div>
                     {/if}
                     <div class="question_answer__item__answer">
+                        {#if i.isAnswerPending}
+                            🔃
+                        {/if}
                         ⌚ {format(i.createdAtAnswer, 'dd.MM.yyyy HH:mm')} | 🦰 {i.createdByAnswer}: {i.textAnswer}
                     </div>
                 {:else}
@@ -142,7 +230,8 @@
             <div class="question__interaction__area">
                 <textarea
                     placeholder={isAnswering ? t.offers.typeAnswer : t.offers.typeQuestion}
-                    bind:value={textInput}>
+                    bind:value={textInput}
+                    onkeydown={handleKeydown}>
                 </textarea>
             </div>
             <div class="question__block__confirm">
@@ -171,6 +260,7 @@
         border-radius: 6px;
         outline: none;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        resize: none;
     }
 
     textarea:focus {
@@ -364,7 +454,7 @@
     }
 
     .question_answer__item__delete__answer__button:hover {
-        transform: translateY(-3px);
+        transform: translateY(-15px);
         box-shadow: 0 8px 20px rgba(223, 13, 30, 0.4);
         cursor: pointer;
     }
