@@ -14,19 +14,57 @@ class PersonalState {
     DB_NAME = 'PersonalDB';
     DB_VERSION = 1;
 
-    async setUserDto(data: UserDto) {
+    async setUserDto(data: UserDto, userId: string) {
         this.userDto = data;
         const db = await this.getDB();
         const tx = db.transaction('userDto', 'readwrite');
-        await tx.store.put(data, data.age);
+        await tx.store.put(data, userId);
         await tx.done;
     }
 
-    async setUserStatsModel(data: UserStatsModel) {
+    async updateEmail(userId: string, email: string) {
+        if (!this.userDto) return;
+
+        this.userDto.email = email;
+
+        const db = await this.getDB();
+        
+        const tx = db.transaction('userDto', 'readwrite');
+        const store = tx.objectStore('userDto');
+        const data = await store.get(userId) as UserDto;
+
+        if (data) {
+            data.email = email;
+            await store.put($state.snapshot(data), userId);
+        }
+
+        await tx.done;
+    }
+
+    async updatePhone(userId: string, phone: string) {
+        if (!this.userDto) return;
+
+        this.userDto.phoneNumber = phone;
+
+        const db = await this.getDB();
+        
+        const tx = db.transaction('userDto', 'readwrite');
+        const store = tx.objectStore('userDto');
+        const data = await store.get(userId) as UserDto;
+
+        if (data) {
+            data.phoneNumber = phone;
+            await store.put($state.snapshot(data));
+        }
+
+        await tx.done;
+    }
+
+    async setUserStatsModel(data: UserStatsModel, userId: string) {
         this.userStatsModel = data;
         const db = await this.getDB();
         const tx = db.transaction('userStats', 'readwrite');
-        await tx.store.put(data, data.answersCnt);
+        await tx.store.put(data, userId);
         await tx.done;
     }
 
@@ -99,11 +137,10 @@ class PersonalState {
         if (this.userDto) return;
 
         const db = await this.getDB();
-        const cached = await db.getAll('userDto');
+        const cached = await db.get('userDto', id);
         
         if (cached) {
-            this.userDto = cached.at(0);
-            console.log("Дані підтягнуто з IndexedDB:", cached);
+            this.userDto = cached;
         }
     }
 
@@ -111,11 +148,10 @@ class PersonalState {
         if (this.userStatsModel) return;
 
         const db = await this.getDB();
-        const cached = await db.getAll('userStats');
+        const cached = await db.get('userStats', id);
         
         if (cached) {
-            this.userStatsModel = cached.at(0);
-            console.log("Дані підтягнуто з IndexedDB:", cached);
+            this.userStatsModel = cached;
         }
     }
 
@@ -127,7 +163,6 @@ class PersonalState {
         
         if (cached) {
             this.placed[id] = cached;
-            console.log("Дані підтягнуто з IndexedDB:", cached);
         }
     }
 
@@ -139,7 +174,6 @@ class PersonalState {
         
         if (cached) {
             this.bought[id] = cached;
-            console.log("Дані підтягнуто з IndexedDB:", cached);
         }
     }
 
@@ -151,7 +185,6 @@ class PersonalState {
         
         if (cached) {
             this.favorite[id] = cached;
-            console.log("Дані підтягнуто з IndexedDB:", cached);
         }
     }
 
@@ -163,7 +196,6 @@ class PersonalState {
         
         if (cached) {
             this.sold[id] = cached;
-            console.log("Дані підтягнуто з IndexedDB:", cached);
         }
     }
 
@@ -184,8 +216,6 @@ class PersonalState {
             ...stores.map(store => tx.objectStore(store).clear()),
             tx.done
         ]);
-
-        console.log("PersonalDB успешно очищена");
     }
 }
 

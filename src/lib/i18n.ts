@@ -12,6 +12,11 @@ export interface TranslationKeys {
         closeDialog: string;
         changeTheme: string;
         changeLang: string;
+        loading: string;
+        errorConnection: string;
+        describeProblem: string;
+        success: string;
+        dbError: string;
     };
 
     validation: {
@@ -45,6 +50,8 @@ export interface TranslationKeys {
         passwordError: string;
         repeatPasswordError: string;
         userNotFound: string;
+        loginError: string;
+        loginNotExist: string;
     };
 
     header:{
@@ -148,6 +155,7 @@ export interface TranslationKeys {
         searchPropertyType: string;
         ok: string;
         reasonForComplain: string;
+        complaintSent: string;
         notes: string;
         complain: string;
         unfavorite: string;
@@ -187,6 +195,16 @@ export interface TranslationKeys {
         roomsByAsc: string;
         floorsByDesc: string;
         floorsByAsc: string;
+        rent: string;
+        lease: string;
+        sale: string;
+        apartment: string;
+        house: string;
+        commercial: string;
+        office: string;
+        warehouse: string;
+        land: string;
+        room: string;
     };
 
     reports: {
@@ -275,7 +293,12 @@ export const translations: Record<Language, TranslationKeys> = {
             areYouSure: "Ви впевнені?",
             closeDialog: "Закрити діалог",
             changeLang: "Змінити мову",
-            changeTheme: "Змінити тему"
+            changeTheme: "Змінити тему",
+            loading: "Завантаження...",
+            errorConnection: "Перевірте підключення до інтернету",
+            describeProblem: "Опишіть проблему, будь ласка",
+            success: "Успіх",
+            dbError: "Помилка бази даних"
         },
         validation: {
             selectImage: 'Оберіть зображення, будь ласка',
@@ -307,7 +330,9 @@ export const translations: Record<Language, TranslationKeys> = {
             ageBetween: "Вік повинен бути 1-130",
             passwordError: "Помилка паролю",
             repeatPasswordError: "Помилка повтору пароля",
-            userNotFound: "Користувача не знайдено"
+            userNotFound: "Користувача не знайдено",
+            loginError: "Помилка логіну",
+            loginNotExist: "Логін не існує"
         },
         header:{
             lang_ua: "Укр",
@@ -406,6 +431,7 @@ export const translations: Record<Language, TranslationKeys> = {
             title: "Заголовок",
             ok: "Ок",
             reasonForComplain: "Причина скарги",
+            complaintSent: "Скаргу успішно відправлено",
             notes: "Замітки",
             complain: "Поскаржитись",
             unfavorite: "Прибрати з обраного",
@@ -444,7 +470,17 @@ export const translations: Record<Language, TranslationKeys> = {
             roomsByDesc: 'Кімнати за спаданням',
             roomsByAsc: 'Кімнати за зростанням',
             floorsByDesc: 'Поверхи за спаданням',
-            floorsByAsc: 'Поверхи за зростанням'
+            floorsByAsc: 'Поверхи за зростанням',
+            rent: 'Оренда',
+            lease: 'Лізинг',
+            sale: 'Продаж',
+            apartment: 'Квартири',
+            house: 'Будинки',
+            commercial: 'Комерційні',
+            office: 'Офіси',
+            warehouse: 'Склади',
+            land: 'Землі',
+            room: 'Кімнати',
         },
         reports: {
             searchFilters: 'Фільтри пошуку',
@@ -527,7 +563,12 @@ export const translations: Record<Language, TranslationKeys> = {
             areYouSure: "Are you sure?",
             closeDialog: "Close dialog",
             changeLang: "Change lang",
-            changeTheme: "Chsnge theme"
+            changeTheme: "Chsnge theme",
+            loading: "Loading...",
+            errorConnection: "Check your internet connection",
+            describeProblem: "Please, describe the problem",
+            success: "Success",
+            dbError: "Database error"
         },
         validation: {
             selectImage: 'Please select an image',
@@ -559,7 +600,9 @@ export const translations: Record<Language, TranslationKeys> = {
             ageBetween: "Age must be between 1-130",
             passwordError: "Password error",
             repeatPasswordError: "Repeat password error",
-            userNotFound: "User not found"
+            userNotFound: "User not found",
+            loginError: "Login error",
+            loginNotExist: "Login is not exist"
         },
         header:{
             lang_ua: "UA",
@@ -658,6 +701,7 @@ export const translations: Record<Language, TranslationKeys> = {
             title: "Title",
             ok: "Ok",
             reasonForComplain: "Reason for complain",
+            complaintSent: "Complaint successfully sent",
             notes: "Notes",
             complain: "Complain",
             unfavorite: "Unfavorite",
@@ -696,7 +740,17 @@ export const translations: Record<Language, TranslationKeys> = {
             roomsByDesc: 'Rooms by desc',
             roomsByAsc: 'Rooms by asc',
             floorsByDesc: 'Floors by desc',
-            floorsByAsc: 'Floors by asc'
+            floorsByAsc: 'Floors by asc',
+            rent: 'For rent',
+            lease: 'For lease',
+            sale: 'For sale',
+            apartment: 'Apartment',
+            house: 'House',
+            commercial: 'Commercial',
+            office: 'Office',
+            warehouse: 'Warehouse',
+            land: 'Lands',
+            room: 'Rooms',
         },
 
         reports: {

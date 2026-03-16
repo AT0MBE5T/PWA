@@ -7,15 +7,8 @@
         ValidationErrors,
         LookupItem,
         ImageItem,
-
-        AnnouncementShort,
-
         AnnouncementAddModel,
-
         AnnouncementUpdateModel
-
-
-
     } from '$lib';
     import { Modal, Toast, auth, settings, translations } from '$lib';
     import { goto } from '$app/navigation';
@@ -73,162 +66,78 @@
         filteredStatementTypes = statementTypes;
     })
 
-    // const getDataForEdit = async () => {
-    //     try{
-    //         const response = await fetch('http://localhost:5118/api/Announcement/get-announcement-for-edit', {
-    //             method: 'Post',
-    //             body: JSON.stringify(announcementId),
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 "Authorization": `Bearer ${$auth.accessToken}`
-    //             },
-    //         });
-
-    //         if(!response.ok){
-    //             return;
-    //         }
-
-    //         const data = await response.json() as AnnouncementEditResponse;
-
-    //         propertyTypeSearch = (propertyTypes.find((type: LookupItem) =>
-    //             type.id === data.propertyTypeId
-    //         ))!.name;
-
-    //         statementTypeSearch = (statementTypes.find((type: LookupItem) =>
-    //             type.id === data.statementTypeId
-    //         ))!.name;
-
-    //         propertyTypeId = data.propertyTypeId;
-    //         statementTypeId = data.statementTypeId;
-    //         areaInput = data.area;
-    //         contentInput = data.content;
-    //         descriptionInput = data.description;
-    //         floorsInput = data.floors;
-    //         locationInput = data.location;
-    //         priceInput = data.price;
-    //         roomsInput = data.rooms;
-    //         titleInput = data.title;
-
-    //         images = data.photos.map(p => ({
-    //             type: 'existing',
-    //             id: p.id,
-    //             url: p.url
-    //         }));
-    //     }catch{
-    //         const data = await offerFullStore.getPendingOffersUpdate();
-
-    //         propertyTypeSearch = (propertyTypes.find((type: LookupItem) =>
-    //             type.id === data
-    //         ))!.name;
-
-    //         statementTypeSearch = (statementTypes.find((type: LookupItem) =>
-    //             type.id === data.statementTypeId
-    //         ))!.name;
-
-    //         propertyTypeId = data.propertyTypeId;
-    //         statementTypeId = data.statementTypeId;
-    //         areaInput = data.area;
-    //         contentInput = data.content;
-    //         descriptionInput = data.description;
-    //         floorsInput = data.floors;
-    //         locationInput = data.location;
-    //         priceInput = data.price;
-    //         roomsInput = data.rooms;
-    //         titleInput = data.title;
-
-    //         images = data.photos.map(p => ({
-    //             type: 'existing',
-    //             id: p.id,
-    //             url: p.url
-    //         }));
-    //     }
-    // };
-
     const getDataForEdit = async () => {
-    try {
-        const response = await fetch('http://localhost:5118/api/Announcement/get-announcement-for-edit', {
-            method: 'POST',
-            body: JSON.stringify(announcementId),
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": `Bearer ${$auth.accessToken}`
-            },
-        });
+        try {
+            const response = await fetch('http://localhost:5118/api/Announcement/get-announcement-for-edit', {
+                method: 'POST',
+                body: JSON.stringify(announcementId),
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
+                },
+            });
 
-        if (!response.ok) throw new Error("Server error");
+            if (!response.ok) throw new Error("Server error");
 
-        const data = await response.json() as AnnouncementEditResponse;
+            const data = await response.json() as AnnouncementEditResponse;
+
+            images = data.photos.map(p => ({
+                type: 'existing',
+                id: p.id,
+                url: p.url
+            }));
+
+            applyDataToForm(data);
+
+        } catch (error) {   
+            const offlineData = offerFullStore.offerDetails[announcementId];
+
+            if (offlineData) {
+                const propType = propertyTypes.find(t => t.name === offlineData.propertyTypeName);
+                const statType = statementTypes.find(t => t.name === offlineData.statementTypeName);
+
+                const mappedData: AnnouncementEditResponse = {
+                    title: offlineData.title,
+                    location: offlineData.location,
+                    area: offlineData.area,
+                    floors: offlineData.floors,
+                    rooms: offlineData.rooms,
+                    price: offlineData.price,
+                    content: offlineData.content,
+                    description: offlineData.description,                
+                    propertyTypeId: propType?.id ?? "",
+                    statementTypeId: statType?.id ?? "",
+                    userId: offlineData.authorId,
+                    photos: offlineData.photos
+                };
+
+                applyDataToForm(mappedData);
+            }
+        }
+    };
+
+    function applyDataToForm(data: AnnouncementEditResponse) {
+        propertyTypeId = data.propertyTypeId;
+        statementTypeId = data.statementTypeId;
+        
+        propertyTypeSearch = propertyTypes.find(t => t.id === data.propertyTypeId)?.name ?? "";
+        statementTypeSearch = statementTypes.find(t => t.id === data.statementTypeId)?.name ?? "";
+
+        areaInput = data.area;
+        contentInput = data.content;
+        descriptionInput = data.description;
+        floorsInput = data.floors;
+        locationInput = data.location;
+        priceInput = data.price;
+        roomsInput = data.rooms;
+        titleInput = data.title;
 
         images = data.photos.map(p => ({
             type: 'existing',
             id: p.id,
             url: p.url
         }));
-
-        applyDataToForm(data);
-
-    } catch (error) {
-        console.warn("Offline mode: loading from IndexedDB");
-        
-        const offlineData = offerFullStore.offerDetails[announcementId];
-
-if (offlineData) {
-    // 1. Находим ID типов по их именам из справочников
-    const propType = propertyTypes.find(t => t.name === offlineData.propertyTypeName);
-    const statType = statementTypes.find(t => t.name === offlineData.statementTypeName);
-
-    const mappedData: AnnouncementEditResponse = {
-        // Копируем примитивы
-        title: offlineData.title,
-        location: offlineData.location,
-        area: offlineData.area,
-        floors: offlineData.floors,
-        rooms: offlineData.rooms,
-        price: offlineData.price,
-        content: offlineData.content,
-        description: offlineData.description,
-        
-        // Мапим ID (если не нашли, ставим пустую строку или дефолт)
-        propertyTypeId: propType?.id ?? "",
-        statementTypeId: statType?.id ?? "",
-        userId: offlineData.authorId,
-
-        // Преобразуем массив строк photosUrl в массив объектов PhotoInterface
-        // Так как в просмотре обычно нет ID конкретных фото, 
-        // используем URL как ID или индекс (для существующих фото это допустимо)
-        photos: offlineData.photos
-    };
-
-    applyDataToForm(mappedData);
-}
     }
-};
-
-// Хелпер для заполнения реактивных переменных
-function applyDataToForm(data: AnnouncementEditResponse) {
-    propertyTypeId = data.propertyTypeId;
-    statementTypeId = data.statementTypeId;
-    
-    // Обновляем строковые значения для поисковых инпутов
-    propertyTypeSearch = propertyTypes.find(t => t.id === data.propertyTypeId)?.name ?? "";
-    statementTypeSearch = statementTypes.find(t => t.id === data.statementTypeId)?.name ?? "";
-
-    areaInput = data.area;
-    contentInput = data.content;
-    descriptionInput = data.description;
-    floorsInput = data.floors;
-    locationInput = data.location;
-    priceInput = data.price;
-    roomsInput = data.rooms;
-    titleInput = data.title;
-
-    // Важно: мапим в ImageItem для UI компонента загрузки фото
-    images = data.photos.map(p => ({
-        type: 'existing',
-        id: p.id,
-        url: p.url
-    }));
-}
 
     const getPropertyTypes = async () => {
         try{
@@ -502,6 +411,7 @@ function applyDataToForm(data: AnnouncementEditResponse) {
     }
 
     async function confirmClicked(): Promise<void> {
+        settings.isLoading = true;
         if (validateForm()) {
             const formData = new FormData();
             images
@@ -564,6 +474,8 @@ function applyDataToForm(data: AnnouncementEditResponse) {
                 await offerState.addFullOffer(dataToAdd, $auth.id!, `${$auth.name} ${$auth.personSurname}`);
 
                 goto('/offers');
+            } finally {
+                settings.isLoading = false;
             }
         } else {
             toastType = 'error';
@@ -573,6 +485,7 @@ function applyDataToForm(data: AnnouncementEditResponse) {
     }
 
     async function updateClicked(): Promise<void> {
+        settings.isLoading = true;
         if (validateForm()) {
             const formData = new FormData();
 
@@ -648,6 +561,8 @@ function applyDataToForm(data: AnnouncementEditResponse) {
                 await offerState.updateOffer(dataToUpdate);
 
                 goto('/offers');
+            } finally {
+                settings.isLoading = false;
             }
         } else {
             toastType = 'error';

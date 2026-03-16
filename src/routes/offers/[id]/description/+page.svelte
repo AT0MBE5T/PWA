@@ -29,70 +29,82 @@
             return;
         }
 
-        const response = await fetch('http://localhost:5118/api/Chat/get-or-create-chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": `Bearer ${$auth.accessToken}`
-            },
-            body: JSON.stringify(offer!.authorId)
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Chat/get-or-create-chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
+                },
+                body: JSON.stringify(offer!.authorId)
+            });
 
-        if(!response.ok){
-            toast.show(t.offers.creatingDialogueError, 'error');
-            return;
+            if(!response.ok){
+                toast.show(t.offers.creatingDialogueError, 'error');
+                return;
+            }
+
+            const chatId = await response.json() as string;
+
+            toast.show(t.offers.dialogueCreatedSuccessfully, 'success');
+            
+            goto(`/chats/${chatId}`);
+        }catch{
+            toast.show(t.system.errorConnection, 'error', 5000);
         }
-
-        const chatId = await response.json() as string;
-
-        toast.show(t.offers.dialogueCreatedSuccessfully, 'success');
-        
-        goto(`/chats/${chatId}`);
     };
 
     const onVerifyClick = async () => {
-        const response = await fetch('http://localhost:5118/api/Announcement/switch-verification', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": `Bearer ${$auth.accessToken}`
-            },
-            body: JSON.stringify(data.id)
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Announcement/switch-verification', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
+                },
+                body: JSON.stringify(data.id)
+            });
 
-        if(!response.ok){
-            toast.show(offer?.isVerified ? t.offers.unverifyError : t.offers.verifyError, 'error');
-            return;
+            if(!response.ok){
+                toast.show(offer?.isVerified ? t.offers.unverifyError : t.offers.verifyError, 'error');
+                return;
+            }
+
+            toast.show(offer?.isVerified ? t.offers.unverifiedSuccessfully : t.offers.verifiedSuccessfully, 'success');
+
+            offer!.isVerified = !offer?.isVerified;
+        }catch{
+            toast.show(t.system.errorConnection, 'error', 5000);
         }
-
-        toast.show(offer?.isVerified ? t.offers.unverifiedSuccessfully : t.offers.verifiedSuccessfully, 'success');
-
-        offer!.isVerified = !offer?.isVerified;
     };
 
-const onFavoriteClick = async (isAdd: boolean) => {
-        const response = await fetch(`http://localhost:5118/api/Favorite/${isAdd ? 'add-favorite' : 'delete-favorite'}`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": `Bearer ${$auth.accessToken}`
-            },
-            body: JSON.stringify({
-                userId: $auth.id,
-                announcementId: data.id
-            })
-        });
+    const onFavoriteClick = async (isAdd: boolean) => {
+        try{
+            const response = await fetch(`http://localhost:5118/api/Favorite/${isAdd ? 'add-favorite' : 'delete-favorite'}`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
+                },
+                body: JSON.stringify({
+                    userId: $auth.id,
+                    announcementId: data.id
+                })
+            });
 
-        if(!response.ok){
-            toast.show(offer?.isFavorite ? t.offers.unfavoriteError: t.offers.favoriteError, 'error');
-            return;
+            if(!response.ok){
+                toast.show(offer?.isFavorite ? t.offers.unfavoriteError: t.offers.favoriteError, 'error');
+                return;
+            }
+
+            toast.show(offer?.isFavorite ? t.offers.unfavoriteSuccessfully : t.offers.favoriteSuccessfully, 'success');
+
+            offer!.isFavorite = !offer?.isFavorite;
+        }catch{
+            toast.show(t.system.errorConnection, 'error', 5000);
         }
-
-        toast.show(offer?.isFavorite ? t.offers.unfavoriteSuccessfully : t.offers.favoriteSuccessfully, 'success');
-
-        offer!.isFavorite = !offer?.isFavorite;
     };
 
     let confirmModal: ConfirmModal;
@@ -104,26 +116,30 @@ const onFavoriteClick = async (isAdd: boolean) => {
             return;
         }
 
-        const response = await fetch('http://localhost:5118/api/Announcement/delete-announcement-by-id', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": `Bearer ${$auth.accessToken}`
-            },
-            body: JSON.stringify(data.id)
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Announcement/delete-announcement-by-id', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
+                },
+                body: JSON.stringify(data.id)
+            });
 
-        if(!response.ok){
-            toast.show(t.offers.deletingError, 'error');
+            if(!response.ok){
+                toast.show(t.offers.deletingError, 'error');
+                goto('/offers');
+                return;
+            }
+
+            offerFullStore.removeOffer(data.id);
+            offerFullStore.removeOfferFull(data.id);
+
+            toast.show(t.offers.deletedSuccessfully, 'success');
             goto('/offers');
-            return;
-        }
-
-        offerFullStore.removeOffer(data.id);
-        offerFullStore.removeOfferFull(data.id);
-
-        toast.show(t.offers.deletedSuccessfully, 'success');
-        goto('/offers');
+        }catch{
+            toast.show(t.system.errorConnection, 'error', 5000);
+        }        
     };
 
 let currentIndex = $state(0);
@@ -213,23 +229,36 @@ let currentIndex = $state(0);
     let typeId = $state<string>(typeData[0].id);
 
     const createComplaint = async () => {
-        const userId = $auth.id;
-        const offerId = data.id;
-        if (userNote === '' || typeId === '' || userId === null || offerId === undefined)
-            return;
+        try{
+            const userId = $auth.id;
+            const offerId = data.id;
 
-        await fetch('http://localhost:5118/api/Complaint/add-complaint', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userId,
-                announcementId: offerId,
-                userNote,
-                typeId
-            })
-        });
+            if (typeId === '' || userId === null || offerId === undefined){
+                toast.show(t.system.errorOccurred, 'error');
+                return;
+            }
 
-        showComplaint = false;
+            if (userNote === ''){
+                toast.show(t.system.describeProblem, 'info');
+                return;
+            }
+
+            await fetch('http://localhost:5118/api/Complaint/add-complaint', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    announcementId: offerId,
+                    userNote,
+                    typeId
+                })
+            });
+            toast.show(t.offers.complaintSent, 'success');
+        }catch{
+            toast.show(t.system.errorConnection, 'error', 5000);
+        } finally {
+            showComplaint = false;
+        }
     }
 
 </script>
@@ -411,15 +440,38 @@ let currentIndex = $state(0);
         gap: 2rem;
     }
 
-    .complaint__form__text{
+    .complaint__form__type {
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
     }
 
-    .complaint__form label {
-        font-weight: bold;
+    .complaint__form select {
+        padding: 0.6rem 2rem 0.6rem 0.8rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: white;
         color: #333;
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: calc(100% - 0.8rem) center;
+        background-size: 12px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .complaint__form select:focus {
+        border-color: #7a42f4;
+        box-shadow: 0 0 5px rgba(122, 66, 244, 0.3);
+    }
+
+    .complaint__form__text{
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
     }
 
     .complaint__form label {
@@ -439,6 +491,24 @@ let currentIndex = $state(0);
     .complaint__form input:focus {
         border-color: #7a42f4;
         box-shadow: 0 0 5px rgba(122, 66, 244, 0.3);
+    }
+
+    .btn {
+        padding: 0.8rem;
+        background-color: #7a42f4;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        width: 100%;
+    }
+
+    .btn:hover {
+        background-color: #ff9900;
+        transform: scale(1.03);
     }
 
     .item__container {
@@ -955,6 +1025,56 @@ let currentIndex = $state(0);
         font-weight: 300;
     }
 
+    :global([data-theme="dark"]) .complaint__form {
+        background: #1e293b;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    :global([data-theme="dark"]) select {
+        background-color: #0f172a;
+        border: 1px solid #334155;
+        color: #f1f5f9;
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23f1f5f9' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: calc(100% - 0.8rem) center;
+        background-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    :global([data-theme="dark"]) select:focus {
+        border-color: #7a42f4;
+        box-shadow: 0 0 0 3px rgba(122, 66, 244, 0.2);
+        outline: none;
+    }
+
+    :global([data-theme="dark"]) select option {
+        background-color: #1e293b;
+        color: #f1f5f9;
+    }
+    
+    :global([data-theme="dark"]) label {
+        color: #ccc;
+    }
+
+    :global([data-theme="dark"]) input {
+        background-color: #0f172a;
+        border: 1px solid #334155;
+        color: #f1f5f9;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    :global([data-theme="dark"]) input:focus {
+        border-color: #7a42f4;
+        box-shadow: 0 0 0 3px rgba(122, 66, 244, 0.2);
+        outline: none;
+    }
+
     :global([data-theme="dark"]) .carousel__thumbnails::-webkit-scrollbar-thumb {
         background: #334155;
     }
@@ -1020,6 +1140,16 @@ let currentIndex = $state(0);
     }
 
     :global([data-theme="dark"]) .footer__container__complain button:hover {
+        background-color: #ff9900;
+        color: #000;
+    }
+
+    :global([data-theme="dark"]) .footer__container__edit button:hover {
+        background-color: #ff9900;
+        color: #000;
+    }
+
+    :global([data-theme="dark"]) .delete__item button:hover {
         background-color: #ff9900;
         color: #000;
     }

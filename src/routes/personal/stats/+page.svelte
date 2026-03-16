@@ -3,16 +3,15 @@
     import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
     import { onMount } from 'svelte';
 
-    let { data } = $props();
-
     onMount(async () => {
+        settings.isLoading = true;
         await personalStore.loadUserStatsDto($auth.id!);
+        settings.isLoading = false;
     });
 
-    // const userStats = $derived(data.stats);
     const userStats = $derived(personalStore.userStatsModel);
 
-const t = $derived(translations[settings.lang]);
+    const t = $derived(translations[settings.lang]);
 </script>
 
 <div class="greeting-container">

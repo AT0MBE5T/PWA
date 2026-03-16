@@ -1,7 +1,6 @@
 import type { QuestionAnswer } from "$lib/interfaces/QuestionAnswer";
 import * as signalR from "@microsoft/signalr";
 import { offerFullStore } from "./OfferFullStore.svelte";
-import type { CommentInterface } from "$lib/interfaces/CommentInterface";
 import offerState from "./offerStore.svelte";
 
 const questionAnswerState = createQuestionAnswerState();
@@ -13,6 +12,33 @@ function createQuestionAnswerState() {
     let currentChatId = $state<string | null>(null);
     let isConnecting = false;
     let isSyncing = false;
+
+async function setup(currentId: string) {
+    try {
+        const response = await fetch(
+            `http://localhost:5118/api/Question/get-all-by-announcement-id/${currentId}`
+        );
+
+        if (response.ok) {
+            const initialQuestions = await response.json();
+
+            offerFullStore.setQuestions(currentId, initialQuestions);
+            offerState.setQuestions(initialQuestions);
+            questionAnswerState.setData(initialQuestions);
+        }
+    } catch {
+        await offerFullStore.loadQuestions(currentId);
+        const pendingQuestions = await offerFullStore.getPendingQuestions();
+        let arrToAdd = offerFullStore.questions[currentId].concat(pendingQuestions);
+
+        const sortedArr = [...arrToAdd].sort((a, b) => {
+            return new Date(a.createdAtQuestion).getTime() - new Date(b.createdAtQuestion).getTime();
+        });
+
+        questionAnswerState.setData(sortedArr);
+        offerState.setQuestions(sortedArr);
+    }
+}
 
 async function initSignalR(chatId: string, userName: string) {
     if ((connection || isConnecting) && currentChatId === chatId) {
@@ -28,41 +54,40 @@ async function initSignalR(chatId: string, userName: string) {
         .withAutomaticReconnect()
         .build();
 
-newConnection.on("ReceiveQuestion", (announcementId, questionId, userName, message) => {
-
-    const pendingIndex = questionAnswerData.findIndex(
-        x => x.isQuestionPending && x.textQuestion === message && x.createdByQuestion === userName
-    );
-
-    if (pendingIndex !== -1) {
-        questionAnswerData = questionAnswerData.map((x, i) =>
-            i === pendingIndex
-                ? {
-                    ...x,
-                    questionId,
-                    isQuestionPending: false
-                }
-                : x
+    newConnection.on("ReceiveQuestion", (announcementId, questionId, userName, message) => {
+        const pendingIndex = questionAnswerData.findIndex(
+            x => x.isQuestionPending && x.textQuestion === message && x.createdByQuestion === userName
         );
-    } else {
-        questionAnswerData = [
-            ...questionAnswerData,
-            {
-                questionId,
-                createdAtQuestion: new Date().toISOString(),
-                createdByQuestion: userName,
-                textQuestion: message,
-                answerId: null,
-                createdAtAnswer: null,
-                createdByAnswer: null,
-                textAnswer: null,
-                isQuestionPending: false,
-                isAnswerPending: null,
-                announcementId
-            }
-        ];
-    }
-});
+
+        if (pendingIndex !== -1) {
+            questionAnswerData = questionAnswerData.map((x, i) =>
+                i === pendingIndex
+                    ? {
+                        ...x,
+                        questionId,
+                        isQuestionPending: false
+                    }
+                    : x
+            );
+        } else {
+            questionAnswerData = [
+                ...questionAnswerData,
+                {
+                    questionId,
+                    createdAtQuestion: new Date().toISOString(),
+                    createdByQuestion: userName,
+                    textQuestion: message,
+                    answerId: null,
+                    createdAtAnswer: null,
+                    createdByAnswer: null,
+                    textAnswer: null,
+                    isQuestionPending: false,
+                    isAnswerPending: null,
+                    announcementId
+                }
+            ];
+        }
+    });
 
     newConnection.on("ReceiveAnswer", (answerId, questionId, userName, message) => {
         const existData = questionAnswerData.find(x => x.questionId === questionId);
@@ -70,18 +95,18 @@ newConnection.on("ReceiveQuestion", (announcementId, questionId, userName, messa
         if (existData === undefined)
             return;
 
-questionAnswerData = questionAnswerData.map(x =>
-    x.questionId === questionId
-        ? {
-            ...x,
-            answerId,
-            createdAtAnswer: new Date().toISOString(),
-            createdByAnswer: userName,
-            textAnswer: message,
-            isAnswerPending: false
-        }
-        : x
-);
+        questionAnswerData = questionAnswerData.map(x =>
+            x.questionId === questionId
+                ? {
+                    ...x,
+                    answerId,
+                    createdAtAnswer: new Date().toISOString(),
+                    createdByAnswer: userName,
+                    textAnswer: message,
+                    isAnswerPending: false
+                }
+                : x
+        );
     });
 
     newConnection.on("DeleteQuestion", (questionId) => {
@@ -235,11 +260,9 @@ async function stopSignalR() {
                 try {
                     await connection.invoke("SendQuestion", chatId, text, userName);
                 } catch (e) {
-                    console.error("Ошибка отправки, сохраняем в outbox", e);
                     await offerFullStore.savePendingQuestion(pendingQuestion);
                 }
             } else {
-                console.log("Оффлайн: сохраняем в очередь");
                 await offerFullStore.savePendingQuestion(pendingQuestion);
             }
         },
@@ -277,14 +300,13 @@ async function stopSignalR() {
                 try {
                     await connection.invoke("SendAnswer", chatId, questionId, text, userName);
                 } catch (e) {
-                    console.error("Ошибка отправки, сохраняем в outbox", e);
                     await offerFullStore.savePendingQuestion(pendingAnswer);
                 }
             } else {
-                console.log("Оффлайн: сохраняем в очередь");
                 await offerFullStore.savePendingQuestion(pendingAnswer);
             }
         },
+        setup,
         deleteQuestion: async (chatId: string, questionId: string) => {
             if (connection) {
                 await connection.invoke("DeleteQuestion", chatId, questionId);

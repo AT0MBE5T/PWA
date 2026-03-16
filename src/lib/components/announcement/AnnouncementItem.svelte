@@ -23,7 +23,7 @@
             <div class="shop__item__description__block__short-description__item">🔐 {item.statementTypeName}</div>
             <div class="shop__item__description__block__short-description__item align-end">🏠 {item.propertyTypeName}</div>
             <div class="shop__item__description__block__short-description__item">💵 {item.price} ₴</div>
-            <div class="shop__item__description__block__short-description__item align-end">📐 {item.area} sq.m.</div>
+            <div class="shop__item__description__block__short-description__item align-end">📐 {item.area} {t.offers.sqm}</div>
         </div>
         <div class="shop__item__description__block__item">📌 {item.location}</div>
         <div class="shop__item__description__block__item">👁️ {item.viewsCnt}</div>

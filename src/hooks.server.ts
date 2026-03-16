@@ -69,12 +69,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 async function tryServerRefresh(svelteFetch: typeof fetch) {
-    const response = await svelteFetch("http://localhost:5118/api/Refresh/refresh", {
-        method: "POST"
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    return data.token as string;
+    try{
+        const response = await svelteFetch("http://localhost:5118/api/Refresh/refresh", {
+            method: "POST"
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data.token as string;
+    }catch{
+
+    }
 }
 
 const getUserDto = async (token: string): Promise<UserDto | null> => {

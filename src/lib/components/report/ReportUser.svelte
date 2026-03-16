@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { auth, settings, translations } from '$lib';
+    import { auth, settings, toast, translations } from '$lib';
     import { onMount } from 'svelte';
     import type {
         UserStatsModel,
@@ -22,20 +22,24 @@
             dateTo: data.dateTo
         };
 
-        const response = await fetch('http://localhost:5118/api/Report/get-report-by-user-login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Report/get-report-by-user-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
 
-        if(!response.ok){
-            callBack(response.status);
-            return;
-        }
+            if(!response.ok){
+                callBack(response.status);
+                return;
+            }
 
-        userStats = await response.json() as UserStatsModel;
+            userStats = await response.json() as UserStatsModel;
+        }catch{
+            toast.show(t.system.errorOccurred, 'error');
+        }        
     };
 
     onMount(async (): Promise<void> => {

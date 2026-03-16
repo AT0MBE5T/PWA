@@ -21,7 +21,6 @@ export const load: LayoutServerLoad = async ({ params, locals, fetch }) => {
       return {
         id,
         authorId: authorId
-        //offer
       };
   }
 };

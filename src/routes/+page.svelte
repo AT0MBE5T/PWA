@@ -1,8 +1,6 @@
 <script lang='ts'>
     import { auth, settings, translations } from '$lib';
     import { goto } from '$app/navigation';
-    import { onMount } from 'svelte';
-    import { personalStore } from '$lib/stores/PersonalStore.svelte';
 
 const t = $derived(translations[settings.lang]);
 

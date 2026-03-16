@@ -5,6 +5,8 @@ class SettingsStore {
     theme = $state<string>(browser ? localStorage.getItem('theme') || 'light' : 'light');
     lang = $state<Language>(browser ? localStorage.getItem('lang') as Language || 'UA' : 'UA');
 
+    isLoading = $state<boolean>(false);
+
     constructor() {
         $effect.root(() => {
             $effect(() => {

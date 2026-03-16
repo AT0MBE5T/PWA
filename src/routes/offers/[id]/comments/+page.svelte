@@ -1,14 +1,8 @@
 <script lang='ts'>
-    import type { CommentInterface, AddCommentInterface } from '$lib';
-    import { auth, ConfirmModal, Roles, settings, toast, Toast, translations } from '$lib';
+    import { auth, ConfirmModal, Roles, settings, translations } from '$lib';
     import { format } from 'date-fns';
     import type { PageData } from './$types';
-    import { onMount, tick, untrack } from 'svelte';
-    import createChatState from '$lib/stores/chatStore.svelte';
-    import createCommentState from '$lib/stores/commentStore.svelte';
-    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
-    import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte';
-    import offerState from '$lib/stores/offerStore.svelte';
+    import { tick, untrack } from 'svelte';
     import commentState from '$lib/stores/commentStore.svelte';
 
     let { data }: { data: PageData } = $props();
@@ -39,30 +33,14 @@
 
         const userName = untrack(() => data.user?.name || 'Guest');
 
-        async function setupChat() {
-            try {
-                const response = await fetch(`http://localhost:5118/api/Comment/get-comments-by-announcement-id/${currentId}`);
-                if (response.ok) {
-                    const initialComments = await response.json();
-                    offerFullStore.setComments(currentId, initialComments);
-                    commentState.setComments(initialComments);
-                }
-            } catch (e) {
-                await offerFullStore.loadComments(currentId);
-                const pendingComments = await offerFullStore.getPendingComments();
-                let arrToAdd = offerFullStore.comments[currentId].concat(pendingComments);
-
-                const sortedArr = [...arrToAdd].sort((a, b) => {
-                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-                });
-
-                commentState.setComments(sortedArr);
-            } finally {
-                await commentState.initSignalR(currentId, userName);
-            }
+        async function loadData() {
+            settings.isLoading = true;
+            await commentState.setupChat(data.id);
+            settings.isLoading = false;
+            await commentState.initSignalR(currentId, userName);
         }
 
-        setupChat();
+        loadData();
 
         return () => {
             commentState.stopSignalR();

@@ -1,37 +1,32 @@
-import type { AnnouncementFull, QuestionAnswer } from '$lib';
+import type { AnnouncementFull } from '$lib';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals, fetch }) => {
-    const { id } = params;
-    const userId = locals.user?.id ?? null;
+  const { id } = params;
+  const userId = locals.user?.id ?? null;
 
-    let authorId = '';
+  let authorId = '';
 
-    if (userId === null)
-      return {
-        id: '',
-        authorId: ''//,
-        //initialData: []
+  if (userId === null)
+    return {
+      id: '',
+      authorId: authorId
     };
 
-    try{
-
-    const response = await fetch(`http://localhost:5118/api/Question/get-all-by-announcement-id/${id}`);
+  try{
     const authorResponse = await getAnnouncementFullInfoById(id, userId, fetch);
 
-    if (response.ok && authorResponse !== undefined) {
-        const initialData = await response.json() as QuestionAnswer[];
+    if (authorResponse !== undefined) {
         authorId = authorResponse?.authorId;
     }
   }catch(error){
     console.log(error);
   }
   finally{
-            return { 
-            id,
-            authorId: authorId
-            //initialData 
-        };
+    return { 
+      id,
+      authorId: authorId
+    };
   }
 };
 

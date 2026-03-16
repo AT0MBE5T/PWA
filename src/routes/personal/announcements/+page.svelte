@@ -18,11 +18,6 @@
                             data.currentTab === 'Placed' ? personalStore.placed :
                             personalStore.favorite);
 
-    $effect(() => {
-        console.log(personalStore.placed);
-    });
-
-    //let currentAction = $derived(data.currentTab);
     let currentAction = $derived(data.currentTab);
 
     async function pageClicked(tabName: string) {
@@ -45,7 +40,7 @@
     }
 
     let currentPage = $state(1);
-    let totalPages = $state<number>(0);
+    let totalPages = $state<number>(1);
 
     let announcementId = $state<string>('');
 
@@ -151,11 +146,12 @@ const t = $derived(translations[settings.lang]);
     }
 
     .shop__items {
-        display: flex;
+        display: grid;
         justify-content: center;
         flex-wrap: wrap;
         gap: 2rem;
         animation: fadeInUp 0.6s ease-out;
+        grid-template-columns: 1fr 1fr 1fr;
     }
 
     @keyframes slideDown {

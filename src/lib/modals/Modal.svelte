@@ -10,6 +10,17 @@
     // svelte-ignore non_reactive_update
         let dialogEl: HTMLDivElement | null = null;
 
+    $effect(() => {
+        if (open) {
+            const originalStyle = window.getComputedStyle(document.body).overflow;
+            document.body.style.overflow = 'hidden';
+            
+            return () => {
+                document.body.style.overflow = originalStyle;
+            };
+        }
+    });
+
     function trapFocus(e: KeyboardEvent) {
         if (!open || e.key !== "Tab" || !dialogEl) return;
         const focusables = dialogEl.querySelectorAll<HTMLElement>(

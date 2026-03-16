@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { onMount } from 'svelte';
-    import { auth, settings, translations } from '$lib';
+    import { auth, settings, toast, translations } from '$lib';
     import type { GeneralStats } from '$lib';
 
     let { callBack }: { callBack: () => void } = $props();
@@ -12,18 +12,22 @@
             return;
         }
 
-        const response = await fetch('http://localhost:5118/api/Report/get-general-report', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+        try{
+            const response = await fetch('http://localhost:5118/api/Report/get-general-report', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if(!response.ok){
+                return;
             }
-        });
 
-        if(!response.ok){
-            return;
+            generalStats = await response.json() as GeneralStats;
+        }catch{
+            toast.show(t.system.errorOccurred, 'error');
         }
-
-        generalStats = await response.json() as GeneralStats;
     };
 
     onMount(async (): Promise<void> => {

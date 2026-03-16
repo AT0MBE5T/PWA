@@ -43,6 +43,19 @@
     };
 
     onMount(async () => {
+        if (browser) {
+            const { registerSW } = await import('virtual:pwa-register');
+            registerSW({ 
+                immediate: true,
+                onRegistered(r) {
+                    console.log('SW Registered:', r);
+                },
+                onRegisterError(error) {
+                    console.error('SW registration error', error);
+                }
+            });
+        }
+
         if (!$auth.isAuthenticated)
             return;
 
@@ -58,91 +71,115 @@
             personalStore.setPlaced($auth.id!, placed?.data ?? []);
             personalStore.setFavorite($auth.id!, favorite?.data ?? []);
             personalStore.setSold($auth.id!, sold?.data ?? []);
-            personalStore.setUserDto(userDto!);
-            personalStore.setUserStatsModel(userStats!);
+            personalStore.setUserDto(userDto!, $auth.id!);
+            personalStore.setUserStatsModel(userStats!, $auth.id!);
         }catch(error){
 
         }
     });
 
     const getUserDto = async () => {
-        const response = await fetch('http://localhost:5118/api/Account/get-user-dto-by-id', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${$auth.accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        const userData = response.ok ? await response.json() as UserDto : null;
-        return userData;
+        try{
+            const response = await fetch('http://localhost:5118/api/Account/get-user-dto-by-id', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const userData = response.ok ? await response.json() as UserDto : null;
+            return userData;
+        }catch{
+
+        }
     };
 
     const getUserStats = async () => {
-        const response = await fetch('http://localhost:5118/api/Account/get-stats-by-user-id', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${$auth.accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        const userData = response.ok ? await response.json() as UserStatsModel : null;
-        return userData;
+        try{
+            const response = await fetch('http://localhost:5118/api/Account/get-stats-by-user-id', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const userData = response.ok ? await response.json() as UserStatsModel : null;
+            return userData;
+        }catch{
+
+        }
     };
 
     const getSold = async (
         page: number
     ): Promise<AnnouncementsResponse | null> => {
-        const response = await fetch(`http://localhost:5118/api/Announcement/get-sold-by-user-id/${page}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${$auth.accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) return null;
-        return await response.json() as AnnouncementsResponse;
+        try{
+            const response = await fetch(`http://localhost:5118/api/Announcement/get-sold-by-user-id/${page}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) return null;
+            return await response.json() as AnnouncementsResponse;
+        }catch{
+            return null;
+        }
     };
 
     const getFavorites = async (
         page: number
     ): Promise<AnnouncementsResponse | null> => {
-        const response = await fetch(`http://localhost:5118/api/Favorite/get-favorites-by-user-id/${page}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${$auth.accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) return null;
-        return await response.json() as AnnouncementsResponse;
+        try{
+            const response = await fetch(`http://localhost:5118/api/Favorite/get-favorites-by-user-id/${page}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) return null;
+            return await response.json() as AnnouncementsResponse;
+        }catch{
+            return null;
+        }
     };
 
     const getPlaced = async (
         page: number
     ): Promise<AnnouncementsResponse | null> => {
-        const response = await fetch(`http://localhost:5118/api/Announcement/get-placed-by-user-id/${page}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${$auth.accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) return null;
-        return await response.json() as AnnouncementsResponse;
+        try{
+            const response = await fetch(`http://localhost:5118/api/Announcement/get-placed-by-user-id/${page}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) return null;
+            return await response.json() as AnnouncementsResponse;
+        }catch{
+            return null;
+        }
     };
 
     const getBought = async (
         page: number
     ): Promise<AnnouncementsResponse | null> => {
-        const response = await fetch(`http://localhost:5118/api/Announcement/get-bought-by-user-id/${page}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${$auth.accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) return null;
-        return await response.json() as AnnouncementsResponse;
+        try{
+            const response = await fetch(`http://localhost:5118/api/Announcement/get-bought-by-user-id/${page}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) return null;
+            return await response.json() as AnnouncementsResponse;
+        }catch{
+            return null;
+        }
     };
 
     const t = $derived(translations[settings.lang]);
@@ -155,6 +192,13 @@
         type={$toast.type} 
         showToastCallback={toast.hide} 
     />
+{/if}
+
+{#if settings.isLoading}
+        <div class="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text">{t.system.loading}</div>
+        </div>
 {/if}
 
 <div class="wrapper">
@@ -255,6 +299,44 @@
 </div>
 
 <style>
+    .loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 15, 15, 0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 6px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    .loading-text {
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 500;
+        letter-spacing: 1px;
+        animation: fadeIn 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0.4; }
+        to { opacity: 1; }
+    }
 
     .wrapper {
         background: var(--bg-gradient);

@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 import type { AuthState } from '$lib';
-import { goto, invalidateAll } from "$app/navigation";
+import { goto } from "$app/navigation";
 
 function createAuthStore() {
     const initialState: AuthState = {

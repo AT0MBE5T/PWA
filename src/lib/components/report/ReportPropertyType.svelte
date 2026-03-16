@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { auth, settings, translations } from '$lib';
+    import { auth, settings, toast, translations } from '$lib';
     import { onMount } from 'svelte';
     import type {
         PropertyTypeReportRequest,
@@ -21,19 +21,23 @@
             dateTo: data.dateTo
         };
 
-        const response = await fetch('http://localhost:5118/api/Report/get-report-by-property-type-id', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Report/get-report-by-property-type-id', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
 
-        if(!response.ok){
-            return;
+            if(!response.ok){
+                return;
+            }
+
+            propertyTypeStats = await response.json() as PropertyTypeStats;
+        }catch{
+            toast.show(t.system.errorOccurred, 'error');
         }
-
-        propertyTypeStats = await response.json() as PropertyTypeStats;
     };
 
     onMount(async (): Promise<void> => {

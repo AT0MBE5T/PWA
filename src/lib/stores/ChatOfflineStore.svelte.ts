@@ -69,7 +69,6 @@ class ChatOfflineState {
         
         if (cached) {
             this.chats[id] = cached;
-            console.log("Дані підтягнуто з IndexedDB:", cached);
         }
     }
 
@@ -80,7 +79,6 @@ class ChatOfflineState {
         const cached = await db.getAllFromIndex('messages', 'chatId', id);
         if (cached) {
             this.messages[id] = cached;
-            console.log("Дані підтягнуто з IndexedDB:", cached);
         }
     }
 
@@ -97,8 +95,6 @@ class ChatOfflineState {
             ...stores.map(store => tx.objectStore(store).clear()),
             tx.done
         ]);
-
-        console.log("ChatOfflineDB успешно очищена");
     }
 }
 

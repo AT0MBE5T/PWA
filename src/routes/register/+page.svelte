@@ -134,12 +134,14 @@
         return true;
     }
 
-    const confirmClicked = () => {
+    const confirmClicked = async () => {
         if(!validation()){
             return;
         }
 
-        sendData(selectedFile as File, loginInput, nameInput, surnameInput, emailInput, phoneNumberInput, ageInput, passwordInput, repeatPasswordInput);
+        settings.isLoading = true;
+        await sendData(selectedFile as File, loginInput, nameInput, surnameInput, emailInput, phoneNumberInput, ageInput, passwordInput, repeatPasswordInput);
+        settings.isLoading = false;
     }
 
     const toastError = () => {

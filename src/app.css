@@ -44,6 +44,10 @@
     --accent-color: #ffd580;
 }
 
+:global(body) {
+    scrollbar-gutter: stable;
+}
+
 :root {
     --input-bg: #ffffff;
     --input-border: #e2e8f0;
@@ -77,3 +81,4 @@
     padding: 0;
     box-sizing: border-box;
 }
+

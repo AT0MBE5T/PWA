@@ -1,5 +1,4 @@
 <script lang='ts'>
-
     import type {
         ChangeEmailRequest,
         ChangePasswordRequest,
@@ -10,15 +9,15 @@
     import {format} from 'date-fns';
     import { onMount } from 'svelte';
 
-    let { data } = $props();
-
     onMount(async () => {
         await personalStore.loadUserDto($auth.id!);
     });
 
-    // let userInfo = $derived(data.userInfo);
-
     let userInfo = $derived(personalStore.userDto);
+
+    $effect(() => {
+        imagePreview = userInfo?.avatarUrl ?? '';
+    });
 
     const changeEmailClick = () => {
         switchEmailModal(true);
@@ -55,21 +54,27 @@
             newPassword: newPassword,
         }
 
-        const response = await fetch('http://localhost:5118/api/Account/change-password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Account/change-password', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
 
-        if(!response.ok){
+            if(!response.ok){
+                return false;
+            }
+
+            passwordErrors = await response.json() as ChangePasswordResponse[];
+
+            return passwordErrors.length === 0;
+        }catch{
+            toast.show(t.system.errorOccurred, 'error');
             return false;
         }
-
-        passwordErrors = await response.json() as ChangePasswordResponse[];
-
-        return passwordErrors.length === 0;
     };
 
     const confirmChangePasswordClick = async (): Promise<void> => {
@@ -90,10 +95,12 @@
 
     const sendChangeEmail = async (): Promise<boolean> => {
         if($auth.id === null){
+            newEmail = userInfo!.email;
             return false;
         }
 
         if(!newEmail.match('^(\\w|[.-])+@(\\w|-)+\\.(\\w|-){2,4}$')){
+            newEmail = userInfo!.email;
             return false;
         }
 
@@ -102,20 +109,35 @@
             newEmail: newEmail,
         }
 
-        const response = await fetch('http://localhost:5118/api/Account/change-email', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Account/change-email', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
 
-        if(!response.ok){
+            if(!response.ok){
+                newEmail = userInfo!.email;
+                return false;
+            }
+
+            const responseData = await response.json();
+
+            if (responseData.errors !== undefined){
+                newEmail = userInfo!.email;
+                return false;
+            }
+
+            personalStore.updateEmail($auth.id, newEmail);
+            return true;
+        }catch{
+            toast.show(t.system.errorOccurred, 'error');
+            newEmail = userInfo!.email;
             return false;
         }
-
-        const responseData = await response.json();
-        return responseData.errors === undefined;
     };
 
     const confirmChangeEmailClick = async (): Promise<void> => {
@@ -137,10 +159,12 @@
 
     const sendChangePhone = async (): Promise<boolean> => {
         if($auth.id === null){
+            newPhone = userInfo!.phoneNumber;
             return false;
         }
 
         if(!newPhone.match('^\\+\\d{12}$')){
+            newPhone = userInfo!.phoneNumber;
             return false;
         }
 
@@ -149,20 +173,35 @@
             newPhone: newPhone
         }
 
-        const response = await fetch('http://localhost:5118/api/Account/change-phone', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Account/change-phone', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
 
-        if(!response.ok){
+            if(!response.ok){
+                newPhone = userInfo!.phoneNumber;
+                return false;
+            }
+
+            const responseData = await response.json();
+
+            if (responseData.errors !== undefined){
+                newPhone = userInfo!.phoneNumber;
+                return false;
+            }
+
+            personalStore.updateEmail($auth.id, newEmail);
+            return true;
+        }catch{
+            toast.show(t.system.errorOccurred, 'error');
+            newPhone = userInfo!.phoneNumber;
             return false;
         }
-
-        const responseData = await response.json();
-        return responseData.errors === undefined;
     };
 
     const confirmChangePhoneClick = async (): Promise<void> => {
@@ -178,7 +217,7 @@
     let fileInput = $state<HTMLInputElement>();
     let selectedFileName = $state<string>('');
     // svelte-ignore state_referenced_locally
-        let imagePreview = $state<string>(userInfo?.avatarUrl ?? '');
+    let imagePreview = $state<string>(userInfo?.avatarUrl ?? '');
     let selectedFile = $state<File | null>(null);
 
     function handleFileChange(event: Event): void {
@@ -210,18 +249,26 @@
         formData.append("Avatar", selectedFile);
         formData.append("UserId", $auth.id);
 
-        const response = await fetch('http://localhost:5118/api/Account/change-avatar', {
-            method: 'POST',
-            body: formData
-        });
+        try{
+            const response = await fetch('http://localhost:5118/api/Account/change-avatar', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`
+                },
+                body: formData
+            });
 
-        if(!response.ok){
+            if(!response.ok){
+                return false;
+            }
+
+            const data: { url: string } = await response.json();
+            $auth.avatarUrl = data.url;
+            return true;
+        }catch{
+            toast.show(t.system.errorOccurred, 'error');
             return false;
         }
-
-        const data: { url: string } = await response.json();
-        $auth.avatarUrl = data.url;
-        return true;
     };
 
 const t = $derived(translations[settings.lang]);
@@ -310,7 +357,7 @@ const t = $derived(translations[settings.lang]);
                             class="image-upload-button"
                             onclick={() => fileInput?.click()}
                     >
-                        {selectedFileName || 'Choose Image'}
+                        {selectedFileName || t.authorization.chooseImage}
                     </button>
                     {#if imagePreview}
                         <div class="image-preview">
@@ -371,7 +418,6 @@ const t = $derived(translations[settings.lang]);
                         <h3 class="info-title">{t.personal.registerDate}</h3>
                         <!-- <p class="info-value">{format(userInfo!.createdAt, 'dd.MM.yyyy')}</p> -->
                         <div class="info-value">
-                            ⌚ {t.offers.createdAt}: 
                             {userInfo?.createdAt ? format(userInfo.createdAt, 'dd.MM.yyyy HH:mm') : ''}
                         </div>
                     </div>

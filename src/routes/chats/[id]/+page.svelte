@@ -1,8 +1,7 @@
 <script lang='ts'>
     import { format } from 'date-fns';
-    import { auth, ConfirmModal, settings, translations, type Message } from '$lib';
-    import { onMount, tick, untrack } from 'svelte';
-    import createChatState from '$lib/stores/chatStore.svelte.js';
+    import { auth, ConfirmModal, settings, translations } from '$lib';
+    import { tick } from 'svelte';
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
 
@@ -14,20 +13,11 @@
 
     $effect(() => {
         const chatId = data.chatId;
-
+        settings.isLoading = true;
         (async () => {
-            try {
-                const response = await fetch(`http://localhost:5118/api/Chat/get-messages-by-chat-id/${chatId}`);
-                if (response.ok) {
-                    const initialMessages = await response.json() as Message[];
-                    chatOfflineState.setMessages(chatId, initialMessages);
-                }
-            } catch {
-                console.log('Оффлайн сообщения берём с кеша');
-            } finally {
-                await chatOfflineState.loadMessages(chatId);
-            }
+            await chatState.loadMessages(chatId);
         })();
+        settings.isLoading = false;
     });
 
 $effect(() => {

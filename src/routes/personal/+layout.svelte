@@ -86,14 +86,13 @@ const t = $derived(translations[settings.lang]);
 
     .wrapper__container {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         width: 100%;
         height: 100%;
     }
 
     .container__header {
         width: var(--sidebar-width);
-        position: fixed;
         height: 100%;
         background: var(--header-bg); 
         backdrop-filter: blur(15px);

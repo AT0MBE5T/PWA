@@ -38,6 +38,7 @@ export type * from './interfaces/LookupItem.ts';
 export type * from './interfaces/ValidationErrors.ts';
 export type * from './interfaces/AnnouncementAddModel.ts';
 export type * from './interfaces/AnnouncementUpdateModel.ts';
+export type * from './interfaces/LookupItemFilter.ts';
 
 // modals
 export { default as ConfirmModal } from './modals/ConfirmModal.svelte';

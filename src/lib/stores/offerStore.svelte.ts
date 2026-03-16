@@ -6,7 +6,6 @@ import type { SearchRequestInterface } from "$lib/interfaces/SearchRequestInterf
 import * as signalR from "@microsoft/signalr";
 import { offerFullStore } from "./OfferFullStore.svelte";
 import type { AnnouncementAddModel } from "$lib/interfaces/AnnouncementAddModel";
-import { browser } from "$app/environment";
 import getCookie from "$lib/utils/cookieData";
 import type { AnnouncementUpdateModel } from "$lib/interfaces/AnnouncementUpdateModel";
 
@@ -71,104 +70,59 @@ async function initSignalR(chatId: string, userName: string) {
     newConnection.onreconnected(async () => {
         if (newConnection !== connection) return;
 
-        console.log("Связь восстановлена, синхронизируем...");
-
         try {
             await newConnection.invoke("JoinOffersChat", {
                 ChatRoom: chatId,
                 UserName: userName
             });
 
-        // const pending = await offerFullStore.getPendingOffers();
+        const pendingUpdate = await offerFullStore.getPendingOffersUpdate();
 
-        // for (const offer of pending) {
-        //     const formData = new FormData();
-        //     offer.images
-        //         .filter(i => i.type === 'new')
-        //         .forEach(img => {
-        //             formData.append("Photos", img.file);
-        //         });
-        //     formData.append("PropertyType", offer.propertyTypeId);
-        //     formData.append("StatementType", offer.statementTypeId);
-        //     formData.append("Location", offer.location);
-        //     formData.append("Area", offer.area);
-        //     formData.append("Floors", offer.floors);
-        //     formData.append("Rooms", offer.rooms);
-        //     formData.append("Title", offer.title);
-        //     formData.append("Price", offer.price);
-        //     formData.append("Content", offer.content);
-        //     formData.append("Description", offer.description);
-        //     formData.append("UserId", offer.userId);
+        for (const offer of pendingUpdate) {
+            const formData = new FormData();
 
-        //     const token = getCookie('accessToken');
+            offer.images
+                .filter(i => i.type === 'new')
+                .forEach(img => formData.append("NewPhotos", img.file));
 
-        //     const response = await fetch('http://localhost:5118/api/Announcement/add-announcement', {
-        //         method: 'POST',
-        //         body: formData,
-        //         headers: {
-        //             "Authorization": `Bearer ${token}`
-        //         },
-        //         credentials: "include"
-        //     });
+            offer.deletedImageIds.forEach(id => formData.append("DeletedImageIds", id));
 
-        //     await offerFullStore.removePendingOffers(offer.id);
+            offer.images.forEach(img => {
+                formData.append("ExistingImageOrder", img.type === 'existing' ? img.id : 'new');
+            });
 
-        //     const index = offers.findIndex(x => x.title === offer.title);
-        //     offers[index].isPending = false;
-        // }
+            formData.append("PropertyTypeId", offer.propertyTypeId);
+            formData.append("StatementTypeId", offer.statementTypeId);
+            formData.append("Location", offer.location);
+            formData.append("Area", offer.area.toString());
+            formData.append("Floors", offer.floors.toString());
+            formData.append("Rooms", offer.rooms.toString());
+            formData.append("Title", offer.title);
+            formData.append("Price", offer.price.toString());
+            formData.append("Content", offer.content);
+            formData.append("Description", offer.description);
+            formData.append("AnnouncementId", offer.id);
 
-// Внутри initSignalR -> onreconnected
-const pendingUpdate = await offerFullStore.getPendingOffersUpdate();
+            try {
+                const token = getCookie('accessToken');
+                const response = await fetch('http://localhost:5118/api/Announcement/update-announcement', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
 
-for (const offer of pendingUpdate) {
-    const formData = new FormData();
-
-    // 1. Обработка фото
-    offer.images
-        .filter(i => i.type === 'new')
-        .forEach(img => formData.append("NewPhotos", img.file));
-
-    offer.deletedImageIds.forEach(id => formData.append("DeletedImageIds", id));
-
-    // Порядок фото (если ваш бэкенд это поддерживает)
-    offer.images.forEach(img => {
-        formData.append("ExistingImageOrder", img.type === 'existing' ? img.id : 'new');
-    });
-
-    // 2. Остальные поля
-    formData.append("PropertyTypeId", offer.propertyTypeId);
-    formData.append("StatementTypeId", offer.statementTypeId);
-    formData.append("Location", offer.location);
-    formData.append("Area", offer.area.toString());
-    formData.append("Floors", offer.floors.toString());
-    formData.append("Rooms", offer.rooms.toString());
-    formData.append("Title", offer.title);
-    formData.append("Price", offer.price.toString());
-    formData.append("Content", offer.content);
-    formData.append("Description", offer.description);
-    formData.append("AnnouncementId", offer.id);
-
-    try {
-        const token = getCookie('accessToken');
-        const response = await fetch('http://localhost:5118/api/Announcement/update-announcement', {
-            method: 'POST',
-            body: formData,
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-
-        if (response.ok) {
-            await offerFullStore.removePendingOffersUpdate(offer.id);
-            
-            // Обновляем статус в локальном массиве
-            const index = offers.findIndex(x => x.id === offer.id);
-            if (index !== -1) {
-                offers[index].isPending = false;
+                if (response.ok) {
+                    await offerFullStore.removePendingOffersUpdate(offer.id);
+                    
+                    const index = offers.findIndex(x => x.id === offer.id);
+                    if (index !== -1) {
+                        offers[index].isPending = false;
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to sync update for offer", offer.id, e);
             }
         }
-    } catch (e) {
-        console.error("Failed to sync update for offer", offer.id, e);
-    }
-}
 
         offers = offers.filter(x => !x.isPending);
         } catch (e) {
@@ -417,11 +371,9 @@ async function stopSignalR() {
         offer.photoUrl = data.images
             .filter(i => i.type === 'existing' || (i.type === 'new' && i.preview))
             .map(i => {
-                if (i.type === 'existing') {
-                    return i.url
-                } else {
-                    return i.preview
-                }
+                return i.type === 'existing'
+                    ? i.url
+                    : i.preview
             }).at(0) ?? '';
 
         const db = await offerFullStore.getDB();

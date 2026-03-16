@@ -3,14 +3,16 @@
     import { Modal, auth, settings, toast, translations } from '$lib';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
 
+    const t = $derived(translations[settings.lang]);
+
     let loginInput = $state<string>('');
     let passwordInput = $state<string>('');
 
     let loginError = $state<boolean>(false);
     let passwordError = $state<boolean>(false);
 
-    let loginErrorText = $derived<string>(loginError ? 'Login error' : '');
-    let passwordErrorText = $derived<string>(passwordError ? 'Password error' : '');
+    let loginErrorText = $derived<string>(loginError ? t.validation.loginError : '');
+    let passwordErrorText = $derived<string>(passwordError ? t.validation.passwordError : '');
 
     const validation = (): boolean => {
         if(loginInput.length < 4){
@@ -26,12 +28,14 @@
         return true;
     }
 
-    const confirmClicked = () => {
+    const confirmClicked = async () => {
         if(!validation()){
             return;
         }
 
-        sendData(loginInput, passwordInput);
+        settings.isLoading = true;
+        await sendData(loginInput, passwordInput);
+        settings.isLoading = false;
     }
 
     const sendData = async (login: string, password: string) => {
@@ -55,14 +59,14 @@
                     await personalStore.clearAllData();
                     const res = await response.json() as { id: string, login: string, accessToken: string };
                     auth.login(res.accessToken);
-                    toast.show('Success', 'success');
+                    toast.show(t.system.success, 'success');
                     break;
                 case 401:
-                    longText = 'Password is incorrect';
+                    longText = t.validation.passwordError;
                     switchModal(true);
                     break;
                 case 404:
-                    longText = 'Login is not exist';
+                    longText = t.validation.loginNotExist;
                     switchModal(true);
                     break;
                 default:
@@ -71,7 +75,7 @@
             }
 
         } catch (error) {
-            longText = 'Database error';
+            longText = t.system.dbError;
             switchModal(true);
         }
     };
@@ -83,10 +87,8 @@
     };
 
     const toastError = () => {
-        toast.show('An error occurred', 'error');
+        toast.show(t.system.errorOccurred, 'error');
     };
-
-    const t = $derived(translations[settings.lang]);
 
 </script>
 

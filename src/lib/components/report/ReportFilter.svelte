@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { type ReportFilterParams, type PropertyTypeInterface, Roles, translations, settings } from '$lib';
+    import { type ReportFilterParams, type PropertyTypeInterface, Roles, translations, settings, toast } from '$lib';
     import { auth } from '$lib';
     import { onMount } from 'svelte';
 
@@ -14,18 +14,22 @@
     let propertyTypes = $state<PropertyTypeInterface[]>([]);
 
     const getPropertyTypes = async () => {
-        const response = await fetch('http://localhost:5118/api/PropertyType/get-property-types', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+        try{
+            const response = await fetch('http://localhost:5118/api/PropertyType/get-property-types', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if(!response.ok){
+                return;
             }
-        });
 
-        if(!response.ok){
-            return;
+            propertyTypes = await response.json() as PropertyTypeInterface[];
+        }catch{
+            toast.show(t.system.errorOccurred, 'error');
         }
-
-        propertyTypes = await response.json() as PropertyTypeInterface[];
     };
 
     onMount(async () => {

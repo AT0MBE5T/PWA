@@ -4,18 +4,9 @@
 
     let { data, children } = $props();
 
-    type Pages = 'Description' | 'Comments' | 'Questions';
-
     let menuOpen = $state(false);
 
     const isActive = (path: string) => $page.url.pathname.endsWith(path);
-
-    const pageClicked = (page: Pages) => {
-        currentPage = page;
-        menuOpen = false;
-    };
-
-    let currentPage = $state<Pages>('Description');
 
     let navElement = $state<HTMLElement>();
 

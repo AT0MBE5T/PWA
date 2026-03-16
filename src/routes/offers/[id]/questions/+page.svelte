@@ -1,92 +1,38 @@
 <script lang='ts'>
     import { format } from 'date-fns';
-    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte.js';
     import questionAnswerState from '$lib/stores/questionAnswerStore.svelte';
     import ConfirmModal from '$lib/modals/ConfirmModal.svelte';
     import { auth, Roles, settings, translations } from '$lib';
-    import { tick, untrack } from 'svelte';
-    import offerState from '$lib/stores/offerStore.svelte.js';
+    import { tick } from 'svelte';
 
     let { data } = $props();
 
     let questionContainer: HTMLElement;
 
-    //let questionAnswers = $derived(offerState.questions);
-
     let confirmModal: ConfirmModal;
 
-    // $effect(() => {
-    //     const currentId = data.id;
-    //     if (!currentId) return;
+    let questionAnswers = $derived(questionAnswerState.questionAnswerData);
 
-    //     async function setupChat() {
-    //         try {
-    //             const response = await fetch(`http://localhost:5118/api/Question/get-all-by-announcement-id/${currentId}`);
-    //             if (response.ok) {
-    //                 const initialComments = await response.json();
-    //                 offerFullStore.setQuestions(currentId, initialComments);
-    //                 questionAnswerState.setData(initialComments);
-    //             }
-    //         } catch (e) {
-    //             console.log('Оффлайн сообщения берём с кеша');
-    //             await offerFullStore.loadQuestions(currentId);
-    //         } finally {
-    //             questionAnswerState.initSignalR(currentId, data.user?.name || 'Guest');
-    //         }
-    //     }
+    $effect(() => {
+        const currentId = data.id;
+        if (!currentId) return;
 
-    //     setupChat();
+        setup(currentId);
 
-    //     return () => {
-    //         questionAnswerState.stopSignalR();
-    //     };
-    // });
+        return () => {
+            questionAnswerState.stopSignalR();
+        };
+    });
 
-let questionAnswers = $derived(questionAnswerState.questionAnswerData);
-
-$effect(() => {
-    const currentId = data.id;
-    if (!currentId) return;
-
-    setupChat(currentId);
-
-    return () => {
-        questionAnswerState.stopSignalR();
-    };
-});
-
-async function setupChat(currentId: string) {
-    try {
-        const response = await fetch(
-            `http://localhost:5118/api/Question/get-all-by-announcement-id/${currentId}`
-        );
-
-        if (response.ok) {
-            const initialQuestions = await response.json();
-
-            offerFullStore.setQuestions(currentId, initialQuestions);
-            offerState.setQuestions(initialQuestions);
-            questionAnswerState.setData(initialQuestions);
-        }
-    } catch {
-        console.log("Оффлайн сообщения берём с кеша");
-        await offerFullStore.loadQuestions(currentId);
-        const pendingQuestions = await offerFullStore.getPendingQuestions();
-        let arrToAdd = offerFullStore.questions[currentId].concat(pendingQuestions);
-
-        const sortedArr = [...arrToAdd].sort((a, b) => {
-            return new Date(a.createdAtQuestion).getTime() - new Date(b.createdAtQuestion).getTime();
-        });
-
-        questionAnswerState.setData(sortedArr);
-        offerState.setQuestions(sortedArr);
-    } finally {
+    async function setup(currentId: string) {
+        settings.isLoading = true;
+        await questionAnswerState.setup(currentId);
+        settings.isLoading = false;
         questionAnswerState.initSignalR(
             currentId,
             data.user?.name || "Guest"
         );
     }
-}
 
     async function addQuestion() {
         if (!textInput.trim()) return;
@@ -174,9 +120,6 @@ async function setupChat(currentId: string) {
     <div class="question__answer__container" bind:this={questionContainer}>
         {#each questionAnswers as i}
             <div class="question_answer__item">
-                <!-- <div class="question_answer__item__question">
-                    ⌚ {format(i.createdAtQuestion, 'dd.MM.yyyy HH:mm')} | 🦰 {i.createdByQuestion}: {i.textQuestion}
-                </div> -->
                 <div class="question_answer__item__question">
                     {#if i.isQuestionPending}
                         🔃
