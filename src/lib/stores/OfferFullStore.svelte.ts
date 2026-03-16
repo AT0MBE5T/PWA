@@ -9,6 +9,7 @@ import type { StatementTypeInterface } from '$lib/interfaces/StatementTypeInterf
 import type { AnnouncementUpdateModel } from '$lib/interfaces/AnnouncementUpdateModel';
 import type { SearchRequestInterface } from '$lib/interfaces/SearchRequestInterface';
 import type { AnnouncementsResponse } from '$lib/interfaces/AnnouncementsResponse';
+import { env } from '$env/dynamic/public';
 
 class OfferState {
     offerDetails = $state<Record<string, AnnouncementFull>>({});
@@ -49,7 +50,7 @@ class OfferState {
 
     async syncAnnouncements(searchData: SearchRequestInterface) {
         try {
-            const response = await fetch('http://localhost:5118/api/Announcement/search', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/search`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(searchData)
@@ -83,9 +84,9 @@ class OfferState {
 
         try {
             const [resFull, resComm, resQuest] = await Promise.all([
-                fetch(`http://localhost:5118/api/Announcement/get-announcement-full-by-id/${id}`),
-                fetch(`http://localhost:5118/api/Comment/get-comments-by-announcement-id/${id}`),
-                fetch(`http://localhost:5118/api/Question/get-all-by-announcement-id/${id}`)
+                fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-announcement-full-by-id/${id}`),
+                fetch(`${env.PUBLIC_API_URL}/api/Comment/get-comments-by-announcement-id/${id}`),
+                fetch(`${env.PUBLIC_API_URL}/api/Question/get-all-by-announcement-id/${id}`)
             ]);
 
             if (resFull.ok) {
@@ -111,8 +112,8 @@ class OfferState {
     async fetchLookupData(type: 'PropertyType' | 'StatementType') {
         const storeName = type === 'PropertyType' ? 'propertyTypes' : 'statementTypes';
         const url = type === 'PropertyType'
-                    ? 'http://localhost:5118/api/PropertyType/get-property-types'
-                    : 'http://localhost:5118/api/StatementType/get-statement-types';
+                    ? `${env.PUBLIC_API_URL}/api/PropertyType/get-property-types`
+                    : `${env.PUBLIC_API_URL}/api/StatementType/get-statement-types`;
 
         try {
             const res = await fetch(url);
@@ -133,7 +134,7 @@ class OfferState {
 
     async getPages(): Promise<number> {
         const storeName = 'page';
-        const response = 'http://localhost:5118/api/Announcement/get-pages';
+        const response = `${env.PUBLIC_API_URL}/api/Announcement/get-pages`;
 
         try {
             const res = await fetch(response);

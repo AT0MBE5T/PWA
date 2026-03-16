@@ -6,6 +6,7 @@
         ReportFilterParams,
         UserReportRequest
     } from '$lib';
+    import { env } from '$env/dynamic/public';
 
     let { callBack, data }: { callBack: (status: number) => void, data: ReportFilterParams } = $props();
 
@@ -23,7 +24,7 @@
         };
 
         try{
-            const response = await fetch('http://localhost:5118/api/Report/get-report-by-user-login', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Report/get-report-by-user-login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

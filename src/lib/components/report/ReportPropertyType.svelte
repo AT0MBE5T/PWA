@@ -5,6 +5,7 @@
         PropertyTypeReportRequest,
         ReportFilterParams,
         PropertyTypeStats} from '$lib';
+    import { env } from '$env/dynamic/public';
 
     let { data, callBack }: { data: ReportFilterParams, callBack: () => void } = $props();
 
@@ -22,7 +23,7 @@
         };
 
         try{
-            const response = await fetch('http://localhost:5118/api/Report/get-report-by-property-type-id', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Report/get-report-by-property-type-id`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

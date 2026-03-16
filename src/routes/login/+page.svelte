@@ -1,5 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
+    import { env } from '$env/dynamic/public';
     import { Modal, auth, settings, toast, translations } from '$lib';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
 
@@ -45,7 +46,7 @@
         });
 
         try {
-            const response = await fetch('http://localhost:5118/api/Account/login', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

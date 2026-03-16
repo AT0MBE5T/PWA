@@ -8,6 +8,7 @@ import { offerFullStore } from "./OfferFullStore.svelte";
 import type { AnnouncementAddModel } from "$lib/interfaces/AnnouncementAddModel";
 import getCookie from "$lib/utils/cookieData";
 import type { AnnouncementUpdateModel } from "$lib/interfaces/AnnouncementUpdateModel";
+import { env } from "$env/dynamic/public";
 
 const offerState = createOfferState();
 export default offerState;
@@ -29,7 +30,7 @@ async function initSignalR(chatId: string, userName: string) {
     await stopSignalR();
 
     const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl("http://localhost:5118/messageHub", { withCredentials: true })
+        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
         .withAutomaticReconnect()
         .build();
 
@@ -105,7 +106,7 @@ async function initSignalR(chatId: string, userName: string) {
 
             try {
                 const token = getCookie('accessToken');
-                const response = await fetch('http://localhost:5118/api/Announcement/update-announcement', {
+                const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/update-announcement`, {
                     method: 'POST',
                     body: formData,
                     headers: { "Authorization": `Bearer ${token}` }
@@ -165,7 +166,7 @@ async function initSignalR(chatId: string, userName: string) {
 
             const token = getCookie('accessToken');
 
-            const response = await fetch('http://localhost:5118/api/Announcement/add-announcement', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/add-announcement`, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -221,7 +222,7 @@ async function initSignalR(chatId: string, userName: string) {
 
             const token = getCookie('accessToken');
 
-            const response = await fetch('http://localhost:5118/api/Announcement/update-announcement', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/update-announcement`, {
                 method: 'POST',
                 body: formData,
                 headers: {

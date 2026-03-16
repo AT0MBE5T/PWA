@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { auth, settings, toast, translations } from '$lib';
     import type { GeneralStats } from '$lib';
+    import { env } from '$env/dynamic/public';
 
     let { callBack }: { callBack: () => void } = $props();
 
@@ -13,7 +14,7 @@
         }
 
         try{
-            const response = await fetch('http://localhost:5118/api/Report/get-general-report', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Report/get-general-report`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'

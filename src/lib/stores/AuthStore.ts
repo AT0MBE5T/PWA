@@ -1,6 +1,7 @@
 import { writable } from "svelte/store";
 import type { AuthState } from '$lib';
 import { goto } from "$app/navigation";
+import { env } from "$env/dynamic/public";
 
 function createAuthStore() {
     const initialState: AuthState = {
@@ -56,7 +57,7 @@ function createAuthStore() {
             set(initialState);
             document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
             try {
-                await fetch("http://localhost:5118/api/Refresh/logout", {
+                await fetch(`${env.PUBLIC_API_URL}/api/Refresh/logout`, {
                     method: "GET",
                     credentials: "include"
                 });

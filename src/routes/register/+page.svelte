@@ -1,5 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
+    import { env } from '$env/dynamic/public';
     import { Modal, auth, toast, translations, settings } from '$lib';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
 
@@ -162,7 +163,7 @@
         formData.append('RepeatPassword', repeatPasswordInput);
 
         try {
-            const response = await fetch('http://localhost:5118/api/Account/register', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/register`, {
                 method: 'POST',
                 credentials: "include",
                 body: formData

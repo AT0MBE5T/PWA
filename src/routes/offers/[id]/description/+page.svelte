@@ -8,6 +8,7 @@
     import Modal from '$lib/modals/Modal.svelte';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import { onMount } from 'svelte';
+    import { env } from '$env/dynamic/public';
 
     let { data }: { data: PageData } = $props();
     let offer = $derived(offerFullStore.offerDetails[data.id!]);
@@ -30,7 +31,7 @@
         }
 
         try{
-            const response = await fetch('http://localhost:5118/api/Chat/get-or-create-chat', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Chat/get-or-create-chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -56,7 +57,7 @@
 
     const onVerifyClick = async () => {
         try{
-            const response = await fetch('http://localhost:5118/api/Announcement/switch-verification', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/switch-verification`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -81,7 +82,7 @@
 
     const onFavoriteClick = async (isAdd: boolean) => {
         try{
-            const response = await fetch(`http://localhost:5118/api/Favorite/${isAdd ? 'add-favorite' : 'delete-favorite'}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Favorite/${isAdd ? 'add-favorite' : 'delete-favorite'}`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -117,7 +118,7 @@
         }
 
         try{
-            const response = await fetch('http://localhost:5118/api/Announcement/delete-announcement-by-id', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/delete-announcement-by-id`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -243,7 +244,7 @@ let currentIndex = $state(0);
                 return;
             }
 
-            await fetch('http://localhost:5118/api/Complaint/add-complaint', {
+            await fetch(`${env.PUBLIC_API_URL}/api/Complaint/add-complaint`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

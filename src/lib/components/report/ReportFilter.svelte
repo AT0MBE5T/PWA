@@ -1,4 +1,5 @@
 <script lang='ts'>
+    import { env } from '$env/dynamic/public';
     import { type ReportFilterParams, type PropertyTypeInterface, Roles, translations, settings, toast } from '$lib';
     import { auth } from '$lib';
     import { onMount } from 'svelte';
@@ -15,7 +16,7 @@
 
     const getPropertyTypes = async () => {
         try{
-            const response = await fetch('http://localhost:5118/api/PropertyType/get-property-types', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/PropertyType/get-property-types`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'

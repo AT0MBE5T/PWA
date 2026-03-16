@@ -1,3 +1,4 @@
+import { env } from "$env/dynamic/public";
 import type { UserDto } from "$lib";
 import { auth, type JwtPayload } from "$lib";
 import { Roles } from "$lib";
@@ -70,7 +71,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 async function tryServerRefresh(svelteFetch: typeof fetch) {
     try{
-        const response = await svelteFetch("http://localhost:5118/api/Refresh/refresh", {
+        const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/Refresh/refresh`, {
             method: "POST"
         });
         if (!response.ok) return null;
@@ -83,7 +84,7 @@ async function tryServerRefresh(svelteFetch: typeof fetch) {
 
 const getUserDto = async (token: string): Promise<UserDto | null> => {
     try{
-        const response = await fetch('http://localhost:5118/api/Account/get-user-dto-by-id', {
+        const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-user-dto-by-id`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

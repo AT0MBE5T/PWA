@@ -14,6 +14,7 @@
     import { goto } from '$app/navigation';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import offerState from '$lib/stores/offerStore.svelte';
+    import { env } from '$env/dynamic/public';
 
     let { isUpdate, announcementId }: { isUpdate: boolean, announcementId: string } = $props();
 
@@ -68,7 +69,7 @@
 
     const getDataForEdit = async () => {
         try {
-            const response = await fetch('http://localhost:5118/api/Announcement/get-announcement-for-edit', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-announcement-for-edit`, {
                 method: 'POST',
                 body: JSON.stringify(announcementId),
                 headers: {
@@ -141,7 +142,7 @@
 
     const getPropertyTypes = async () => {
         try{
-            const response = await fetch('http://localhost:5118/api/PropertyType/get-property-types', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/PropertyType/get-property-types`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -160,7 +161,7 @@
 
     const getStatementTypes = async () => {
         try{
-            const response = await fetch('http://localhost:5118/api/StatementType/get-statement-types', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/StatementType/get-statement-types`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -432,7 +433,7 @@
             formData.append("UserId", $auth.id!);
 
             try{
-                const response = await fetch('http://localhost:5118/api/Announcement/add-announcement', {
+                const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/add-announcement`, {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -520,7 +521,7 @@
             formData.append("AnnouncementId", announcementId);
 
             try{
-                const response = await fetch('http://localhost:5118/api/Announcement/update-announcement', {
+                const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/update-announcement`, {
                     method: 'POST',
                     body: formData,
                     headers: {

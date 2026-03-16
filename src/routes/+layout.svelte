@@ -7,6 +7,7 @@
     import '../app.css';
     import { onMount } from 'svelte';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
+    import { env } from '$env/dynamic/public';
 
     let { data, children } = $props();
 
@@ -80,7 +81,7 @@
 
     const getUserDto = async () => {
         try{
-            const response = await fetch('http://localhost:5118/api/Account/get-user-dto-by-id', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-user-dto-by-id`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -96,7 +97,7 @@
 
     const getUserStats = async () => {
         try{
-            const response = await fetch('http://localhost:5118/api/Account/get-stats-by-user-id', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-stats-by-user-id`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -114,7 +115,7 @@
         page: number
     ): Promise<AnnouncementsResponse | null> => {
         try{
-            const response = await fetch(`http://localhost:5118/api/Announcement/get-sold-by-user-id/${page}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-sold-by-user-id/${page}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -132,7 +133,7 @@
         page: number
     ): Promise<AnnouncementsResponse | null> => {
         try{
-            const response = await fetch(`http://localhost:5118/api/Favorite/get-favorites-by-user-id/${page}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Favorite/get-favorites-by-user-id/${page}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -150,7 +151,7 @@
         page: number
     ): Promise<AnnouncementsResponse | null> => {
         try{
-            const response = await fetch(`http://localhost:5118/api/Announcement/get-placed-by-user-id/${page}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-placed-by-user-id/${page}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -168,7 +169,7 @@
         page: number
     ): Promise<AnnouncementsResponse | null> => {
         try{
-            const response = await fetch(`http://localhost:5118/api/Announcement/get-bought-by-user-id/${page}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-bought-by-user-id/${page}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,

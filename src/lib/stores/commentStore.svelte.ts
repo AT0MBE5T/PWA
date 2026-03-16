@@ -1,6 +1,7 @@
 import type { CommentInterface } from "$lib/interfaces/CommentInterface";
 import * as signalR from "@microsoft/signalr";
 import { offerFullStore } from "./OfferFullStore.svelte";
+import { env } from "$env/dynamic/public";
 
 const commentState = createCommentState();
 export default commentState;
@@ -18,7 +19,7 @@ async function initSignalR(chatId: string, userName: string) {
     await stopSignalR();
 
     const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl("http://localhost:5118/messageHub", { withCredentials: true })
+        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
         .withAutomaticReconnect()
         .build();
 
@@ -143,7 +144,7 @@ async function initSignalR(chatId: string, userName: string) {
 
     async function setupChat(currentId: string) {
         try {
-            const response = await fetch(`http://localhost:5118/api/Comment/get-comments-by-announcement-id/${currentId}`);
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Comment/get-comments-by-announcement-id/${currentId}`);
             if (response.ok) {
                 const initialComments = await response.json();
                 offerFullStore.setComments(currentId, initialComments);

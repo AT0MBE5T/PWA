@@ -3,6 +3,7 @@ import type { Message } from "$lib";
 import * as signalR from "@microsoft/signalr";
 import { chatOfflineState } from "./ChatOfflineStore.svelte";
 import getCookie from "$lib/utils/cookieData";
+import { env } from "$env/dynamic/public";
 
 const chatState = createChatState();
 export default chatState;
@@ -23,7 +24,7 @@ function createChatState() {
         await stopSignalR();
 
         const newConnection = new signalR.HubConnectionBuilder()
-            .withUrl("http://localhost:5118/messageHub", { withCredentials: true })
+            .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
             .withAutomaticReconnect()
             .build();
 
@@ -100,7 +101,7 @@ function createChatState() {
         }
 
         const getMessages = async (chatId: string) => {
-            const response = await fetch(`http://localhost:5118/api/Chat/get-messages-by-chat-id/${chatId}`);        
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Chat/get-messages-by-chat-id/${chatId}`);        
             if (response.ok) {
                 const initialMessages = await response.json();
                 return initialMessages;
@@ -111,7 +112,7 @@ function createChatState() {
             try{
                 const token = getCookie('accessToken');
 
-                    const response = await fetch('http://localhost:5118/api/Chat/my-chats', {
+                    const response = await fetch(`${env.PUBLIC_API_URL}/api/Chat/my-chats`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -134,7 +135,7 @@ function createChatState() {
 
         async function loadMessages(chatId: string) {
             try {
-                const response = await fetch(`http://localhost:5118/api/Chat/get-messages-by-chat-id/${chatId}`);
+                const response = await fetch(`${env.PUBLIC_API_URL}/api/Chat/get-messages-by-chat-id/${chatId}`);
                 if (response.ok) {
                     const initialMessages = await response.json() as Message[];
                     chatOfflineState.setMessages(chatId, initialMessages);

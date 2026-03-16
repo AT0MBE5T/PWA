@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/public';
 import type { AnnouncementFull } from '$lib';
 import type { LayoutServerLoad } from './$types';
 
@@ -30,7 +31,7 @@ const getAnnouncementFullInfoById = async (
   userId: string | null,
   fetch: typeof globalThis.fetch 
 ): Promise<AnnouncementFull | undefined> => {
-  const response = await fetch('http://localhost:5118/api/Announcement/get-announcement-full-by-id', {
+  const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-announcement-full-by-id`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -48,7 +49,7 @@ const addViewer = async (
   userId: string,
   fetch: typeof globalThis.fetch 
 ): Promise<void> => {
-  await fetch('http://localhost:5118/api/View/add-view', {
+  await fetch(`${env.PUBLIC_API_URL}/api/View/add-view`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

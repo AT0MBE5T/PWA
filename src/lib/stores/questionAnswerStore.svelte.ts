@@ -2,6 +2,7 @@ import type { QuestionAnswer } from "$lib/interfaces/QuestionAnswer";
 import * as signalR from "@microsoft/signalr";
 import { offerFullStore } from "./OfferFullStore.svelte";
 import offerState from "./offerStore.svelte";
+import { env } from "$env/dynamic/public";
 
 const questionAnswerState = createQuestionAnswerState();
 export default questionAnswerState;
@@ -16,7 +17,7 @@ function createQuestionAnswerState() {
 async function setup(currentId: string) {
     try {
         const response = await fetch(
-            `http://localhost:5118/api/Question/get-all-by-announcement-id/${currentId}`
+            `${env.PUBLIC_API_URL}/api/Question/get-all-by-announcement-id/${currentId}`
         );
 
         if (response.ok) {
@@ -50,7 +51,7 @@ async function initSignalR(chatId: string, userName: string) {
     currentChatId = chatId;
 
     const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl("http://localhost:5118/messageHub", { withCredentials: true })
+        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
         .withAutomaticReconnect()
         .build();
 

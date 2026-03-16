@@ -1,4 +1,5 @@
 <script lang='ts'>
+    import { env } from '$env/dynamic/public';
     import type {
         ChangeEmailRequest,
         ChangePasswordRequest,
@@ -55,7 +56,7 @@
         }
 
         try{
-            const response = await fetch('http://localhost:5118/api/Account/change-password', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/change-password`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -110,7 +111,7 @@
         }
 
         try{
-            const response = await fetch('http://localhost:5118/api/Account/change-email', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/change-email`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -174,7 +175,7 @@
         }
 
         try{
-            const response = await fetch('http://localhost:5118/api/Account/change-phone', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/change-phone`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -250,7 +251,7 @@
         formData.append("UserId", $auth.id);
 
         try{
-            const response = await fetch('http://localhost:5118/api/Account/change-avatar', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/change-avatar`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`
