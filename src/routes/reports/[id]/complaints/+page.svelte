@@ -61,33 +61,40 @@
 </script>
 
 <div class="complaints-container">
-    <h2>Мої скарги</h2>
+    <div class="complaints-header">
+        <div class="header-icon">📢</div>
+        <h2>{t.personal.complaints}</h2>
+    </div>
 
     <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
-                    <th>Дата</th>
-                    <th>Оголошення</th>
-                    <th>Тип</th>
-                    <th>Коментар</th>
-                    <th>Статус</th>
-                    <th>Адмін</th>
-                    <th>Нотатки</th>
-                    <th>Дата рішення</th>
+                    <th>{t.personal.dateComplaint}</th>
+                    <th>{t.personal.offerComplaint}</th>
+                    <th>{t.personal.typeComplaint}</th>
+                    <th>{t.personal.commentComplaint}</th>
+                    <th>{t.personal.statusComplaint}</th>
+                    <th>{t.personal.solutionComplaint}</th>
                 </tr>
             </thead>
             <tbody>
-                {#if complaints?.length !== undefined && complaints.length > 0}
+                {#if complaints && complaints.length > 0}
                     {#each complaints as complaint}
                         <tr class={getStatusClass(complaint.statusName)}>
-                            <td>{new Date(complaint.createdAt).toLocaleDateString()}</td>
-                            <td><strong>{complaint.announcementName}</strong></td>
-                            <td>{complaint.typeName}</td>
+                            <td class="date-cell">
+                                {new Date(complaint.createdAt).toLocaleDateString()}
+                            </td>
                             <td>
-                                <span class="note" title={complaint.userNote}>
-                                    {complaint.userNote}
+                                <span class="announcement-link">
+                                    {complaint.announcementName}
                                 </span>
+                            </td>
+                            <td><span class="type-tag">{complaint.typeName}</span></td>
+                            <td>
+                                <div class="note-container" title={complaint.userNote}>
+                                    {complaint.userNote}
+                                </div>
                             </td>
                             <td>
                                 <span class="status-badge">
@@ -95,22 +102,27 @@
                                 </span>
                             </td>
                             <td>
-                                {complaint.adminName || '—'}
-                                {#if complaint.adminNote}
-                                    <i class="info-icon" title={complaint.adminNote}>ℹ️</i>
-                                {/if}
-                            </td>
-                            <td>
-                                {complaint.adminNote || '—'}
-                            </td>
-                            <td>
-                                {complaint.processedAt !== null ? new Date(complaint.processedAt).toLocaleDateString() : '—'}
+                                <div class="admin-decision">
+                                    {#if complaint.adminNote}
+                                        <span class="admin-text">{complaint.adminNote}</span>
+                                        <small class="process-date">
+                                            {complaint.processedAt ? new Date(complaint.processedAt).toLocaleDateString() : ''}
+                                        </small>
+                                    {:else}
+                                        <span class="pending-dash">—</span>
+                                    {/if}
+                                </div>
                             </td>
                         </tr>
                     {/each}
                 {:else}
                     <tr>
-                        <td colspan="6" class="empty">Скарг не знайдено</td>
+                        <td colspan="6" class="empty-state">
+                            <div class="empty-content">
+                                <span>📭</span>
+                                <p>{t.personal.emptyComplaints}</p>
+                            </div>
+                        </td>
                     </tr>
                 {/if}
             </tbody>
@@ -120,71 +132,187 @@
 
 <style>
     .complaints-container {
-        padding: 1rem;
-        font-family: sans-serif;
+        max-width: 1100px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .complaints-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .header-icon {
+        font-size: 2rem;
+    }
+
+    .complaints-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
     }
 
     .table-wrapper {
-        overflow-x: auto;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        background: white;
-    }
-
-    th, td {
-        padding: 12px 15px;
         text-align: left;
-        border-bottom: 1px solid #eee;
     }
 
     th {
-        background-color: #f8f9fa;
-        color: #666;
-        font-weight: 600;
+        background: rgba(248, 249, 250, 0.5);
+        padding: 1.25rem 1rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        color: #374151;
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    tr {
+        transition: background-color 0.2s ease;
+    }
+
+    tr:hover {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Statuses Logic */
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-resolved .status-badge {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-rejected .status-badge {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-pending .status-badge {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+
+    /* Decorative border for statuses */
+    tr[class^="status-"] {
+        border-left: 4px solid transparent;
+    }
+    .status-resolved { border-left-color: #22c55e !important; }
+    .status-rejected { border-left-color: #ef4444 !important; }
+    .status-pending { border-left-color: #eab308 !important; }
+
+    .announcement-link {
+        font-weight: 600;
+        color: #4f46e5;
+    }
+
+    .type-tag {
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
         font-size: 0.85rem;
     }
 
-    tr.status-resolved {
-        background-color: #39ff00;
-    }
-
-    tr.status-rejected {
-        background-color: #ff4500;
-    }
-
-    tr.status-pending {
-        background-color: #ffde80;
-    }
-
-    .status-badge {
-        font-weight: bold;
-        font-size: 0.9rem;
-    }
-
-    .note {
-        display: inline-block;
+    .note-container {
         max-width: 200px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        cursor: help;
+        color: #6b7280;
     }
 
-    .info-icon {
-        cursor: help;
-        margin-left: 5px;
-        font-style: normal;
+    .admin-decision {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
     }
 
-    .empty {
+    .admin-text {
+        font-weight: 500;
+    }
+
+    .process-date {
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+
+    .empty-state {
         text-align: center;
-        color: #999;
-        padding: 2rem;
+        padding: 4rem 0;
+    }
+
+    .empty-content span {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    /* Dark Mode Support */
+    :global([data-theme="dark"]) .table-wrapper {
+        background: rgba(30, 41, 59, 0.7);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    :global([data-theme="dark"]) td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+    }
+
+    :global([data-theme="dark"]) th {
+        background: rgba(15, 23, 42, 0.3);
+        color: #94a3b8;
+    }
+
+    :global([data-theme="dark"]) tr:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    :global([data-theme="dark"]) .status-resolved .status-badge { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+    :global([data-theme="dark"]) .status-rejected .status-badge { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    :global([data-theme="dark"]) .status-pending .status-badge { background: rgba(234, 179, 8, 0.2); color: #fbbf24; }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .table-wrapper {
+            border-radius: 12px;
+        }
+        td, th {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
     }
 </style>

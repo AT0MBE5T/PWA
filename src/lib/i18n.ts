@@ -295,6 +295,13 @@ export interface TranslationKeys {
         image: string;
         favoriteCategory: string;
         complaints: string;
+        emptyComplaints: string;
+        dateComplaint: string;
+        offerComplaint: string;
+        typeComplaint: string;
+        commentComplaint: string;
+        statusComplaint: string;
+        solutionComplaint: string;
     }
 }
 
@@ -587,7 +594,14 @@ export const translations: Record<Language, TranslationKeys> = {
             change: "Змінити",
             image: 'Фото',
             favoriteCategory: 'Улюблена категорія',
-            complaints: 'Скарги'
+            complaints: 'Скарги',
+            emptyComplaints: 'Скарг не знайдено',
+            commentComplaint: 'Коментар',
+            dateComplaint: 'Дата',
+            solutionComplaint: 'Рішення',
+            offerComplaint: 'Оголошення',
+            statusComplaint: 'Статус',
+            typeComplaint: 'Тип'
         }
     },
     EN: {
@@ -877,7 +891,14 @@ export const translations: Record<Language, TranslationKeys> = {
             change: "Change",
             image: 'Photo',
             favoriteCategory: 'Favorite category',
-            complaints: 'Complaints'
+            complaints: 'Complaints',
+            emptyComplaints: "There's no complaints",
+            commentComplaint: 'Notes',
+            dateComplaint: 'Date',
+            solutionComplaint: 'Solution',
+            offerComplaint: 'Announcement',
+            statusComplaint: 'Status',
+            typeComplaint: 'Type'
         }
     }
 };

@@ -160,6 +160,8 @@ const t = $derived(translations[settings.lang]);
         display: flex;
         justify-content: center;
         overflow-y: auto;
+
+        margin-left: var(--sidebar-width);
     }
 
     .burger {
@@ -200,6 +202,7 @@ const t = $derived(translations[settings.lang]);
 
         .container__main {
             padding-bottom: 80px;
+            margin: 0;
         }
     }
 </style>
