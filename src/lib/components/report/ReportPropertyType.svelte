@@ -36,7 +36,9 @@
             }
 
             propertyTypeStats = await response.json() as PropertyTypeStats;
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
         }
     };
@@ -64,6 +66,10 @@
                 <div class="report__container__item">
                     <h3>📈 {t.reports.profit}</h3>
                     <div style="font-size: 2rem; font-weight: bold; color: #FF9800;">{propertyTypeStats.totalIncome}</div>
+                </div>
+                <div class="report__container__item">
+                    <h3>👁️ {t.reports.views}</h3>
+                    <div style="font-size: 2rem; font-weight: bold; color: #9353b0;">{propertyTypeStats.views}</div>
                 </div>
             </div>
         </div>
@@ -127,7 +133,7 @@
 
     .report__container__summary {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 20px;
         margin-bottom: 20px;
     }
@@ -166,6 +172,10 @@
 
     .report__container__summary .report__container__item:nth-child(3)::before {
         background: linear-gradient(90deg, #FF9800, #F57C00);
+    }
+
+    .report__container__summary .report__container__item:nth-child(4)::before {
+        background: linear-gradient(90deg, #8e43b0, #8332a8);
     }
 
     .report__container__top_property {

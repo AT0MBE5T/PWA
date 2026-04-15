@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/public';
-import type { AnnouncementFull } from '$lib';
+import { settings, type AnnouncementFull } from '$lib';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals, fetch }) => {
@@ -20,8 +20,9 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
     if (authorResponse !== undefined) {
         authorId = authorResponse?.authorId;
     }
+    settings.online = true;
   }catch(error){
-    console.log(error);
+    settings.online = false;
   }
   finally{
     return { 

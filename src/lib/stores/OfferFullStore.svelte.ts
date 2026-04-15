@@ -10,6 +10,8 @@ import type { AnnouncementUpdateModel } from '$lib/interfaces/AnnouncementUpdate
 import type { SearchRequestInterface } from '$lib/interfaces/SearchRequestInterface';
 import type { AnnouncementsResponse } from '$lib/interfaces/AnnouncementsResponse';
 import { env } from '$env/dynamic/public';
+import offerState from './offerStore.svelte';
+import { settings } from './settings.svelte';
 
 class OfferState {
     offerDetails = $state<Record<string, AnnouncementFull>>({});
@@ -48,8 +50,100 @@ class OfferState {
         await tx.done;
     }
 
+    // async syncAnnouncements(searchData: SearchRequestInterface): Promise<AnnouncementsResponse> {
+    //     try {
+    //         const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/search`, {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify(searchData)
+    //         });
+
+    //         if (!response.ok) throw new Error("Server unreachable");
+
+    //         const data = await response.json() as AnnouncementsResponse;
+    //         const db = await this.getDB();
+
+    //         const tx = db.transaction('announcements', 'readwrite');
+    //         tx.store.clear();
+    //         await Promise.all([
+    //             ...data.data.map(item => tx.store.put(item)),
+    //             tx.done
+    //         ]);
+
+    //         db.clear('announcementDetails');
+    //         db.clear('comments');
+    //         db.clear('questions');
+
+    //         await Promise.allSettled(data.data.map(i => this.fetchAndCacheFullData(i.id)));
+
+    //         return data;
+
+    //     } catch (e) {
+    //         const db = await this.getDB();
+    //         const cached = await db.getAll('announcements');
+    //         await new Promise(res => setTimeout(res, 500));
+    //         return {
+    //             data: [...cached].sort((a, b) => b.viewsCnt - a.viewsCnt),
+    //             totalItems: cached.length,
+    //             totalPages: cached.length / searchData.limit
+    //         };
+    //     }
+    // }
+
     async syncAnnouncements(searchData: SearchRequestInterface) {
-        try {
+        const db = await this.getDB();
+        const cacheKey = await this.getCacheKey(searchData);
+
+        const cachedPage = await db.get(
+            'announcements_pages',
+            `${cacheKey}_${searchData.page}`
+        );
+
+        if (cachedPage) {
+            this.backgroundFetch(searchData);
+            return {
+                data: cachedPage.items,
+                totalPages: cachedPage.totalPages
+            };
+        }
+
+        try{
+            return await this.fetchAndCache(searchData, cacheKey);
+        }catch {
+            const all = await db.getAllFromIndex(
+                'announcements_pages',
+                'cacheKey',
+                cacheKey
+            );
+
+            if (all.length > 0) {
+                const closest = all.sort((a, b) =>
+                    Math.abs(a.page - searchData.page) - Math.abs(b.page - searchData.page)
+                )[0];
+
+                return {
+                    data: closest.items,
+                    totalPages: closest.totalPages,
+                    page: closest.page
+                };
+            }
+
+            return {
+                data: [],
+                totalPages: 0
+            };
+        }
+    }
+
+    private async getCacheKey(searchData: SearchRequestInterface) {
+        return JSON.stringify({
+            ...searchData,
+            page: undefined
+        });
+    }
+
+    async fetchAndCache(searchData: SearchRequestInterface, cacheKey: string) {
+        try{
             const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/search`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -57,26 +151,30 @@ class OfferState {
             });
 
             if (!response.ok) throw new Error("Server unreachable");
+            const data = await response.json();
 
-            const data = await response.json() as AnnouncementsResponse;
             const db = await this.getDB();
 
-            const tx = db.transaction('announcements', 'readwrite');
-            await Promise.all([
-                ...data.data.map(item => tx.store.put(item)),
-                tx.done
-            ]);
-
-            await Promise.allSettled(data.data.map(i => this.fetchAndCacheFullData(i.id)));
-
-            return data.data;
-
-        } catch (e) {
-            const db = await this.getDB();
-            const cached = await db.getAll('announcements');
-            await new Promise(res => setTimeout(res, 500));
-            return [...cached].sort((a, b) => b.viewsCnt - a.viewsCnt);
+            await db.put('announcements_pages', {
+                id: `${cacheKey}_${searchData.page}`,
+                cacheKey,
+                page: searchData.page,
+                items: data.data,
+                totalPages: data.totalPages,
+                timestamp: Date.now()
+            });
+            settings.online = true;
+            return data;
+        }catch{
+            settings.online = false;
+            throw new Error();
         }
+    }
+
+    async backgroundFetch(searchData: SearchRequestInterface) {
+        try {
+            await this.fetchAndCache(searchData, await this.getCacheKey(searchData));
+        } catch {}
     }
 
     private async fetchAndCacheFullData(id: string) {
@@ -104,8 +202,10 @@ class OfferState {
                 const data = await resQuest.json();
                 await this.setQuestions(id, data);
             }
+            settings.online = true;
         } catch (e) {
             console.error(`Failed to background sync for ${id}`, e);
+            settings.online = false;
         }
     }
 
@@ -124,39 +224,18 @@ class OfferState {
             const tx = db.transaction(storeName, 'readwrite');
             for (const item of data) await tx.store.put(item);
             await tx.done;
-
+            settings.online = true;
             return data;
         } catch (e) {
+            settings.online = false;
             const db = await this.getDB();
             return await db.getAll(storeName);
-        }
-    }
-
-    async getPages(): Promise<number> {
-        const storeName = 'page';
-        const response = `${env.PUBLIC_API_URL}/api/Announcement/get-pages`;
-
-        try {
-            const res = await fetch(response);
-            if (!res.ok) throw new Error();
-            const count = await res.json() as number;
-            
-            const db = await this.getDB();
-            await db.put(storeName, count, 'totalPages');
-
-            return count;
-        } catch (e) {
-            const db = await this.getDB();
-            return await db.get(storeName, 'totalPages');
         }
     }
 
     getDB = async () => {
         return await openDB(this.DB_NAME, this.DB_VERSION, {
             upgrade(db) {
-                if (!db.objectStoreNames.contains('page')) {
-                    db.createObjectStore('page');
-                }
                 if (!db.objectStoreNames.contains('statementTypes')) {
                     db.createObjectStore('statementTypes', { keyPath: 'id' });
                 }
@@ -165,6 +244,11 @@ class OfferState {
                 }
                 if (!db.objectStoreNames.contains('announcements')) {
                     db.createObjectStore('announcements', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('announcements_pages')) {
+                    const store = db.createObjectStore('announcements_pages', { keyPath: 'id' });
+                    store.createIndex('cacheKey', 'cacheKey', { unique: false });
+                    store.createIndex('page', 'page', { unique: false });
                 }
                 if (!db.objectStoreNames.contains('announcementDetails')) {
                     db.createObjectStore('announcementDetails', { keyPath: 'id' });
@@ -192,6 +276,22 @@ class OfferState {
             },
         });
     };
+
+    async updateAnnouncementDetails(adId: string) {
+        offerFullStore.offerDetails[adId].closedAt = (new Date()).toISOString();
+        const db = await this.getDB();
+        const tx = db.transaction('announcementDetails', 'readwrite');
+        const store = tx.objectStore('announcementDetails');
+        store.put(offerFullStore.offerDetails[adId], adId);
+    }
+
+    async updateAnnouncements(adId: string) {
+        offerState.offers.find(x => x.id === adId)!.closedAt = (new Date()).toISOString();
+        const db = await this.getDB();
+        const tx = db.transaction('announcements', 'readwrite');
+        const store = tx.objectStore('announcements');
+        store.put(offerState.offers.find(x => x.id === adId), adId);
+    }
 
     async getPropertyTypes(): Promise<PropertyTypeInterface[]> {
         const db = await this.getDB();
@@ -290,10 +390,15 @@ class OfferState {
         if (this.offerDetails[id]) return;
 
         const db = await this.getDB();
-        const cached = await db.get('announcementDetails', id);
+        let cached = await db.get('announcementDetails', id);
         
         if (cached) {
             this.offerDetails[id] = cached;
+        }
+        else{
+            this.fetchAndCacheFullData(id);
+            cached = await db.get('announcementDetails', id);
+            this.offerDetails[id] = cached
         }
     }
 

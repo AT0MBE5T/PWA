@@ -1,4 +1,4 @@
-import type { Chat } from "$lib";
+import { auth, settings, toast, translations, type Chat } from "$lib";
 import type { Message } from "$lib";
 import * as signalR from "@microsoft/signalr";
 import { chatOfflineState } from "./ChatOfflineStore.svelte";
@@ -13,15 +13,12 @@ function createChatState() {
     let chats = $state<Chat[]>([]);
     let connection = $state<signalR.HubConnection | null>(null);
     let isConnecting = false;
+    const t = $derived(translations[settings.lang]);
 
-    async function initSignalR(chatId: string, userName: string) {
-        if (isConnecting) return;
-        
-        if (connection && connection.state !== signalR.HubConnectionState.Disconnected)
-            return;
-
-        isConnecting = true;
-        await stopSignalR();
+    async function initSignalR(userId: string, userName: string, chatIdd?: string) {
+        if (!connection || connection.state === signalR.HubConnectionState.Disconnected) {
+                if (isConnecting) return;
+                isConnecting = true;
 
         const newConnection = new signalR.HubConnectionBuilder()
             .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
@@ -29,23 +26,26 @@ function createChatState() {
             .build();
 
         newConnection.on("ReceiveMessage", (uId, uName, content, chatId) => {
-            messages.push({
-                id: '',
-                chatId,
-                senderId: uId,
-                senderName: uName,
-                content,
-                createdAt: new Date().toISOString(),
-                isRead: false,
-                isPending: false
-            });
+            if (uName !== userName){
+                messages = [...messages, {
+                    id: '',
+                    chatId,
+                    senderId: uId,
+                    senderName: uName,
+                    content,
+                    createdAt: new Date().toISOString(),
+                    isRead: false,
+                    isPending: false
+                }];
+            }
         });
 
         newConnection.on("UpdateChatList", (
             chatId: string,
-            userId: string,
+            offerId: string,
             userName: string,
-            message: string
+            message: string,
+            realtorId: string
         ) => {
             const chatIndex = chats.findIndex(c => c.chatId === chatId);
 
@@ -62,8 +62,24 @@ function createChatState() {
                     chatName: userName,
                     lastMessage: message,
                     lastMessageAt: new Date().toISOString(),
-                    unreadCount: '1'
+                    unreadCount: '1',
+                    closedAt: null,
+                    offerId: offerId,
+                    realtorId: realtorId
                 });
+            }
+        });
+
+        newConnection.on("ReceiveNotification", (senderName: string, text: string, chatId: string) => {
+            if (chatIdd === chatId) return;
+
+            if (Notification.permission === "granted") {
+                new Notification(`${t.chats.newMessageFrom} ${senderName}`, {
+                    body: text,
+                    icon: '/icon-192x192.png'
+                });
+            } else {
+                toast.show(`${t.chats.messageInChat}: ${text}`, 'info', 10000);
             }
         });
 
@@ -71,14 +87,14 @@ function createChatState() {
             if (newConnection !== connection) return;
             try {
                 await newConnection.invoke("JoinChat", {
-                    ChatRoom: chatId,
+                    ChatRoom: chatIdd,
                     UserName: userName
                 });
 
                 const pending = await chatOfflineState.getPendingMessages();
 
                 for (const msg of pending) {
-                    await newConnection.invoke("SendMessage", msg.chatId, msg.content);
+                    await newConnection.invoke("SendMessage", msg.chatId, msg.content, userName);
                     await chatOfflineState.removePendingMessage(msg.id);
                 }
 
@@ -88,23 +104,28 @@ function createChatState() {
             }
         });
 
-        try {
-                await newConnection.start();
-                connection = newConnection;
-                
-                await connection.invoke("JoinChat", { ChatRoom: chatId, UserName: userName });
-            } catch (err) {
-                console.error("SignalR Start Error:", err);
-            } finally {
-                isConnecting = false; 
-            }
-        }
+        await newConnection.start();
+        connection = newConnection;
+        isConnecting = false;
+
+        await connection.invoke("JoinChat", { ChatRoom: userId, UserName: userName });
+    }
+
+    if (chatIdd) {
+        await connection.invoke("JoinChat", { ChatRoom: chatIdd, UserName: userName });
+    }
+}
 
         const getMessages = async (chatId: string) => {
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Chat/get-messages-by-chat-id/${chatId}`);        
-            if (response.ok) {
-                const initialMessages = await response.json();
-                return initialMessages;
+            try{
+                const response = await fetch(`${env.PUBLIC_API_URL}/api/Chat/get-messages-by-chat-id/${chatId}`);        
+                if (response.ok) {
+                    const initialMessages = await response.json();
+                    return initialMessages;
+                }
+                settings.online = true;
+            }catch{
+                settings.online = false;
             }
         };
 
@@ -128,6 +149,9 @@ function createChatState() {
                             await chatOfflineState.setMessages(i.chatId, messages);
                         });
                     }
+                    settings.online = true;
+                } catch{
+                    settings.online = false;
                 } finally {
                     await chatOfflineState.loadChats(userId);
                 }
@@ -140,6 +164,9 @@ function createChatState() {
                     const initialMessages = await response.json() as Message[];
                     chatOfflineState.setMessages(chatId, initialMessages);
                 }
+                settings.online = true;
+            } catch{
+                settings.online = false;
             } finally {
                 await chatOfflineState.loadMessages(chatId);
             }
@@ -152,6 +179,7 @@ function createChatState() {
                 try {
                     oldConn.off("ReceiveMessage");
                     oldConn.off("UpdateChatList");
+                    oldConn.off("ReceiveNotification");
                     await oldConn.stop();
                 } catch (e) {}
             }
@@ -166,7 +194,7 @@ function createChatState() {
             stopSignalR,
             loadData,
             loadMessages,
-            sendMessage: async (userId: string, userName: string, chatId: string, text: string) => {
+            sendMessage: async (userId: string, userName: string, chatId: string, text: string, offerId: string, realtorId: string) => {
                 const tempId = crypto.randomUUID();
                 const pendingMsg: Message = {
                     id: tempId,
@@ -183,7 +211,7 @@ function createChatState() {
 
                 if (connection?.state === signalR.HubConnectionState.Connected) {
                     try {
-                        await connection.invoke("SendMessage", chatId, text);
+                        await connection.invoke("SendMessage", chatId, text, userName, offerId, realtorId);
                     } catch (e) {
                         await chatOfflineState.savePendingMessage(pendingMsg);
                     }

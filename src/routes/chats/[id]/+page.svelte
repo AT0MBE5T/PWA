@@ -1,13 +1,16 @@
 <script lang='ts'>
     import { format } from 'date-fns';
-    import { auth, ConfirmModal, settings, translations } from '$lib';
+    import { auth, ConfirmModal, settings, toast, translations, type BuyRequest } from '$lib';
     import { tick } from 'svelte';
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
+    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte.js';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
 
     let { data } = $props();
     let textInput = $state<string>('');
     let messageContainer: HTMLElement;
+    let chat = $derived(chatState.chats.find(x => x.chatId === data.chatId));
 
     let allMessages = $derived(chatState.messages);
 
@@ -22,7 +25,7 @@
 
 $effect(() => {
     const chatId = data.chatId;
-    const userName = data.user?.name;
+    const userName = `${data.user?.name} ${data.user?.personSurname}`;
 
     if (!chatId || !userName) return;
 
@@ -31,16 +34,61 @@ $effect(() => {
         chatState.setMessages(offlineMessages);
     }
 
-    chatState.initSignalR(chatId, userName);
+    chatState.initSignalR($auth.id!, userName, chatId);
 
     return () => {
         chatState.stopSignalR();
     };
 });
 
+    const onCloseAnnouncementClick = async () => {
+        if($auth.id == null){
+            return;
+        }
+
+        const confirmed = await confirmModal.ask();
+
+        if(!confirmed){
+            return;
+        }
+
+        const chatWithId = allMessages.find(x => x.senderId !== $auth.id)?.senderId;
+
+        if (!chatWithId)
+            return;
+
+        const dataForBuy: BuyRequest = {
+            announcementId: chat?.offerId!,
+            customerId: chatWithId
+        };
+
+        try{
+            const response = await fetch('http://localhost:5118/api/Announcement/close-announcement', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
+                },
+                body: JSON.stringify(dataForBuy)
+            });
+
+            if(!response.ok){
+                toast.show(t.offers.closeError, 'error');
+                return;
+            }
+
+            toast.show(t.offers.closeSuccess, 'success');
+            offerFullStore.offerDetails[chat?.offerId!].closedAt = new Date().toISOString();
+            //personalStore.handleDealClosed($auth.id, chat?.offerId!);
+            settings.online = true;
+        }catch{
+            settings.online = false;
+        }
+    };
+
     async function sendMessage() {
         if (!textInput.trim()) return;
-        await chatState.sendMessage($auth.id!, $auth.name!, data.chatId, textInput);
+        await chatState.sendMessage($auth.id!, `${$auth.name} ${$auth.personSurname}`, data.chatId, textInput, chat?.offerId!, chat?.realtorId!);
         textInput = "";
     }
 
@@ -51,14 +99,14 @@ $effect(() => {
     };
 
     const handleKeydown = (e: KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey && chat?.closedAt === null) {
             e.preventDefault();
             addMessage();
         }
     };
 
     $effect(() => {
-        if (chatOfflineState.messages[data.chatId] && messageContainer) {
+        if (allMessages && messageContainer) {
             tick().then(() => {
                 messageContainer.scrollTo({
                     top: messageContainer.scrollHeight,
@@ -90,6 +138,14 @@ $effect(() => {
                 <p>{t.chats.noMessages}</p>
             </div>
         {/each}
+        {#if chat?.closedAt !== null}
+            <div class="closed_text">[{t.chats.closed}]</div>
+        {/if}
+        {#if chat?.closedAt === null && $auth.id === chat?.realtorId}
+            <div class="footer__container__close">
+                <button onclick={onCloseAnnouncementClick}>🔒 {t.offers.close}</button>
+            </div>
+        {/if}
     </div>
 
     <div class="input-area">
@@ -97,6 +153,7 @@ $effect(() => {
             placeholder={t.chats.typeMessage}
             bind:value={textInput}
             onkeydown={handleKeydown}
+            disabled={chat?.closedAt !== null}
         ></textarea>
         <button onclick={addMessage} disabled={!textInput.trim()}>
             <span>➤</span>
@@ -171,6 +228,30 @@ $effect(() => {
         align-items: flex-end;
     }
 
+    .closed_text{
+        margin: 0 auto;
+        font-size: 2rem;
+    }
+
+    .footer__container__close button{
+        padding: 0.8rem;
+        background-color: #f44242;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        border: 0;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+    }
+
+    .footer__container__close button:hover{
+        background-color: #ff9900;
+        transform: scale(1.03);
+    }
+
     textarea {
         flex: 1;
         border: 1px solid #e2e8f0;
@@ -203,24 +284,29 @@ $effect(() => {
         cursor: not-allowed;
     }
 
-    /* Фон вікна повідомлень */
+    :global([data-theme="dark"]) .footer__container__close button:hover {
+        background-color: #ff9900;
+        color: #000;
+    }
+
+    :global([data-theme="dark"]) .closed_text{
+        color: #ccc;
+    }
+
     :global([data-theme="dark"]) .messages-viewport {
         background: #0f172a;
     }
 
-    /* Бульбашка іншого користувача (рієлтора) */
     :global([data-theme="dark"]) .msg-wrapper:not(.mine) .msg-bubble {
         background: #1e293b;
         border-color: #334155;
         color: #f1f5f9;
     }
 
-    /* Ваша бульбашка (фіолетова) — зробимо трохи насиченішою */
     :global([data-theme="dark"]) .mine .msg-bubble {
         background: linear-gradient(135deg, #6d28d9 0%, #7a42f4 100%);
     }
 
-    /* Поле вводу */
     :global([data-theme="dark"]) .input-area {
         background: #1e293b;
         border-top: 1px solid #334155;
@@ -236,7 +322,6 @@ $effect(() => {
         border-color: #7a42f4;
     }
 
-    /* Скролбар для темної теми */
     :global([data-theme="dark"]) .messages-viewport::-webkit-scrollbar-track {
         background: #0f172a;
     }

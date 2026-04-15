@@ -24,5 +24,6 @@ export interface GeneralStats {
     topClientSpentFirst: number,
     topClientNameSecond: string,
     topClientDealsSecond: number,
-    topClientSpentSecond: number
+    topClientSpentSecond: number,
+    views: number
 }

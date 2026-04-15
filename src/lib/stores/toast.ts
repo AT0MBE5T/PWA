@@ -10,7 +10,7 @@ const { subscribe, set, update } = writable({
 
 export const toast = {
     subscribe,
-    show: (message: string, type: ToastType = 'info', duration = 2500) => {
+    show: (message: string, type: ToastType = 'info', duration: number = 2500) => {
         set({ show: true, message, type });
         setTimeout(() => {
             set({ show: false, message: '', type: 'info' });

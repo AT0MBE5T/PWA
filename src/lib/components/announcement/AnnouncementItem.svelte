@@ -1,9 +1,9 @@
 <script lang='ts'>
     import { settings, translations, type AnnouncementShort } from '$lib';
+    import { translatePropertyType, translateStatementType } from '$lib/i18n';
     import type { Snippet } from 'svelte';
 
     let { item, btn_ok_name }: { item: AnnouncementShort, btn_ok_name: Snippet } = $props();
-
     const t = $derived(translations[settings.lang]);
 </script>
 
@@ -20,8 +20,8 @@
 
     <div class="shop__item__description__block">
         <div class="shop__item__description__block__short-description">
-            <div class="shop__item__description__block__short-description__item">🔐 {item.statementTypeName}</div>
-            <div class="shop__item__description__block__short-description__item align-end">🏠 {item.propertyTypeName}</div>
+            <div class="shop__item__description__block__short-description__item">🔐 {translateStatementType(item.statementTypeName)}</div>
+            <div class="shop__item__description__block__short-description__item align-end">🏠 {translatePropertyType(item.propertyTypeName)}</div>
             <div class="shop__item__description__block__short-description__item">💵 {item.price} ₴</div>
             <div class="shop__item__description__block__short-description__item align-end">📐 {item.area} {t.offers.sqm}</div>
         </div>
@@ -122,6 +122,7 @@
         position: absolute;
         right: 1rem;
         font-size: 1.5rem;
+        z-index: 1;
     }
 
         .shop__item__description__block__favoriting{

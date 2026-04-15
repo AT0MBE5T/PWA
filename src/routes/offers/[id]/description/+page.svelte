@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { ConfirmModal, toast, translations, settings, Roles } from '$lib';
+    import { ConfirmModal, toast, translations, settings, Roles, type BuyRequest, type AnnouncementShort } from '$lib';
     import { auth } from '$lib';
     import {format} from "date-fns";
     import type { PageData } from './$types';
@@ -9,15 +9,84 @@
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import { onMount } from 'svelte';
     import { env } from '$env/dynamic/public';
+    import { personalStore } from '$lib/stores/PersonalStore.svelte';
+    import AnnouncementForm from '$lib/components/announcement/AnnouncementForm.svelte';
 
     let { data }: { data: PageData } = $props();
     let offer = $derived(offerFullStore.offerDetails[data.id!]);
 
     onMount(async () => {
         await offerFullStore.loadDetails(data.id!);
+        setTimeout(() =>
+        {
+            if (offer === undefined){
+                history.back();
+                toast.show(t.system.noData, 'error');
+            }
+        }, 1000);
     });
 
     const t = $derived(translations[settings.lang]);
+
+    const onCloseAnnouncementClick = async () => {
+        if($auth.id == null){
+            return;
+        }
+
+        const confirmed = await confirmModal.ask();
+
+        if(!confirmed){
+            return;
+        }
+
+        const dataForBuy: BuyRequest = {
+            announcementId: data.id,
+            customerId: $auth.id
+        };
+        try{
+            const response = await fetch('http://localhost:5118/api/Announcement/close-announcement', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": `Bearer ${$auth.accessToken}`
+                    },
+                    body: JSON.stringify(dataForBuy)
+                });
+
+                if(!response.ok){
+                    toast.show(t.offers.closeError, 'error');
+                    return;
+                }
+
+                toast.show(t.offers.closeSuccess, 'success');
+                const currentDate = new Date().toISOString();
+                offerFullStore.offerDetails[data.id!].closedAt = currentDate
+
+                const objToAdd: AnnouncementShort = {
+                    area: offer.area,
+                    closedAt: offer.closedAt,
+                    id: offer.id,
+                    isFavorite: offer.isFavorite,
+                    isPending: false,
+                    isVerified: offer.isVerified,
+                    location: offer.location,
+                    photoUrl: offer.photos[0].url,
+                    price: offer.price,
+                    propertyTypeName: offer.propertyTypeName,
+                    statementTypeName: offer.statementTypeName,
+                    title: offer.title,
+                    viewsCnt: offer.viewsCnt
+                };
+
+                //personalStore.handleDealClosed($auth.id, objToAdd);
+                //offerFullStore.updateAnnouncementDetails(offer.id);
+                //offerFullStore.updateAnnouncements(offer.id);
+                offer.closedAt = currentDate;
+                settings.online = true;
+        }catch{
+            settings.online = false;
+        }
+    };
 
     const onContactAuthor = async () => {
         if($auth.id == null){
@@ -37,7 +106,7 @@
                     'Content-Type': 'application/json',
                     "Authorization": `Bearer ${$auth.accessToken}`
                 },
-                body: JSON.stringify(offer!.authorId)
+                body: JSON.stringify(offer!.id)
             });
 
             if(!response.ok){
@@ -50,7 +119,9 @@
             toast.show(t.offers.dialogueCreatedSuccessfully, 'success');
             
             goto(`/chats/${chatId}`);
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorConnection, 'error', 5000);
         }
     };
@@ -75,7 +146,9 @@
             toast.show(offer?.isVerified ? t.offers.unverifiedSuccessfully : t.offers.verifiedSuccessfully, 'success');
 
             offer!.isVerified = !offer?.isVerified;
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorConnection, 'error', 5000);
         }
     };
@@ -103,7 +176,9 @@
             toast.show(offer?.isFavorite ? t.offers.unfavoriteSuccessfully : t.offers.favoriteSuccessfully, 'success');
 
             offer!.isFavorite = !offer?.isFavorite;
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorConnection, 'error', 5000);
         }
     };
@@ -138,7 +213,9 @@
 
             toast.show(t.offers.deletedSuccessfully, 'success');
             goto('/offers');
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorConnection, 'error', 5000);
         }        
     };
@@ -255,7 +332,9 @@ let currentIndex = $state(0);
                 })
             });
             toast.show(t.offers.complaintSent, 'success');
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorConnection, 'error', 5000);
         } finally {
             showComplaint = false;
@@ -298,7 +377,7 @@ let currentIndex = $state(0);
             <div class="header__container">
                 <div class="header__container__actions">
                     <div class="header__container__verification">
-                        {#if auth.hasRole(Roles.Admin)}
+                        {#if auth.hasRole(Roles.Admin) && offer?.closedAt === null}
                             <div class={offer?.isVerified ? 'footer__container__unverify' : 'footer__container__verify'}>
                                 <button onclick={onVerifyClick}>{offer?.isVerified ? t.offers.unverify : t.offers.verify}</button>
                             </div>
@@ -308,7 +387,7 @@ let currentIndex = $state(0);
                         </div>
                     </div>
                     <div class="header__container__favoriting">
-                        {#if $auth.isAuthenticated}
+                        {#if $auth.isAuthenticated && offer?.closedAt === null}
                             <div class={offer?.isFavorite ? 'footer__container__unfavorite' : 'footer__container__favorite'}>
                                 <button onclick={() => onFavoriteClick(!offer?.isFavorite!)}>{offer?.isFavorite ? t.offers.unfavorite : t.offers.favorite}</button>
                             </div>
@@ -406,7 +485,7 @@ let currentIndex = $state(0);
                         {offer?.createdAt ? format(offer.createdAt, 'dd.MM.yyyy HH:mm') : ''}
                     </div>
                 </div>
-                {#if $auth.isAuthenticated}
+                {#if $auth.isAuthenticated && offer?.closedAt === null}
                     <div class="footer__container__buy">
                         <button onclick={onContactAuthor}>💰 {t.offers.contactRealtor}</button>
                     </div>
@@ -414,14 +493,17 @@ let currentIndex = $state(0);
                         <button onclick={() => showComplaint = true}>💢 {t.offers.complain}</button>
                     </div>
                 {/if}
-                {#if auth.hasRole(Roles.Admin) || $auth.id === data.authorId}
+                {#if (auth.hasRole(Roles.Admin) || $auth.id === data.authorId) && offer?.closedAt === null}
                     <div class="footer__container__edit">
                         <button onclick={() => goto(`/offers/${data.id}/edit`)}>✏️ {t.offers.edit}</button>
+                    </div>
+                    <div class="footer__container__close">
+                        <button onclick={onCloseAnnouncementClick}>🔒 {t.offers.close}</button>
                     </div>
                 {/if}
             </div>
         </footer>
-        {#if auth.hasRole(Roles.Admin)}
+        {#if auth.hasRole(Roles.Admin) && offer?.closedAt === null}
             <div class="delete__item">
                 <button onclick={onDeleteClick}>🗑️ {t.offers.deleteAnnouncement}</button>
             </div>
@@ -582,6 +664,25 @@ let currentIndex = $state(0);
     }
 
     .footer__container__edit button:hover{
+        background-color: #ff9900;
+        transform: scale(1.03);
+    }
+
+    .footer__container__close button{
+        padding: 0.8rem;
+        background-color: #f44242;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        border: 0;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+    }
+
+    .footer__container__close button:hover{
         background-color: #ff9900;
         transform: scale(1.03);
     }
@@ -1146,6 +1247,11 @@ let currentIndex = $state(0);
     }
 
     :global([data-theme="dark"]) .footer__container__edit button:hover {
+        background-color: #ff9900;
+        color: #000;
+    }
+
+    :global([data-theme="dark"]) .footer__container__close button:hover {
         background-color: #ff9900;
         color: #000;
     }

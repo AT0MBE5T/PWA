@@ -71,8 +71,11 @@
 
             passwordErrors = await response.json() as ChangePasswordResponse[];
 
+            settings.online = true;
+
             return passwordErrors.length === 0;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             return false;
         }
@@ -133,8 +136,10 @@
             }
 
             personalStore.updateEmail($auth.id, newEmail);
+            settings.online = true;
             return true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             newEmail = userInfo!.email;
             return false;
@@ -197,8 +202,10 @@
             }
 
             personalStore.updateEmail($auth.id, newEmail);
+            settings.online = true;
             return true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             newPhone = userInfo!.phoneNumber;
             return false;
@@ -265,8 +272,10 @@
 
             const data: { url: string } = await response.json();
             $auth.avatarUrl = data.url;
+            settings.online = true;
             return true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             return false;
         }

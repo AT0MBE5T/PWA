@@ -1,10 +1,12 @@
 <script lang='ts'>
     import { goto } from '$app/navigation';
-    import { AnnouncementItem, auth, translations, settings, Roles, toast, getItemsProfilePerPage } from '$lib';
-    import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
+    import { env } from '$env/dynamic/public';
+    import { AnnouncementItem, auth, translations, settings, Roles, toast, getItemsProfilePerPage, type AnnouncementsResponse } from '$lib';
+    import getCookie from '$lib/utils/cookieData.js';
     import { onMount, tick } from 'svelte';
 
     const { data } = $props();
+    let currentUserId = $derived<string | undefined | null>(data.userUrl);
 
     let itemsPerPage = getItemsProfilePerPage();
 
@@ -43,34 +45,158 @@
         const tab = data.currentTab;
         const userId = $auth.id;
 
+        if (!currentUserId)
+            return;
+
         if (userId) {
             switch(tab) {
-                case 'Sold': personalStore.loadSold(userId, page ?? 1); break;
-                case 'Bought': personalStore.loadBought(userId, page ?? 1); break;
-                case 'Placed': loadPlaced(); break;
-                case 'Favorite': personalStore.loadFavorite(userId, page ?? 1); break;
+                case 'Sold': getSold(currentUserId, page ?? 1); break;
+                case 'Bought': getBought(currentUserId, page ?? 1); break;
+                case 'Placed': getPlaced(currentUserId, page ?? 1); break;
+                case 'Favorite': getFavorite(currentUserId, page ?? 1); break;
             }
         }
 
         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     });
 
-    const loadPlaced = async () => {
-        const page = data.currentPage;
-        const tab = data.currentTab;
-        const userId = $auth.id;
+    // const loadPlaced = async () => {
+    //     const page = data.currentPage;
+    //     const tab = data.currentTab;
+    //     const userId = $auth.id;
 
-        const res = await personalStore.loadPlaced(userId!, page ?? 1);
-        if (res !== null && res.page !== undefined && res.page !== data.currentPage){
-            toast.show(t.system.noData, 'error');
-            goToPage(res.page, false);
+    //     const res = await personalStore.loadPlaced(userId!, page ?? 1);
+    //     if (res !== null && res.page !== undefined && res.page !== data.currentPage){
+    //         toast.show(t.system.noData, 'error');
+    //         goToPage(res.page, false);
+    //     }
+    // };
+
+    let placedData = $state<AnnouncementsResponse | null>(null);
+    let favoriteData = $state<AnnouncementsResponse | null>(null);
+    let boughtData = $state<AnnouncementsResponse | null>(null);
+    let soldData = $state<AnnouncementsResponse | null>(null);
+
+    const getPlaced = async (userId: string, page: number): Promise<AnnouncementsResponse | null> => {
+        try {
+            const accessToken = getCookie('accessToken');
+
+            const response = await fetch(
+                `${env.PUBLIC_API_URL}/api/Announcement/get-placed-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) return null;
+
+            const freshData: AnnouncementsResponse = await response.json();
+
+            placedData = freshData;
+            settings.online = true;
+            return freshData;
+
+        } catch (e) {
+            settings.online = false;
+            return null;
         }
-    };
+    }
 
-    let offers = $derived(data.currentTab === 'Sold' ? personalStore.sold :
-                            data.currentTab === 'Bought' ? personalStore.bought :
-                            data.currentTab === 'Placed' ? personalStore.placed :
-                            personalStore.favorite);
+    const getFavorite = async (userId: string, page: number): Promise<AnnouncementsResponse | null> => {
+        try {
+            const accessToken = getCookie('accessToken');
+
+            const response = await fetch(
+                `${env.PUBLIC_API_URL}/api/Favorite/get-favorites-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) return null;
+
+            const freshData: AnnouncementsResponse = await response.json();
+
+            favoriteData = freshData;
+            settings.online = true;
+            return freshData;
+
+        } catch (e) {
+            settings.online = false;
+            return null;
+        }
+    }
+
+const getSold = async (userId: string, page: number): Promise<AnnouncementsResponse | null> => {
+        try {
+            const accessToken = getCookie('accessToken');
+
+            const response = await fetch(
+                `${env.PUBLIC_API_URL}/api/Announcement/get-sold-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) return null;
+
+            const freshData: AnnouncementsResponse = await response.json();
+
+            soldData = freshData;
+            settings.online = true;
+            return freshData;
+
+        } catch (e) {
+            settings.online = false;
+            return null;
+        }
+    }
+
+    const getBought = async (userId: string, page: number): Promise<AnnouncementsResponse | null> => {
+        try {
+            const accessToken = getCookie('accessToken');
+
+            const response = await fetch(
+                `${env.PUBLIC_API_URL}/api/Announcement/get-bought-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) return null;
+
+            const freshData: AnnouncementsResponse = await response.json();
+
+            boughtData = freshData;
+            settings.online = true;
+            return freshData;
+
+        } catch (e) {
+            settings.online = false;
+            return null;
+        }
+    }
+
+    let offers = $derived(data.currentTab === 'Sold' ? soldData :
+                            data.currentTab === 'Bought' ? boughtData :
+                            data.currentTab === 'Placed' ? placedData :
+                            favoriteData);
 
     let currentAction = $derived(data.currentTab);
 
@@ -94,7 +220,7 @@
     }
 
     let currentPage = $derived(data.currentPage ?? 0);
-    let totalPages = $derived(offers[$auth.id!]?.totalPages ?? 0);
+    let totalPages = $derived(offers?.totalPages ?? 0);
 
     let announcementId = $state<string>('');
 
@@ -114,7 +240,7 @@
 
     const offerClicked = async (id: string) => {
         announcementId = id;
-        goto(`/offers/${id}/edit`);
+        goto(`/offers/${id}/description`);
     };
 
 const t = $derived(translations[settings.lang]);
@@ -158,10 +284,10 @@ const t = $derived(translations[settings.lang]);
     </nav>
     <div class="main__shop shop">
         <div class="shop__items">
-            {#each offers[$auth.id!]?.data as i}
+            {#each offers?.data as i}
                 <AnnouncementItem item={i}>
                     {#snippet btn_ok_name()}
-                        <button class="shop__item__button__block__buy_button" onclick={() => offerClicked(i.id)}>{t.personal.edit}</button>
+                        <button class="shop__item__button__block__buy_button" onclick={() => offerClicked(i.id)}>{t.reports.open}</button>
                     {/snippet}
                 </AnnouncementItem>
             {/each}
@@ -170,7 +296,7 @@ const t = $derived(translations[settings.lang]);
             <button
                     class="pagination-btn"
                     onclick={() => goToPage(currentPage - 1, true)}
-                    disabled={currentPage === 1 || offers[$auth.id!]?.totalItems === 0}
+                    disabled={currentPage === 1 || offers?.totalItems === 0}
             >
                 ⬅️
             </button>
@@ -185,7 +311,7 @@ const t = $derived(translations[settings.lang]);
             <button
                     class="pagination-btn"
                     onclick={() => goToPage(currentPage + 1, true)}
-                    disabled={currentPage === totalPages || offers[$auth.id!]?.totalItems === 0}
+                    disabled={currentPage === totalPages || offers?.totalItems === 0}
             >
                 ➡️
             </button>

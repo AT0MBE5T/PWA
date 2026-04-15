@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { AuthState } from '$lib';
+import { settings, type AuthState } from '$lib';
 import { goto } from "$app/navigation";
 import { env } from "$env/dynamic/public";
 
@@ -61,6 +61,9 @@ function createAuthStore() {
                     method: "GET",
                     credentials: "include"
                 });
+                settings.online = true;
+            }catch{
+                settings.online = false;
             } finally {
                 goto('/login');
             }

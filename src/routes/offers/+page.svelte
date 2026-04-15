@@ -13,6 +13,9 @@
     import { browser } from '$app/environment';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
 
+    const props = $props();
+    let currentPage = $derived(props.data?.currentPage ?? 1);
+
     let searchInput = $state<string>('');
     let filtrationDropdownOpen = $state<boolean>(false);
     let sortingDropdownOpen = $state<boolean>(false);
@@ -28,24 +31,57 @@
     let checkedSortId = $state<number>(0);
 
     let limit = $state(getItemsPerPage());
-    let currentPage = $state(1);
     let totalPages = $state<number>(0);
 
     const t = $derived(translations[settings.lang]);
+
+    onMount(() => {
+        const handleResize = () => {
+            const newSize = getItemsPerPage();
+
+            if (newSize !== limit) {
+                updatePagination(newSize);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => window.removeEventListener('resize', handleResize);
+    });
+
+    function updatePagination(newPageSize: number) {
+        // const oldPageSize = itemsPerPage;
+        // const globalIndex = (currentPage - 1) * oldPageSize;
+        // const newPage = Math.floor(globalIndex / newPageSize) + 1;
+
+        // itemsPerPage = newPageSize;
+        // currentPage = newPage;
+
+        // goToPage(newPage, false);
+
+        limit = newPageSize;
+        currentPage = currentPage;
+
+        goToPage(currentPage, false);
+    }
 
     async function searchTransferData(searchData: SearchRequestInterface) {
         if (!browser) return;
         
         settings.isLoading = true;
         const results = await offerFullStore.syncAnnouncements(searchData);
+        offerState.setOffers(results.data);
+        totalPages = results.totalPages;
         settings.isLoading = false;
-        offerState.setOffers(results);
+
+        if (results.page !== currentPage && results.page !== undefined){
+            goToPage(results.page, false);
+        }
     }
 
     async function loadInitialData() {
         propertyTypes = await offerFullStore.fetchLookupData('PropertyType');
         statementTypes = await offerFullStore.fetchLookupData('StatementType');
-        totalPages = await offerFullStore.getPages();
     }
 
     onMount(async () => {
@@ -70,7 +106,7 @@
             const newLimit = getItemsPerPage();
             if (newLimit !== limit) {
                 limit = newLimit;
-                currentPage = 1;
+                //currentPage = 1;
                 await confirmInteraction();
             }
         };
@@ -89,13 +125,21 @@
         // svelte-ignore state_referenced_locally
         { id: 4, name: t.offers.floorsByDesc },
         // svelte-ignore state_referenced_locally
-        { id: 5, name: t.offers.priceByAsc },
+        { id: 5, name: t.offers.popularByDesc },
         // svelte-ignore state_referenced_locally
-        { id: 6, name: t.offers.areaByAsc },
+        { id: 6, name: t.offers.newest },
         // svelte-ignore state_referenced_locally
-        { id: 7, name: t.offers.roomsByAsc },
+        { id: 7, name: t.offers.priceByAsc },
         // svelte-ignore state_referenced_locally
-        { id: 8, name: t.offers.floorsByAsc }
+        { id: 8, name: t.offers.areaByAsc },
+        // svelte-ignore state_referenced_locally
+        { id: 9, name: t.offers.roomsByAsc },
+        // svelte-ignore state_referenced_locally
+        { id: 10, name: t.offers.floorsByAsc },
+        // svelte-ignore state_referenced_locally
+        { id: 11, name: t.offers.popularByAsc },
+        // svelte-ignore state_referenced_locally
+        { id: 12, name: t.offers.oldest },
     ]);
 
     let filterData = $derived<LookupItemFilter[]>([
@@ -121,11 +165,28 @@
         { id: '85e328df-e568-43b4-9c95-bf266fa63dc0', name: t.offers.room }
     ]);
 
-    const goToPage = async (page: number) => {
-        if (page >= 1 && page <= totalPages) {
-            currentPage = page;
-            await confirmInteraction();
-        }
+    // const goToPage = async (page: number) => {
+    //     if (page >= 1 && page <= totalPages) {
+    //         currentPage = page;
+    //         await confirmInteraction();
+    //         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+    //     }
+    // };
+
+    const goToPage = (page: number, isClicked: boolean) => {
+        if (currentPage === undefined || (isClicked && currentPage === page))
+            return;
+
+        if (page < 1 || page > totalPages)
+            page = 1;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', page.toString());
+        
+        //goto(url.toString(), { keepFocus: true, noScroll: true });
+        currentPage = page;
+        //goto(url.toString(), { invalidateAll: true });
+        window.location.href = url.toString();
     };
 
     function toggleFiltrationDropdown() {
@@ -357,7 +418,7 @@
                         {/if}
                     </div>
 
-                    <button class="search-button" onclick={confirmInteraction}>
+                    <button class="search-button" disabled={!settings.online} onclick={confirmInteraction}>
                         <svg class="search-button-icon" viewBox="0 0 24 24">
                             <circle cx="11" cy="11" r="8"/>
                             <path d="m21 21-4.35-4.35"/>
@@ -382,8 +443,8 @@
         <div class="pagination-controls">
             <button
                     class="pagination-btn"
-                    onclick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1 || data.length === 0}
+                    onclick={() => goToPage(currentPage - 1, true)}
+                    disabled={currentPage === 1 || allOffers.length === 0}
             >
                 ⬅️
             </button>
@@ -391,7 +452,7 @@
             {#each Array(totalPages).fill(0).map((_, i) => i + 1) as page}
                 <button
                         class="pagination-btn {currentPage === page ? 'active' : ''}"
-                        onclick={() => goToPage(page)}
+                        onclick={() => goToPage(page, true)}
                 >
                     {page}
                 </button>
@@ -399,8 +460,8 @@
 
             <button
                     class="pagination-btn"
-                    onclick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages || data.length === 0}
+                    onclick={() => goToPage(currentPage + 1, true)}
+                    disabled={currentPage === totalPages || allOffers.length === 0}
             >
                 ➡️
             </button>

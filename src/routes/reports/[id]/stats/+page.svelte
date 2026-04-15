@@ -1,18 +1,47 @@
 <script lang='ts'>
-    import { auth, settings, translations } from '$lib';
-    import { translatePropertyType } from '$lib/i18n';
-    import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
+    import { auth, Roles, settings, toast, translations } from '$lib';
     import { onMount } from 'svelte';
+    import type {
+        UserStatsModel,
+        ReportFilterParams,
+        UserReportRequest
+    } from '$lib';
+    import { env } from '$env/dynamic/public';
+    import { translatePropertyType } from '$lib/i18n';
+    import { goto } from '$app/navigation';
 
-    onMount(async () => {
-        settings.isLoading = true;
-        await personalStore.loadUserStatsDto($auth.id!);
-        settings.isLoading = false;
+    let { data } = $props();
+
+    let userStats = $state<UserStatsModel>();
+
+    let currentUserId = $derived<string | undefined | null>(data.userUrl);
+
+    const getUserStats = async (): Promise<void> => {
+        if($auth.id === null || currentUserId === null || currentUserId === undefined || !auth.hasRole(Roles.Admin)){
+            return;
+        }
+
+        try{
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/Report/get-report-by-user-id/${currentUserId}`);
+
+            if(!response.ok){
+                return;
+            }
+
+            userStats = await response.json() as UserStatsModel;
+            settings.online = true;
+        }catch{
+            settings.online = false;
+            toast.show(t.system.errorOccurred, 'error');
+        }        
+    };
+
+    onMount(async (): Promise<void> => {
+        await getUserStats();
     });
 
-    const userStats = $derived(personalStore.userStatsModel);
-
     const t = $derived(translations[settings.lang]);
+
 </script>
 
 <div class="greeting-container">
@@ -256,39 +285,6 @@
         color: #1f2937;
     }
 
-    :global([data-theme="dark"]) .greeting-authenticated {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    :global([data-theme="dark"]) .info-card {
-        background: rgba(30, 41, 59, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    :global([data-theme="dark"]) .info-value {
-        color: #f8fafc;
-    }
-
-    :global([data-theme="dark"]) .info-title {
-        color: #94a3b8;
-    }
-
-    :global([data-theme="dark"]) .status-badge.authenticated {
-        background: rgba(34, 197, 94, 0.15);
-        color: #4ade80;
-        border-color: rgba(74, 222, 128, 0.3);
-    }
-
-    :global([data-theme="dark"]) .logo-icon {
-        filter: drop-shadow(0 4px 12px rgba(122, 66, 244, 0.4));
-    }
-
-    :global([data-theme="dark"]) .greeting-authenticated::before {
-        background: linear-gradient(90deg, #818cf8, #a855f7, #fb7185, #818cf8);
-        background-size: 300% 100%;
-    }
-
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -327,10 +323,43 @@
         75% { transform: translateX(5px); }
     }
 
+:global([data-theme="dark"]) .greeting-authenticated {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+:global([data-theme="dark"]) .info-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .info-value {
+    color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .info-title {
+    color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .status-badge.authenticated {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.3);
+}
+
+:global([data-theme="dark"]) .logo-icon {
+    filter: drop-shadow(0 4px 12px rgba(122, 66, 244, 0.4));
+}
+
+:global([data-theme="dark"]) .greeting-authenticated::before {
+    background: linear-gradient(90deg, #818cf8, #a855f7, #fb7185, #818cf8);
+    background-size: 300% 100%;
+}
+
+
     @media (max-width: 768px) {
         .greeting-container {
-            margin: 1rem;
-            width: 80%;
+            width: 90%;
         }
 
         .greeting-authenticated {
@@ -351,7 +380,7 @@
             grid-template-columns: 1fr;
         }
 
-        .user-info > :last-child {
+        .info-card__wide {
             grid-column: span 1;
             justify-content: start;
         }

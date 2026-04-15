@@ -14,4 +14,5 @@ export interface PropertyTypeStats {
     topClientName: string;
     topClientDeals: number;
     topClientSpent: number;
+    views: number;
 }

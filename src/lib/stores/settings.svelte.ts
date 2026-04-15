@@ -1,9 +1,12 @@
 import { browser } from '$app/environment';
+import { env } from '$env/dynamic/public';
 import { translations, type Language, type TranslationKeys } from '$lib/i18n';
 
 class SettingsStore {
     theme = $state<string>(browser ? localStorage.getItem('theme') || 'light' : 'light');
     lang = $state<Language>(browser ? localStorage.getItem('lang') as Language || 'UA' : 'UA');
+
+    online = $state<boolean>(false);
 
     isLoading = $state<boolean>(false);
 
@@ -22,6 +25,17 @@ class SettingsStore {
                 }
             });
         });
+    }
+
+    public async checkServer() {
+        try {
+            const res = await fetch(`${env.PUBLIC_API_URL}/api/Account/ping`, { method: 'GET' });
+            this.online = res.ok;
+            return res.ok;
+        } catch {
+            this.online = false;
+            return false;
+        }
     }
 
     get t(): TranslationKeys {

@@ -89,7 +89,7 @@
     };
 
     $effect(() => {
-        if (questionAnswerState.questionAnswerData && questionContainer) {
+        if (questionAnswers && questionContainer) {
             tick().then(() => {
                 questionContainer.scrollTo({
                     top: questionContainer.scrollHeight,

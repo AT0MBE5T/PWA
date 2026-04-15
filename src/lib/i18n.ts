@@ -1,3 +1,5 @@
+import { settings } from "./stores/settings.svelte";
+
 export interface TranslationKeys {
     system:{
         addedSuccessfully: string;
@@ -17,6 +19,10 @@ export interface TranslationKeys {
         describeProblem: string;
         success: string;
         dbError: string;
+        newQuestion: string;
+        newAnswer: string;
+        newMessage: string;
+        noData: string;
     };
 
     validation: {
@@ -77,6 +83,7 @@ export interface TranslationKeys {
         title: string;
         name: string;
         online: string;
+        offline: string;
         hello: string;
         welcome: string;
         roles: string;
@@ -88,6 +95,9 @@ export interface TranslationKeys {
         selectContact: string;
         typeMessage: string;
         noMessages: string;
+        closed: string;
+        newMessageFrom: string;
+        messageInChat: string;
     };
 
     authorization: {
@@ -195,6 +205,10 @@ export interface TranslationKeys {
         roomsByAsc: string;
         floorsByDesc: string;
         floorsByAsc: string;
+        popularByDesc: string;
+        popularByAsc: string;
+        newest: string;
+        oldest: string;
         rent: string;
         lease: string;
         sale: string;
@@ -205,6 +219,9 @@ export interface TranslationKeys {
         warehouse: string;
         land: string;
         room: string;
+        close: string;
+        closeError: string;
+        closeSuccess: string;
     };
 
     reports: {
@@ -243,6 +260,8 @@ export interface TranslationKeys {
         topRealtor: string;
         earned: string;
         topClient: string;
+        views: string;
+        open: string;
     },
 
     personal: {
@@ -274,6 +293,8 @@ export interface TranslationKeys {
         spent: string;
         change: string;
         image: string;
+        favoriteCategory: string;
+        complaints: string;
     }
 }
 
@@ -298,7 +319,11 @@ export const translations: Record<Language, TranslationKeys> = {
             errorConnection: "Перевірте підключення до інтернету",
             describeProblem: "Опишіть проблему, будь ласка",
             success: "Успіх",
-            dbError: "Помилка бази даних"
+            dbError: "Помилка бази даних",
+            newAnswer: "Нова відповідь",
+            newMessage: "Нове повідомлення",
+            newQuestion: "Нове питання",
+            noData: "Немає даних"
         },
         validation: {
             selectImage: 'Оберіть зображення, будь ласка',
@@ -354,6 +379,7 @@ export const translations: Record<Language, TranslationKeys> = {
         authorized: {
             title: "Агенство керування нерухомістю",
             online: "У мережі",
+            offline: "Офлайн",
             hello: "Привіт",
             welcome: "Ласкаво просимо до агенства керування нерухомістю",
             roles: "Ролі",
@@ -364,7 +390,10 @@ export const translations: Record<Language, TranslationKeys> = {
             messages: 'Повідомлення',
             selectContact: 'Оберіть контакт зі списку для початку діалогу.',
             typeMessage: 'Ваше повідомлення...',
-            noMessages: 'Ще немає повідомлень. Почніть розмову!'
+            noMessages: 'Ще немає повідомлень. Почніть розмову!',
+            closed: 'ЗАЧИНЕНО',
+            newMessageFrom: 'Нове повідомлення від',
+            messageInChat: 'Повідомлення у чаті'
         },
         authorization: {
             realEstate: 'Агенство керування нерухомістю',
@@ -383,7 +412,7 @@ export const translations: Record<Language, TranslationKeys> = {
             loginConfirmBtn: "Авторизуватися",
             registerConfirmBtn: "Зареєструватися",
             loginError: "Помилка авторизації",
-            checkFields: "Перевірте поля та спробуйте знов, юудь ласка",
+            checkFields: "Перевірте поля та спробуйте знов, будь ласка",
             chooseImage: 'Оберіть фотографію',
             loginAlreadyExist: "Логін вже існує"
         },
@@ -471,6 +500,10 @@ export const translations: Record<Language, TranslationKeys> = {
             roomsByAsc: 'Кімнати за зростанням',
             floorsByDesc: 'Поверхи за спаданням',
             floorsByAsc: 'Поверхи за зростанням',
+            popularByDesc: 'Популярні',
+            popularByAsc: 'Непопулярні',
+            newest: 'Нові',
+            oldest: 'Старі',
             rent: 'Оренда',
             lease: 'Лізинг',
             sale: 'Продаж',
@@ -481,6 +514,9 @@ export const translations: Record<Language, TranslationKeys> = {
             warehouse: 'Склади',
             land: 'Землі',
             room: 'Кімнати',
+            close: 'Закрити',
+            closeError: "Помилка закриття оголошення",
+            closeSuccess: "Оголошення закрито успішно"
         },
         reports: {
             searchFilters: 'Фільтри пошуку',
@@ -517,7 +553,9 @@ export const translations: Record<Language, TranslationKeys> = {
             sold: 'Продано',
             topRealtor: 'Топ рієтор',
             earned: 'Зароблено',
-            topClient: 'Топ клієнт'
+            topClient: 'Топ клієнт',
+            views: "Переглядів",
+            open: "Відкрити"
         },
         personal: {
             profile: "Профіль",
@@ -547,7 +585,9 @@ export const translations: Record<Language, TranslationKeys> = {
             earned: "Зароблено",
             spent: "Витрачено",
             change: "Змінити",
-            image: 'Фото'
+            image: 'Фото',
+            favoriteCategory: 'Улюблена категорія',
+            complaints: 'Скарги'
         }
     },
     EN: {
@@ -568,7 +608,11 @@ export const translations: Record<Language, TranslationKeys> = {
             errorConnection: "Check your internet connection",
             describeProblem: "Please, describe the problem",
             success: "Success",
-            dbError: "Database error"
+            dbError: "Database error",
+            newAnswer: "New answer",
+            newMessage: "New message",
+            newQuestion: "New question",
+            noData: "No data"
         },
         validation: {
             selectImage: 'Please select an image',
@@ -624,6 +668,7 @@ export const translations: Record<Language, TranslationKeys> = {
         authorized: {
             title: "Real Estate Agency",
             online: "Online",
+            offline: "Offline",
             hello: "Hello",
             welcome: "Welcome to the Real Estate Agency",
             roles: "Roles",
@@ -634,7 +679,10 @@ export const translations: Record<Language, TranslationKeys> = {
             messages: 'Messages',
             selectContact: 'Select a contact from the list to start chatting with a realtor.',
             typeMessage: 'Type your message...',
-            noMessages: 'No messages yet. Start a conversation!'
+            noMessages: 'No messages yet. Start a conversation!',
+            closed: 'CLOSED',
+            newMessageFrom: 'New message from',
+            messageInChat: 'Message in chat'
         },
         authorization: {
             realEstate: 'Real Estate Agency',
@@ -741,6 +789,10 @@ export const translations: Record<Language, TranslationKeys> = {
             roomsByAsc: 'Rooms by asc',
             floorsByDesc: 'Floors by desc',
             floorsByAsc: 'Floors by asc',
+            popularByDesc: 'Popular',
+            popularByAsc: 'Unpopular',
+            newest: 'New',
+            oldest: 'Old',
             rent: 'For rent',
             lease: 'For lease',
             sale: 'For sale',
@@ -751,6 +803,9 @@ export const translations: Record<Language, TranslationKeys> = {
             warehouse: 'Warehouse',
             land: 'Lands',
             room: 'Rooms',
+            close: 'Close',
+            closeError: "Announcement closing error",
+            closeSuccess: "Announcement closed successfully"
         },
 
         reports: {
@@ -788,7 +843,9 @@ export const translations: Record<Language, TranslationKeys> = {
             sold: 'Sold',
             topRealtor: 'Top realtor',
             earned: 'Earned',
-            topClient: 'Top client'
+            topClient: 'Top client',
+            views: "Views",
+            open: "Open"
         },
         personal: {
             profile: "Profile",
@@ -818,7 +875,33 @@ export const translations: Record<Language, TranslationKeys> = {
             earned: "Earned",
             spent: "Spent",
             change: "Change",
-            image: 'Photo'
+            image: 'Photo',
+            favoriteCategory: 'Favorite category',
+            complaints: 'Complaints'
         }
     }
 };
+
+    export const translateStatementType = (type: string): string => {
+        const translation: Record<string, string> = {
+            'For Rent': translations[settings.lang].offers.rent,
+            'For Sale': translations[settings.lang].offers.sale,
+            'For Lease': translations[settings.lang].offers.lease
+        };
+
+        return translation[type] ?? type;
+    };
+
+    export const translatePropertyType = (type: string): string => {
+        const translation: Record<string, string> = {
+            'Apartment': translations[settings.lang].offers.apartment,
+            'House': translations[settings.lang].offers.house,
+            'Commercial': translations[settings.lang].offers.commercial,
+            'Office': translations[settings.lang].offers.office,
+            'Warehouse': translations[settings.lang].offers.warehouse,
+            'Land': translations[settings.lang].offers.land,
+            'Room': translations[settings.lang].offers.room,
+        };
+
+        return translation[type] ?? type;
+    };

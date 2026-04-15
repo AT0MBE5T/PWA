@@ -7,4 +7,5 @@ export interface UserDto {
     phoneNumber: string;
     login: string;
     avatarUrl: string;
+    roles: string[];
 }

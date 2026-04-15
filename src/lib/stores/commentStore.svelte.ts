@@ -2,6 +2,7 @@ import type { CommentInterface } from "$lib/interfaces/CommentInterface";
 import * as signalR from "@microsoft/signalr";
 import { offerFullStore } from "./OfferFullStore.svelte";
 import { env } from "$env/dynamic/public";
+import { settings } from "./settings.svelte";
 
 const commentState = createCommentState();
 export default commentState;
@@ -66,7 +67,7 @@ async function initSignalR(chatId: string, userName: string) {
         if (newConnection !== connection) return;
         
         try {
-            await newConnection.invoke("JoinCommentsChat", {
+            await newConnection.invoke("JoinChatGeneral", {
                 ChatRoom: chatId,
                 UserName: userName
             });
@@ -98,7 +99,7 @@ async function initSignalR(chatId: string, userName: string) {
         if (newConnection.state !== signalR.HubConnectionState.Connected) return;
         connection = newConnection;
 
-        await connection.invoke("JoinCommentsChat", { 
+        await connection.invoke("JoinChatGeneral", { 
             ChatRoom: chatId, 
             UserName: userName
         });
@@ -150,7 +151,9 @@ async function initSignalR(chatId: string, userName: string) {
                 offerFullStore.setComments(currentId, initialComments);
                 commentState.setComments(initialComments);
             }
+            settings.online = true;
         } catch (e) {
+            settings.online = false;
             await offerFullStore.loadComments(currentId);
             const pendingComments = await offerFullStore.getPendingComments();
             let arrToAdd = offerFullStore.comments[currentId].concat(pendingComments);

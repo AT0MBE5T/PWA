@@ -2,7 +2,7 @@
     import { goto } from '$app/navigation';
     import { settings, translations } from '$lib';
 
-    let { children } = $props();
+    let { children, data } = $props();
 
     type Pages = 'Profile' | 'Stats' | 'Announcements' | 'Complaints';
 
@@ -14,6 +14,8 @@
     };
 
     let currentPage = $state<Pages>('Profile');
+
+    let currentUserId = $derived<string | undefined | null>(data.userUrl);
 
     let navElement = $state<HTMLElement>();
 
@@ -52,28 +54,28 @@ const t = $derived(translations[settings.lang]);
                         <!-- svelte-ignore a11y_invalid_attribute -->
                         <a href="#" class={currentPage === 'Profile' ? 'highlighted_page' : ''} onclick={() => {
                             pageClicked('Profile');
-                            goto('/personal/profile');
+                            goto(`/reports/${currentUserId}/profile`);
                             }}>🧑 {t.personal.profile}</a>
                     </li>
                     <li class='header__nav__list__item'>
                         <!-- svelte-ignore a11y_invalid_attribute -->
                         <a href="#" class={currentPage === 'Stats' ? 'highlighted_page' : ''} onclick={() => {
                             pageClicked('Stats');
-                            goto('/personal/stats');
+                            goto(`/reports/${currentUserId}/stats`);
                         }}>📊 {t.personal.stats}</a>
                     </li>
                     <li class='header__nav__list__item'>
                         <!-- svelte-ignore a11y_invalid_attribute -->
                         <a href="#" class={currentPage === 'Announcements' ? 'highlighted_page' : ''} onclick={() => {
                             pageClicked('Announcements');
-                            goto('/personal/announcements?tab=Favorite&page=1');
+                            goto(`/reports/${currentUserId}/announcements?tab=Favorite&page=1`);
                             }}>📢 {t.personal.announcements}</a>
                     </li>
                     <li class='header__nav__list__item'>
                         <!-- svelte-ignore a11y_invalid_attribute -->
                         <a href="#" class={currentPage === 'Complaints' ? 'highlighted_page' : ''} onclick={() => {
                             pageClicked('Complaints');
-                            goto('/personal/complaints');
+                            goto(`/reports/${currentUserId}/complaints`);
                             }}>💢 {t.personal.complaints}</a>
                     </li>
                 </ul>

@@ -7,6 +7,7 @@
         UserReportRequest
     } from '$lib';
     import { env } from '$env/dynamic/public';
+    import { translatePropertyType } from '$lib/i18n';
 
     let { callBack, data }: { callBack: (status: number) => void, data: ReportFilterParams } = $props();
 
@@ -38,7 +39,9 @@
             }
 
             userStats = await response.json() as UserStatsModel;
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
         }        
     };
@@ -70,6 +73,14 @@
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numAnnouncementPlaced}</h3>
                     <p class="info-value">{userStats?.placedCnt}</p>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">👁️</div>
+                <div class="info-content">
+                    <h3 class="info-title">{t.reports.views}</h3>
+                    <p class="info-value">{userStats?.views}</p>
                 </div>
             </div>
 
@@ -124,6 +135,13 @@
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numComments}</h3>
                     <p class="info-value">{userStats?.commentsCnt}</p>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">💬</div>
+                <div class="info-content">
+                    <h3 class="info-title">{t.personal.favoriteCategory}</h3>
+                    <p class="info-value">{translatePropertyType(userStats?.favoriteCategory ?? '')}</p>
                 </div>
             </div>
             <div class="info-card info-card__wide">
@@ -393,7 +411,7 @@
             grid-template-columns: 1fr;
         }
 
-        .user-info > :last-child {
+        .info-card__wide {
             grid-column: span 1;
             justify-content: start;
         }

@@ -181,7 +181,10 @@
                 switchModal(true);
             }
 
+            settings.online = true;
+
         } catch (error) {
+            settings.online = false;
             longText = t.authorization.loginAlreadyExist
             switchModal(true);
         }

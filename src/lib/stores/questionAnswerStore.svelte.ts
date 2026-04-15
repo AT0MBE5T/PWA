@@ -3,6 +3,8 @@ import * as signalR from "@microsoft/signalr";
 import { offerFullStore } from "./OfferFullStore.svelte";
 import offerState from "./offerStore.svelte";
 import { env } from "$env/dynamic/public";
+import { translations } from "$lib/i18n";
+import { settings } from "./settings.svelte";
 
 const questionAnswerState = createQuestionAnswerState();
 export default questionAnswerState;
@@ -13,6 +15,7 @@ function createQuestionAnswerState() {
     let currentChatId = $state<string | null>(null);
     let isConnecting = false;
     let isSyncing = false;
+    const t = $derived(translations[settings.lang]);
 
 async function setup(currentId: string) {
     try {
@@ -27,7 +30,9 @@ async function setup(currentId: string) {
             offerState.setQuestions(initialQuestions);
             questionAnswerState.setData(initialQuestions);
         }
+        settings.online = true;
     } catch {
+        settings.online = false;
         await offerFullStore.loadQuestions(currentId);
         const pendingQuestions = await offerFullStore.getPendingQuestions();
         let arrToAdd = offerFullStore.questions[currentId].concat(pendingQuestions);
@@ -138,7 +143,7 @@ async function initSignalR(chatId: string, userName: string) {
     isSyncing = true;
 
     try {
-        await newConnection.invoke("JoinQuestionAnswerChat", {
+        await newConnection.invoke("JoinChatGeneral", {
             ChatRoom: chatId,
             UserName: userName
         });
@@ -170,7 +175,7 @@ async function initSignalR(chatId: string, userName: string) {
         connection = newConnection;
         await newConnection.start();
 
-        await connection.invoke("JoinQuestionAnswerChat", { 
+        await connection.invoke("JoinChatGeneral", { 
             ChatRoom: chatId, 
             UserName: userName
         });

@@ -4,8 +4,8 @@
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
     import { format } from 'date-fns';
-    import { onMount, untrack } from 'svelte';
-    const { data, children } = $props();
+    import { onMount } from 'svelte';
+    const { children } = $props();
 
     let allChats = $derived(chatState.chats);
 
@@ -22,19 +22,10 @@
 
     $effect(() => {
         const chats = chatOfflineState.chats[$auth.id!];
-
-        untrack(() => {
-            if (chats) {
-                chatState.setChats(chats);
-                chatState.initSignalR($auth.id!, data.user!.name!);
-            }
-        });
-
-        return () => {
-            untrack(() => {
-                chatState.stopSignalR();
-            });
-        };
+        if (chats) {
+            chatState.setChats(chats);
+            chatState.initSignalR($auth.id!, `${$auth.name} ${$auth.personSurname}`);
+        }
     });
 
     const t = $derived(translations[settings.lang]);
@@ -53,9 +44,9 @@
                     class:active={page.params.id === chat.chatId}
                 >
                     <div class="avatar-wrapper">
-                        {#if $auth.avatarUrl}
+                        {#if chat.avatarUrl}
                             <img 
-                                src={$auth.avatarUrl} 
+                                src={chat.avatarUrl} 
                                 alt="User Avatar" 
                                 class="avatar-img" 
                             />
@@ -65,8 +56,8 @@
                     </div>
                     <div class="contact-info">
                         <span class="contact-name">{chat.chatName}</span>
-                        <span class="contact-role">{chat.lastMessage}</span>
-                        <span class="contact-role">{chat.lastMessageAt === null ? '' : format(new Date(chat.lastMessageAt), format(chat.lastMessageAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm')}</span>
+                        <span class="contact-role">{chat.closedAt !== null ? `[${t.chats.closed}]` : chat.lastMessage}</span>
+                        <span class="contact-role">{chat.closedAt !== null ? format(new Date(chat.closedAt), format(chat.closedAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm') : (chat.lastMessageAt === null ? '' : format(new Date(chat.lastMessageAt), format(chat.lastMessageAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm'))}</span>
                     </div>
                 </a>
             {/each}

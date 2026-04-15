@@ -28,7 +28,9 @@
             }
 
             propertyTypes = await response.json() as PropertyTypeInterface[];
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
         }
     };

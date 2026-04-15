@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/public';
-import type { AnnouncementFull } from '$lib';
+import { settings, type AnnouncementFull } from '$lib';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ params, locals, fetch }) => {
@@ -15,8 +15,10 @@ export const load: LayoutServerLoad = async ({ params, locals, fetch }) => {
       const offer = await getAnnouncementFullInfoById(id, userId, fetch);
 
       authorId = offer?.authorId ?? '';
-  }catch(error){
+      settings.online = offer !== undefined;
 
+  }catch(error){
+      settings.online = false;
   }
   finally{
       return {

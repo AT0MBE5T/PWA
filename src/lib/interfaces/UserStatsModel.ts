@@ -9,4 +9,6 @@ export interface UserStatsModel {
     commentsCnt: number;
     totalMoneyEarned: number;
     totalMoneySpent: number;
+    views: number;
+    favoriteCategory: string;
 }

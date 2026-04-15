@@ -5,4 +5,7 @@ export interface Chat {
     lastMessageAt: string | null;
     unreadCount: string;
     avatarUrl: string;
+    closedAt: string | null;
+    offerId: string | null;
+    realtorId: string | null;
 }

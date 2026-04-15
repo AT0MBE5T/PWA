@@ -89,8 +89,10 @@
             }));
 
             applyDataToForm(data);
+            settings.online = true;
 
         } catch (error) {   
+            settings.online = false;
             const offlineData = offerFullStore.offerDetails[announcementId];
 
             if (offlineData) {
@@ -154,7 +156,9 @@
             }
 
             propertyTypes = await response.json() as LookupItem[];
+            settings.online = true;
         }catch{
+            settings.online = false;
             propertyTypes = await offerFullStore.getPropertyTypes();
         }
     };
@@ -173,7 +177,9 @@
             }
 
             statementTypes = await response.json() as LookupItem[];
+            settings.online = true;
         }catch{
+            settings.online = false;
             statementTypes = await offerFullStore.getStatementTypes();
         }
     };
@@ -454,7 +460,9 @@
                 }
 
                 goto('/offers');
+                settings.online = true;
             }catch{
+                settings.online = false;
                 const dataToAdd: AnnouncementAddModel = {
                     propertyTypeId: propertyTypeId,
                     statementTypeId: statementTypeId,
@@ -541,7 +549,9 @@
                     showToast = true;
                 }
                 goto('/offers');
+                settings.online = true;
             }catch{
+                settings.online = false;
                 const dataToUpdate: AnnouncementUpdateModel = {
                     propertyTypeId: propertyTypeId,
                     statementTypeId: statementTypeId,

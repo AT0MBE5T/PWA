@@ -9,6 +9,7 @@ import type { AnnouncementAddModel } from "$lib/interfaces/AnnouncementAddModel"
 import getCookie from "$lib/utils/cookieData";
 import type { AnnouncementUpdateModel } from "$lib/interfaces/AnnouncementUpdateModel";
 import { env } from "$env/dynamic/public";
+import { settings } from "./settings.svelte";
 
 const offerState = createOfferState();
 export default offerState;
@@ -72,7 +73,7 @@ async function initSignalR(chatId: string, userName: string) {
         if (newConnection !== connection) return;
 
         try {
-            await newConnection.invoke("JoinOffersChat", {
+            await newConnection.invoke("JoinChatGeneral", {
                 ChatRoom: chatId,
                 UserName: userName
             });
@@ -120,7 +121,9 @@ async function initSignalR(chatId: string, userName: string) {
                         offers[index].isPending = false;
                     }
                 }
+                settings.online = true;
             } catch (e) {
+                settings.online = false;
                 console.error("Failed to sync update for offer", offer.id, e);
             }
         }
@@ -138,7 +141,7 @@ async function initSignalR(chatId: string, userName: string) {
 
         connection = newConnection;
 
-        await connection.invoke("JoinOffersChat", { 
+        await connection.invoke("JoinChatGeneral", { 
             ChatRoom: chatId, 
             UserName: userName
         });
@@ -239,7 +242,9 @@ async function initSignalR(chatId: string, userName: string) {
         }
 
         offers = offers.filter(x => !x.isPending);
+        settings.online = true;
     } catch (err) {
+        settings.online = false;
         console.error("SignalR Error:", err);
     }
 }
@@ -285,7 +290,8 @@ async function stopSignalR() {
                 propertyTypeName: (await offerFullStore.getPropertyTypes()).filter(x => x.id === data.propertyTypeId).at(0)?.name ?? '',
                 statementTypeName: (await offerFullStore.getStatementTypes()).filter(x => x.id === data.statementTypeId).at(0)?.name ?? '',
                 title: data.title,
-                viewsCnt: 0
+                viewsCnt: 0,
+                closedAt: null
             }
             offers = [...offers, short];
             offerFullStore.addNewShortOffer(short);
@@ -324,7 +330,8 @@ async function stopSignalR() {
                 createdAt: new Date().toISOString(),
                 description: data.description,
                 floors: Number(data.floors),
-                rooms: Number(data.rooms)
+                rooms: Number(data.rooms),
+                closedAt: null
             }
             offerDetails = [...offerDetails, full];
             offerFullStore.addNewFullOffer(full);

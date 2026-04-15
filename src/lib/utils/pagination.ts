@@ -4,7 +4,7 @@ export function getItemsPerPage(): number {
     const width = window.innerWidth;
 
     if (width >= 1100 && width <= 1375) {
-        return 9; 
+        return 6; 
     } else if (width > 1375) {
         return 8;
     } else if (width > 768 && width <= 1024) {

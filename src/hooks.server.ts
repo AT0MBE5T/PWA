@@ -1,6 +1,6 @@
 import { env } from "$env/dynamic/public";
 import type { UserDto } from "$lib";
-import { auth, type JwtPayload } from "$lib";
+import { auth, settings, type JwtPayload } from "$lib";
 import { Roles } from "$lib";
 import { redirect, type Handle } from "@sveltejs/kit";
 import { jwtDecode } from "jwt-decode";
@@ -21,7 +21,9 @@ export const handle: Handle = async ({ event, resolve }) => {
                     token = undefined;
                 }
             }
+            settings.online = true;
         } catch {
+            settings.online = false;
             token = undefined;
         }
     }
@@ -76,15 +78,16 @@ async function tryServerRefresh(svelteFetch: typeof fetch) {
         });
         if (!response.ok) return null;
         const data = await response.json();
+        settings.online = true;
         return data.token as string;
     }catch{
-
+        settings.online = false;
     }
 }
 
 const getUserDto = async (token: string): Promise<UserDto | null> => {
     try{
-        const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-user-dto-by-id`, {
+        const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-user-dto`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -93,9 +96,10 @@ const getUserDto = async (token: string): Promise<UserDto | null> => {
             });
 
         const userData = response.ok ? await response.json() as UserDto : null;
+        settings.online = true;
         return userData;
     }catch(error){
-
+        settings.online = false;
     }
     return null;
 }

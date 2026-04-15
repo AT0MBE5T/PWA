@@ -26,7 +26,9 @@
             }
 
             generalStats = await response.json() as GeneralStats;
+            settings.online = true;
         }catch{
+            settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
         }
     };
@@ -50,6 +52,10 @@
                 <div class="report__container__item">
                     <h3>💰 {t.reports.totalProfit}</h3>
                     <div style="font-size: 2rem; font-weight: bold; color: #2196F3; margin-top: 10px;">{generalStats.totalIncome}</div>
+                </div>
+                <div class="report__container__item">
+                    <h3>👁️ {t.reports.views}</h3>
+                    <div style="font-size: 2rem; font-weight: bold; color: #2196F3; margin-top: 10px;">{generalStats.views}</div>
                 </div>
             </div>
         </div>
@@ -139,7 +145,7 @@
 
     .report__container__summary {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         gap: 20px;
         margin-bottom: 20px;
     }

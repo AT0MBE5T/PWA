@@ -5,9 +5,11 @@
     import { browser } from '$app/environment';
     import { settings } from '$lib';
     import '../app.css';
-    import { onMount } from 'svelte';
+    import { onMount, untrack } from 'svelte';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
     import { env } from '$env/dynamic/public';
+    import chatState from '$lib/stores/chatStore.svelte';
+    import { online } from 'svelte/reactivity/window';
 
     let { data, children } = $props();
 
@@ -44,6 +46,10 @@
     };
 
     onMount(async () => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/src/service-worker.js');
+        }
+
         if (browser) {
             const { registerSW } = await import('virtual:pwa-register');
             registerSW({ 
@@ -61,127 +67,110 @@
             return;
 
         try{
-            const sold = await getSold(1);
-            const bought = await getBought(1);
-            const favorite = await getFavorites(1);
-            const placed = await getPlaced(1);
-            const userDto = await getUserDto();
-            const userStats = await getUserStats();
-
-            personalStore.setBought($auth.id!, bought?.data ?? []);
-            personalStore.setPlaced($auth.id!, placed?.data ?? []);
-            personalStore.setFavorite($auth.id!, favorite?.data ?? []);
-            personalStore.setSold($auth.id!, sold?.data ?? []);
-            personalStore.setUserDto(userDto!, $auth.id!);
-            personalStore.setUserStatsModel(userStats!, $auth.id!);
+            // personalStore.loadBought($auth.id!, 1);
+            // personalStore.loadPlaced($auth.id!, 1);
+            // personalStore.loadSold($auth.id!, 1);
+            // personalStore.loadFavorite($auth.id!, 1);
+            personalStore.loadUserDto($auth.id!);
+            personalStore.loadUserStatsDto($auth.id!);
         }catch(error){
 
         }
     });
 
-    const getUserDto = async () => {
+    async function requestNotificationPermission() {
+        if (!("Notification" in window)) {
+            console.error("Этот браузер не поддерживает уведомления.");
+            return;
+        }
+
+        if (Notification.permission === "granted") {
+            return "granted";
+        }
+
+        if (Notification.permission !== "denied") {
+            const permission = await Notification.requestPermission();
+            
+            // if (permission === "granted") {
+            //     new Notification("Ура!", { body: "Теперь вы будете получать уведомления." });
+            // }
+
+            return permission;
+        }
+    }
+
+    async function subscribeUserToPush() {
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-user-dto-by-id`, {
-                method: 'GET',
+            const registration = await navigator.serviceWorker.ready;
+            const publicVapidKey = 'BJ7rzkreRWZMQ4U9ku_OWVOW6F8SCJbYM7FC4Cf8DDmWugL5E-iSgX9j4bVu-wuzKPxS8FZ5khHu4BirrRtbTaw';
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: publicVapidKey
+            });
+
+            await fetch(`${env.PUBLIC_API_URL}/api/Notifications/subscribe`, {
+                method: 'POST',
+                body: JSON.stringify(subscription),
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${$auth.accessToken}`,
-                    'Content-Type': 'application/json'
                 }
             });
-            const userData = response.ok ? await response.json() as UserDto : null;
-            return userData;
+            settings.online = true;
         }catch{
-
+            settings.online = false;
         }
-    };
+    }
 
-    const getUserStats = async () => {
-        try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-stats-by-user-id`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${$auth.accessToken}`,
-                    'Content-Type': 'application/json'
-                }
+    $effect(() => {
+        untrack(() => {
+            requestNotificationPermission();
+            subscribeUserToPush();
+            //chatState.initSignalR($auth.id!, $auth.name!);
+        });
+
+        return () => {
+            untrack(() => {
+                //chatState.stopSignalR();
             });
-            const userData = response.ok ? await response.json() as UserStatsModel : null;
-            return userData;
-        }catch{
+        };
+    });
 
-        }
-    };
+    let isOnline = $derived(settings.online);
 
-    const getSold = async (
-        page: number
-    ): Promise<AnnouncementsResponse | null> => {
-        try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-sold-by-user-id/${page}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${$auth.accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) return null;
-            return await response.json() as AnnouncementsResponse;
-        }catch{
-            return null;
+        const onlineCheck = async () => {
+            const result = await settings.checkServer();
+            settings.online = result;
         }
-    };
 
-    const getFavorites = async (
-        page: number
-    ): Promise<AnnouncementsResponse | null> => {
-        try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Favorite/get-favorites-by-user-id/${page}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${$auth.accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) return null;
-            return await response.json() as AnnouncementsResponse;
-        }catch{
-            return null;
-        }
-    };
+        const goOffline = () => settings.online = false;
 
-    const getPlaced = async (
-        page: number
-    ): Promise<AnnouncementsResponse | null> => {
-        try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-placed-by-user-id/${page}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${$auth.accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) return null;
-            return await response.json() as AnnouncementsResponse;
-        }catch{
-            return null;
-        }
-    };
+        onMount(async () => {
+            const result = await settings.checkServer();
+            settings.online = result && navigator.onLine;
+        });
 
-    const getBought = async (
-        page: number
-    ): Promise<AnnouncementsResponse | null> => {
-        try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-bought-by-user-id/${page}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${$auth.accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) return null;
-            return await response.json() as AnnouncementsResponse;
-        }catch{
-            return null;
-        }
-    };
+    onMount(() => {
+        window.addEventListener('online', onlineCheck);
+        window.addEventListener('offline', goOffline);
+
+        return () => {
+            window.removeEventListener('online', onlineCheck);
+            window.removeEventListener('offline', goOffline);
+        };
+    });
+
+    async function handleCheck() {
+        if (settings.isLoading) return;
+        
+        settings.isLoading = true;
+        await settings.checkServer();
+        settings.isLoading = false;
+    }
+
+    // setInterval(async() => {
+    //     await settings.checkServer();
+    // }, 30000);
 
     const t = $derived(translations[settings.lang]);
 
@@ -217,7 +206,7 @@
                             </button>
                         </li>
                         <li class="header__nav__list__item">
-                            <button class={$page.route.id?.startsWith('/offers') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/offers'); }}>
+                            <button class={$page.route.id?.startsWith('/offers') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/offers?page=1'); }}>
                                 📋 {t.header.page_offers}
                             </button>
                         </li>
@@ -253,6 +242,14 @@
                     </ul>
 
                     <div class="header__controls">
+                        <button 
+                            class="status-badge {settings.online ? 'authenticated' : 'not-authenticated'}" 
+                            onclick={handleCheck}
+                            disabled={settings.isLoading}
+                        >
+                            <span class="status-dot {settings.online ? 'pulse' : ''} {settings.online ? '' : 'status-dot-offline'}"></span>
+                            {settings.online ? t.authorized.online : t.authorized.offline}
+                        </button>
                         <button class="control-btn" onclick={() => settings.toggleLang()} title="{ t.system.changeLang }">
                             🌐 {settings.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}
                         </button>
@@ -322,6 +319,87 @@
         margin-bottom: 1rem;
     }
 
+.status-badge {
+    /* Сброс дефолтных стилей кнопки */
+    appearance: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease; /* Плавность при наведении */
+}
+
+/* Эффект при нажатии */
+.status-badge:active {
+    transform: scale(0.95);
+}
+
+/* Состояние загрузки */
+.status-badge:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Online */
+.status-badge.authenticated {
+    background: rgba(34, 197, 94, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+            font-size: 1.1rem;
+        font-weight: 500;
+        font-family: inherit;
+}
+
+/* Offline - Исправил фон на красный */
+.status-badge.not-authenticated {
+    background: rgba(239, 68, 68, 0.1); 
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+            font-size: 1.1rem;
+        font-weight: 500;
+        font-family: inherit;
+}
+
+.status-dot, .status-dot-offline {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-dot { background: #22c55e; }
+.status-dot-offline { background: #ef4444; }
+
+/* Анимация пульсации */
+.pulse {
+    animation: pulse-animation 2s infinite;
+}
+
+@keyframes pulse-animation {
+    0% { box-shadow: 0 0 0 0px rgba(34, 197, 94, 0.4); }
+    100% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+}
+
+/* Темная тема */
+:global([data-theme="dark"]) .status-badge.authenticated {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.3);
+}
+
+:global([data-theme="dark"]) .status-badge.not-authenticated {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
     .loading-text {
         color: #fff;
         font-size: 1.2rem;
@@ -380,7 +458,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        max-width: 1200px;
+        max-width: 86rem;
         margin: 0 auto;
     }
 

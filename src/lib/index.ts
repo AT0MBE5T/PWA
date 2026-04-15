@@ -39,6 +39,7 @@ export type * from './interfaces/ValidationErrors.ts';
 export type * from './interfaces/AnnouncementAddModel.ts';
 export type * from './interfaces/AnnouncementUpdateModel.ts';
 export type * from './interfaces/LookupItemFilter.ts';
+export type * from './interfaces/ComplaintGrid.ts';
 
 // modals
 export { default as ConfirmModal } from './modals/ConfirmModal.svelte';
@@ -73,5 +74,6 @@ export { translations } from '$lib/i18n';
 export { settings } from '$lib/stores/settings.svelte';
 
 // utils
-export { getItemsPerPage } from '$lib/utils/pagination'
-export * from '$lib/utils/cookieData'
+export { getItemsPerPage } from '$lib/utils/pagination';
+export { getItemsProfilePerPage } from '$lib/utils/paginationProfile';
+export * from '$lib/utils/cookieData';

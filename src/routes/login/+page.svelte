@@ -16,7 +16,7 @@
     let passwordErrorText = $derived<string>(passwordError ? t.validation.passwordError : '');
 
     const validation = (): boolean => {
-        if(loginInput.length < 4){
+        if(loginInput.length < 3){
             loginError = true;
             return false;
         }
@@ -74,8 +74,9 @@
                     toastError();
                     break;
             }
-
+            settings.online = true;
         } catch (error) {
+            settings.online = false;
             longText = t.system.dbError;
             switchModal(true);
         }
