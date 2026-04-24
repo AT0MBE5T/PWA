@@ -211,9 +211,7 @@ async function initSignalR(chatId: string, userName: string) {
         const isIgnored = ignoredErrors.some(msg => errorMessage.includes(msg));
 
         if (!isIgnored) {
-            console.error("SignalR Critical Error:", err);
-        } else {
-            console.warn("SignalR: Connection closed during initialization (expected on nav).");
+            console.error("[App] SignalR Critical Error:", err);
         }
     }
     finally{

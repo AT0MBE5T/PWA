@@ -100,7 +100,7 @@ function createChatState() {
 
                 messages = messages.filter(x => !x.isPending);
             } catch (e) {
-                console.error("Sync error:", e);
+                console.error("[App] Sync error:", e);
             }
         });
 

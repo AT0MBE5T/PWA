@@ -168,7 +168,7 @@ class OfferState {
             }
             settings.online = true;
         } catch (e) {
-            console.error(`Failed to background sync for ${id}`, e);
+            console.error(`[App] Failed to background sync for ${id}`, e);
             settings.online = false;
         }
     }

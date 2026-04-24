@@ -124,13 +124,13 @@ async function initSignalR(chatId: string, userName: string) {
                 settings.online = true;
             } catch (e) {
                 settings.online = false;
-                console.error("Failed to sync update for offer", offer.id, e);
+                console.error("[App] Failed to sync update for offer", offer.id, e);
             }
         }
 
         offers = offers.filter(x => !x.isPending);
         } catch (e) {
-            console.error("Sync error:", e);
+            console.error("[App] Sync error:", e);
         }
     });
 
@@ -244,7 +244,7 @@ async function initSignalR(chatId: string, userName: string) {
         settings.online = true;
     } catch (err) {
         settings.online = false;
-        console.error("SignalR Error:", err);
+        console.error("[App] SignalR Error:", err);
     }
 }
 

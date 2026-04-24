@@ -3,6 +3,7 @@
     import { env } from '$env/dynamic/public';
     import { Modal, auth, settings, toast, translations } from '$lib';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
+    import { onMount } from 'svelte';
 
     const t = $derived(translations[settings.lang]);
 

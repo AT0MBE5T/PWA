@@ -104,20 +104,20 @@ const t = $derived(translations[settings.lang]);
             </div>
         {/each}
     </div>
-    <div class="comments__block__leave_comment__block">
-        <div class="comments__block__comment">
-            <textarea
-                    placeholder={t.offers.leaveComment}
-                    bind:value={commentText}
-                    onkeydown={handleKeydown}>
-            </textarea>
-        </div>
-        {#if $auth.isAuthenticated}
+    {#if $auth.isAuthenticated}
+        <div class="comments__block__leave_comment__block">
+            <div class="comments__block__comment">
+                <textarea
+                        placeholder={t.offers.leaveComment}
+                        bind:value={commentText}
+                        onkeydown={handleKeydown}>
+                </textarea>
+            </div>
             <div class="comment__block__confirm">
                 <button onclick={addComment}>{t.offers.leaveComment}</button>
             </div>
-        {/if}
-    </div>
+        </div>
+    {/if}
 </div>
 
 <style>

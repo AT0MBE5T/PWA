@@ -49,10 +49,10 @@
             registerSW({ 
                 immediate: true,
                 onRegistered(r) {
-                    console.log('SW Registered:', r);
+                    
                 },
                 onRegisterError(error) {
-                    console.error('SW registration error', error);
+                    console.error('[App] SW registration error', error);
                 }
             });
         }
@@ -70,7 +70,7 @@
 
     async function requestNotificationPermission() {
         if (!("Notification" in window)) {
-            console.error("Этот браузер не поддерживает уведомления.");
+            console.error("[App] This browser doesn't support notifications");
             return;
         }
 
@@ -87,7 +87,7 @@
     async function subscribeUserToPush() {
         try{
             const registration = await navigator.serviceWorker.ready;
-            const publicVapidKey = 'BJ7rzkreRWZMQ4U9ku_OWVOW6F8SCJbYM7FC4Cf8DDmWugL5E-iSgX9j4bVu-wuzKPxS8FZ5khHu4BirrRtbTaw';
+            const publicVapidKey = env.PUBLIC_VAPID_KEY;
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: publicVapidKey
@@ -110,7 +110,8 @@
     $effect(() => {
         untrack(() => {
             requestNotificationPermission();
-            subscribeUserToPush();
+            if ($auth.isAuthenticated)
+                subscribeUserToPush();
         });
     });
 
@@ -152,13 +153,13 @@
 
 </script>
 
-{#if $toast.show}
-    <Toast 
-        message={$toast.message} 
-        type={$toast.type} 
-        showToastCallback={toast.hide} 
-    />
-{/if}
+<Toast 
+    show={$toast.show}
+    message={$toast.message} 
+    type={$toast.type}
+    duration={$toast.duration}
+    showToastCallback={toast.hide} 
+/>
 
 {#if settings.isLoading}
         <div class="loading-overlay">

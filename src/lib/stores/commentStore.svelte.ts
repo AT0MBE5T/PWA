@@ -84,7 +84,7 @@ async function initSignalR(chatId: string, userName: string) {
 
             comments = comments.filter(x => !x.isPending);
         } catch (e) {
-            console.error("Sync error:", e);
+            console.error("[App] Sync error:", e);
         }
     });
 
@@ -126,7 +126,7 @@ async function initSignalR(chatId: string, userName: string) {
         const errorMessage = err?.message || String(err);
         
         if (!ignoredErrors.some(msg => errorMessage.includes(msg))) {
-            console.error("SignalR Critical Error:", err);
+            console.error("[App] SignalR Critical Error:", err);
         }
     }
 }

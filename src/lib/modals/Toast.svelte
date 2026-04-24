@@ -1,27 +1,55 @@
 <script lang="ts">
-    import { fade } from 'svelte/transition';
-    import { onMount } from 'svelte';
+    import { fly } from 'svelte/transition';
+    import { backOut } from 'svelte/easing';
 
-    let duration = $state<number>(2500);
-
-    let { message, type, showToastCallback }: { message: string, type: string, showToastCallback: () => void } = $props();
+    let {
+        show,
+        message,
+        type,
+        duration,
+        showToastCallback
+    }: {
+        show: boolean,
+        message: string,
+        type: string,
+        duration: number,
+        showToastCallback: () => void
+    } = $props();
 
     let visible = $state<boolean>(true);
+    let timer: any;
 
-    onMount(() => {
-        const timer = setTimeout(() => {
+$effect(() => {
+        if (show) {
+            visible = true;
+            
+            if (timer) clearTimeout(timer);
+            
+            timer = setTimeout(() => {
+                visible = false;
+            }, duration);
+        } else {
             visible = false;
-            const addTime = setTimeout(() => {showToastCallback()}, 250);
-            return () => clearTimeout(addTime);
-        }, duration);
-        return () => clearTimeout(timer);
+        }
+
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
     });
+
+    function handleOutEnd() {
+        if (!visible) {
+            showToastCallback();
+        }
+    }
 </script>
 
 {#if visible}
     <div
-        class="toast {type}"
-        transition:fade={{ duration: 250 }}
+class="toast {type}"
+        in:fly={{ y: -50, duration: 800, easing: backOut }}
+        out:fly={{ y: -50, duration: 600 }}
+        onoutroend={handleOutEnd}
     >
         {#if type === 'success'} ✅ {/if}
         {#if type === 'error'} ❌ {/if}
@@ -47,15 +75,9 @@
         font-weight: 500;
         backdrop-filter: blur(10px);
         z-index: 1200;
-        animation: slideUp .25s ease;
     }
 
     .toast.success { border-left: 4px solid #22c55e; }
     .toast.error { border-left: 4px solid #ef4444; }
     .toast.info { border-left: 4px solid #3b82f6; }
-
-    @keyframes slideUp {
-        from { transform: translateY(15px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
 </style>
