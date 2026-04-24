@@ -124,17 +124,6 @@
         color: #e0d4ff;
     }
 
-    /* .avatar {
-        font-size: 1.5rem;
-        background: #eee;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-    } */
-
     .avatar-wrapper {
         width: 2.5rem;
         height: 2.5rem;

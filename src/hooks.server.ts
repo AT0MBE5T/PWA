@@ -44,7 +44,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             id: decoded.sub,
             name: decoded.name ?? null,
             roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.roles],
-            avatarUrl: userDto?.avatarUrl ?? null,
+            avatarUrl: userDto?.avatar ?? null,
             personName: decoded.name,
             personSurname: decoded.surname
         };
@@ -73,7 +73,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 async function tryServerRefresh(svelteFetch: typeof fetch) {
     try{
-        const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/Refresh/refresh`, {
+        const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: "POST"
         });
         if (!response.ok) return null;
@@ -87,7 +87,7 @@ async function tryServerRefresh(svelteFetch: typeof fetch) {
 
 const getUserDto = async (token: string): Promise<UserDto | null> => {
     try{
-        const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-user-dto`, {
+        const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/get-user-dto`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

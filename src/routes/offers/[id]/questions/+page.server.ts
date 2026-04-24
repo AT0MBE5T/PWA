@@ -37,7 +37,7 @@ const getAnnouncementFullInfoById = async (
   userId: string,
   fetch: typeof globalThis.fetch 
 ): Promise<AnnouncementFull | undefined> => {
-  const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-announcement-full-by-id`, {
+  const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/get-announcement-full-by-id`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ announcementId, userId })

@@ -107,7 +107,7 @@ async function initSignalR(chatId: string, userName: string) {
 
             try {
                 const token = getCookie('accessToken');
-                const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/update-announcement`, {
+                const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/update-announcement`, {
                     method: 'POST',
                     body: formData,
                     headers: { "Authorization": `Bearer ${token}` }
@@ -165,11 +165,10 @@ async function initSignalR(chatId: string, userName: string) {
             formData.append("Price", offer.price);
             formData.append("Content", offer.content);
             formData.append("Description", offer.description);
-            formData.append("UserId", offer.userId);
 
             const token = getCookie('accessToken');
 
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/add-announcement`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/add-announcement`, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -225,7 +224,7 @@ async function initSignalR(chatId: string, userName: string) {
 
             const token = getCookie('accessToken');
 
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/update-announcement`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/update-announcement`, {
                 method: 'POST',
                 body: formData,
                 headers: {

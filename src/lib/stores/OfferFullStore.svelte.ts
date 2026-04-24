@@ -8,10 +8,10 @@ import type { PropertyTypeInterface } from '$lib/interfaces/PropertyTypeInterfac
 import type { StatementTypeInterface } from '$lib/interfaces/StatementTypeInterface';
 import type { AnnouncementUpdateModel } from '$lib/interfaces/AnnouncementUpdateModel';
 import type { SearchRequestInterface } from '$lib/interfaces/SearchRequestInterface';
-import type { AnnouncementsResponse } from '$lib/interfaces/AnnouncementsResponse';
 import { env } from '$env/dynamic/public';
 import offerState from './offerStore.svelte';
 import { settings } from './settings.svelte';
+import getCookie from '$lib/utils/cookieData';
 
 class OfferState {
     offerDetails = $state<Record<string, AnnouncementFull>>({});
@@ -49,46 +49,6 @@ class OfferState {
         }
         await tx.done;
     }
-
-    // async syncAnnouncements(searchData: SearchRequestInterface): Promise<AnnouncementsResponse> {
-    //     try {
-    //         const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/search`, {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify(searchData)
-    //         });
-
-    //         if (!response.ok) throw new Error("Server unreachable");
-
-    //         const data = await response.json() as AnnouncementsResponse;
-    //         const db = await this.getDB();
-
-    //         const tx = db.transaction('announcements', 'readwrite');
-    //         tx.store.clear();
-    //         await Promise.all([
-    //             ...data.data.map(item => tx.store.put(item)),
-    //             tx.done
-    //         ]);
-
-    //         db.clear('announcementDetails');
-    //         db.clear('comments');
-    //         db.clear('questions');
-
-    //         await Promise.allSettled(data.data.map(i => this.fetchAndCacheFullData(i.id)));
-
-    //         return data;
-
-    //     } catch (e) {
-    //         const db = await this.getDB();
-    //         const cached = await db.getAll('announcements');
-    //         await new Promise(res => setTimeout(res, 500));
-    //         return {
-    //             data: [...cached].sort((a, b) => b.viewsCnt - a.viewsCnt),
-    //             totalItems: cached.length,
-    //             totalPages: cached.length / searchData.limit
-    //         };
-    //     }
-    // }
 
     async syncAnnouncements(searchData: SearchRequestInterface) {
         const db = await this.getDB();
@@ -144,9 +104,13 @@ class OfferState {
 
     async fetchAndCache(searchData: SearchRequestInterface, cacheKey: string) {
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/search`, {
+            const token = getCookie('accessToken');
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/search`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(searchData)
             });
 
@@ -182,9 +146,9 @@ class OfferState {
 
         try {
             const [resFull, resComm, resQuest] = await Promise.all([
-                fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-announcement-full-by-id/${id}`),
-                fetch(`${env.PUBLIC_API_URL}/api/Comment/get-comments-by-announcement-id/${id}`),
-                fetch(`${env.PUBLIC_API_URL}/api/Question/get-all-by-announcement-id/${id}`)
+                fetch(`${env.PUBLIC_API_URL}/api/announcements/get-announcement-full-by-id/${id}`),
+                fetch(`${env.PUBLIC_API_URL}/api/comments/get-comments-by-announcement-id/${id}`),
+                fetch(`${env.PUBLIC_API_URL}/api/questions/get-all-by-announcement-id/${id}`)
             ]);
 
             if (resFull.ok) {
@@ -212,8 +176,8 @@ class OfferState {
     async fetchLookupData(type: 'PropertyType' | 'StatementType') {
         const storeName = type === 'PropertyType' ? 'propertyTypes' : 'statementTypes';
         const url = type === 'PropertyType'
-                    ? `${env.PUBLIC_API_URL}/api/PropertyType/get-property-types`
-                    : `${env.PUBLIC_API_URL}/api/StatementType/get-statement-types`;
+                    ? `${env.PUBLIC_API_URL}/api/propertyTypes/get-property-types`
+                    : `${env.PUBLIC_API_URL}/api/statementTypes/get-statement-types`;
 
         try {
             const res = await fetch(url);

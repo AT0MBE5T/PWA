@@ -1,14 +1,11 @@
 <script lang='ts'>
     import { env } from '$env/dynamic/public';
     import type {
-        ChangeEmailRequest,
-        ChangePasswordRequest,
         ChangePasswordResponse,
-        ChangePhoneRequest,
         UserDto} from '$lib';
-    import { auth, Modal, settings, toast, translations } from '$lib';
+    import { settings, translations } from '$lib';
     import getCookie from '$lib/utils/cookieData';
-    import {format} from 'date-fns';
+    import { format } from 'date-fns';
     import { onMount } from 'svelte';
 
     let { data } = $props();
@@ -27,7 +24,7 @@
     const getUserDto = async (userId: string) => {
         try {
             const accessToken = getCookie('accessToken');
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-user-dto-by-id/${userId}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/get-user-dto-by-id/${userId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -44,46 +41,16 @@
             settings.online = true;
         } catch (e) {
             settings.online = false;
-            //console.error("Ошибка загрузки данных", e);
         }
     };
 
 
     $effect(() => {
-        imagePreview = userInfo?.avatarUrl ?? '';
+        imagePreview = userInfo?.avatar ?? '';
     });
 
-    let emailError = $state<string>('');
-
-    let showPassword = $state<boolean>(false);
-    const switchPasswordModal = (isOpen: boolean) => {
-        showPassword = isOpen;
-    };
-
-    let oldPassword = $state<string>('');
-    let newPassword = $state<string>('');
-
-    let passwordErrors = $state<ChangePasswordResponse[]>();
-
-    let showEmail = $state<boolean>(false);
-    const switchEmailModal = (isOpen: boolean) => {
-        showEmail = isOpen;
-    };
-
-    let newEmail = $state<string>('');
-
-    let showPhone = $state<boolean>(false);
-    const switchPhoneModal = (isOpen: boolean) => {
-        showPhone = isOpen;
-    };
-
-    let newPhone = $state<string>('');
-
-    let fileInput = $state<HTMLInputElement>();
-    let selectedFileName = $state<string>('');
     // svelte-ignore state_referenced_locally
-    let imagePreview = $state<string>(userInfo?.avatarUrl ?? '');
-    let selectedFile = $state<File | null>(null);
+    let imagePreview = $state<string>(userInfo?.avatar ?? '');
 
 const t = $derived(translations[settings.lang]);
 
@@ -161,7 +128,6 @@ const t = $derived(translations[settings.lang]);
                     <div class="info-icon">⌚</div>
                     <div class="info-content">
                         <h3 class="info-title">{t.personal.registerDate}</h3>
-                        <!-- <p class="info-value">{format(userInfo!.createdAt, 'dd.MM.yyyy')}</p> -->
                         <div class="info-value">
                             {userInfo?.createdAt ? format(userInfo.createdAt, 'dd.MM.yyyy HH:mm') : ''}
                         </div>

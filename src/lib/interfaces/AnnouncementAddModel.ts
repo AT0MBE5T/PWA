@@ -13,5 +13,4 @@ export interface AnnouncementAddModel {
     price: string;
     content: string;
     description: string;
-    userId: string;
 }

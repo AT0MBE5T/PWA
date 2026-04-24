@@ -17,7 +17,7 @@
     let userInfo = $derived(personalStore.userDto);
 
     $effect(() => {
-        imagePreview = userInfo?.avatarUrl ?? '';
+        imagePreview = userInfo?.avatar ?? '';
     });
 
     const changeEmailClick = () => {
@@ -50,13 +50,12 @@
         }
 
         const requestData: ChangePasswordRequest = {
-            userId: $auth.id,
             oldPassword: oldPassword,
             newPassword: newPassword,
         }
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/change-password`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/change-password`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -109,12 +108,11 @@
         }
 
         const requestData: ChangeEmailRequest = {
-            userId: $auth.id,
             newEmail: newEmail,
         }
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/change-email`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/change-email`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -175,12 +173,11 @@
         }
 
         const requestData: ChangePhoneRequest = {
-            userId: $auth.id,
             newPhone: newPhone
         }
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/change-phone`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/change-phone`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`,
@@ -225,7 +222,7 @@
     let fileInput = $state<HTMLInputElement>();
     let selectedFileName = $state<string>('');
     // svelte-ignore state_referenced_locally
-    let imagePreview = $state<string>(userInfo?.avatarUrl ?? '');
+    let imagePreview = $state<string>(userInfo?.avatar ?? '');
     let selectedFile = $state<File | null>(null);
 
     function handleFileChange(event: Event): void {
@@ -258,7 +255,7 @@
         formData.append("UserId", $auth.id);
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/change-avatar`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/change-avatar`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${$auth.accessToken}`

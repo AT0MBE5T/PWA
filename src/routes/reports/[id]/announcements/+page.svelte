@@ -1,9 +1,9 @@
 <script lang='ts'>
     import { goto } from '$app/navigation';
     import { env } from '$env/dynamic/public';
-    import { AnnouncementItem, auth, translations, settings, Roles, toast, getItemsProfilePerPage, type AnnouncementsResponse } from '$lib';
+    import { AnnouncementItem, auth, translations, settings, Roles, getItemsProfilePerPage, type AnnouncementsResponse } from '$lib';
     import getCookie from '$lib/utils/cookieData.js';
-    import { onMount, tick } from 'svelte';
+    import { onMount } from 'svelte';
 
     const { data } = $props();
     let currentUserId = $derived<string | undefined | null>(data.userUrl);
@@ -25,15 +25,6 @@
     });
 
     function updatePagination(newPageSize: number) {
-        // const oldPageSize = itemsPerPage;
-        // const globalIndex = (currentPage - 1) * oldPageSize;
-        // const newPage = Math.floor(globalIndex / newPageSize) + 1;
-
-        // itemsPerPage = newPageSize;
-        // currentPage = newPage;
-
-        // goToPage(newPage, false);
-
         itemsPerPage = newPageSize;
         currentPage = currentPage;
 
@@ -60,18 +51,6 @@
         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     });
 
-    // const loadPlaced = async () => {
-    //     const page = data.currentPage;
-    //     const tab = data.currentTab;
-    //     const userId = $auth.id;
-
-    //     const res = await personalStore.loadPlaced(userId!, page ?? 1);
-    //     if (res !== null && res.page !== undefined && res.page !== data.currentPage){
-    //         toast.show(t.system.noData, 'error');
-    //         goToPage(res.page, false);
-    //     }
-    // };
-
     let placedData = $state<AnnouncementsResponse | null>(null);
     let favoriteData = $state<AnnouncementsResponse | null>(null);
     let boughtData = $state<AnnouncementsResponse | null>(null);
@@ -82,7 +61,7 @@
             const accessToken = getCookie('accessToken');
 
             const response = await fetch(
-                `${env.PUBLIC_API_URL}/api/Announcement/get-placed-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                `${env.PUBLIC_API_URL}/api/announcements/get-placed-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
                 {
                     method: 'GET',
                     headers: {
@@ -111,7 +90,7 @@
             const accessToken = getCookie('accessToken');
 
             const response = await fetch(
-                `${env.PUBLIC_API_URL}/api/Favorite/get-favorites-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                `${env.PUBLIC_API_URL}/api/favorites/get-favorites-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
                 {
                     method: 'GET',
                     headers: {
@@ -140,7 +119,7 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
             const accessToken = getCookie('accessToken');
 
             const response = await fetch(
-                `${env.PUBLIC_API_URL}/api/Announcement/get-sold-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                `${env.PUBLIC_API_URL}/api/announcements/get-sold-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
                 {
                     method: 'GET',
                     headers: {
@@ -169,7 +148,7 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
             const accessToken = getCookie('accessToken');
 
             const response = await fetch(
-                `${env.PUBLIC_API_URL}/api/Announcement/get-bought-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                `${env.PUBLIC_API_URL}/api/announcements/get-bought-by-user-id?userId=${userId}&page=${page}&pageSize=${getItemsProfilePerPage()}`,
                 {
                     method: 'GET',
                     headers: {
@@ -234,7 +213,6 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
         const url = new URL(window.location.href);
         url.searchParams.set('page', page.toString());
         
-        //goto(url.toString(), { keepFocus: true, noScroll: true });
         goto(url.toString(), { invalidateAll: true });
     };
 

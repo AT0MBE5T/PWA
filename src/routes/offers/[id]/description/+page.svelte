@@ -9,8 +9,6 @@
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import { onMount } from 'svelte';
     import { env } from '$env/dynamic/public';
-    import { personalStore } from '$lib/stores/PersonalStore.svelte';
-    import AnnouncementForm from '$lib/components/announcement/AnnouncementForm.svelte';
 
     let { data }: { data: PageData } = $props();
     let offer = $derived(offerFullStore.offerDetails[data.id!]);
@@ -44,7 +42,7 @@
             customerId: $auth.id
         };
         try{
-            const response = await fetch('http://localhost:5118/api/Announcement/close-announcement', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/close-announcement`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -78,9 +76,6 @@
                     viewsCnt: offer.viewsCnt
                 };
 
-                //personalStore.handleDealClosed($auth.id, objToAdd);
-                //offerFullStore.updateAnnouncementDetails(offer.id);
-                //offerFullStore.updateAnnouncements(offer.id);
                 offer.closedAt = currentDate;
                 settings.online = true;
         }catch{
@@ -100,7 +95,7 @@
         }
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Chat/get-or-create-chat`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/chats/get-or-create-chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -128,7 +123,7 @@
 
     const onVerifyClick = async () => {
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/switch-verification`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/switch-verification`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -155,7 +150,7 @@
 
     const onFavoriteClick = async (isAdd: boolean) => {
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Favorite/${isAdd ? 'add-favorite' : 'delete-favorite'}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/favorites/${isAdd ? 'add-favorite' : 'delete-favorite'}`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -163,7 +158,6 @@
                     "Authorization": `Bearer ${$auth.accessToken}`
                 },
                 body: JSON.stringify({
-                    userId: $auth.id,
                     announcementId: data.id
                 })
             });
@@ -193,7 +187,7 @@
         }
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/delete-announcement-by-id`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/delete-announcement-by-id`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -321,11 +315,10 @@ let currentIndex = $state(0);
                 return;
             }
 
-            await fetch(`${env.PUBLIC_API_URL}/api/Complaint/add-complaint`, {
+            await fetch(`${env.PUBLIC_API_URL}/api/complaints/add-complaint`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${$auth.accessToken}` },
                 body: JSON.stringify({
-                    userId,
                     announcementId: offerId,
                     userNote,
                     typeId

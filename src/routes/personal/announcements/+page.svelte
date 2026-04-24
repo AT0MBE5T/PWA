@@ -2,7 +2,7 @@
     import { goto } from '$app/navigation';
     import { AnnouncementItem, auth, translations, settings, Roles, toast, getItemsProfilePerPage } from '$lib';
     import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
-    import { onMount, tick } from 'svelte';
+    import { onMount } from 'svelte';
 
     const { data } = $props();
 
@@ -23,15 +23,6 @@
     });
 
     function updatePagination(newPageSize: number) {
-        // const oldPageSize = itemsPerPage;
-        // const globalIndex = (currentPage - 1) * oldPageSize;
-        // const newPage = Math.floor(globalIndex / newPageSize) + 1;
-
-        // itemsPerPage = newPageSize;
-        // currentPage = newPage;
-
-        // goToPage(newPage, false);
-
         itemsPerPage = newPageSize;
         currentPage = currentPage;
 
@@ -108,7 +99,6 @@
         const url = new URL(window.location.href);
         url.searchParams.set('page', page.toString());
         
-        //goto(url.toString(), { keepFocus: true, noScroll: true });
         goto(url.toString(), { invalidateAll: true });
     };
 

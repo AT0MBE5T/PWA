@@ -57,8 +57,8 @@ function createAuthStore() {
             set(initialState);
             document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
             try {
-                await fetch(`${env.PUBLIC_API_URL}/api/Refresh/logout`, {
-                    method: "GET",
+                await fetch(`${env.PUBLIC_API_URL}/api/refreshes/logout`, {
+                    method: "POST",
                     credentials: "include"
                 });
                 settings.online = true;

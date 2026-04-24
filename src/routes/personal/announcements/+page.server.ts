@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, locals, fetch }) => {
+export const load: PageServerLoad = async ({ url, locals }) => {
     const userId = locals.user?.id;
     if (!userId) return { error: 'Unauthorized' };
 

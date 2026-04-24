@@ -70,7 +70,7 @@
         }
     }
 
-    let { openLogin, successCallback }: { openLogin: (val: boolean) => void, successCallback: () => void } = $props();
+    let { successCallback }: { successCallback: () => void } = $props();
 
     let show = $state<boolean>(false);
 
@@ -163,7 +163,7 @@
         formData.append('RepeatPassword', repeatPasswordInput);
 
         try {
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/register`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/register`, {
                 method: 'POST',
                 credentials: "include",
                 body: formData
@@ -177,7 +177,7 @@
                 return;
             }
             else{
-                errors = (await response.json()).errors;
+                errors = await response.json();
                 switchModal(true);
             }
 
@@ -185,12 +185,12 @@
 
         } catch (error) {
             settings.online = false;
-            longText = t.authorization.loginAlreadyExist
+            longText = t.system.errorOccurred;
             switchModal(true);
         }
     };
 
-    let errors = $state<Record<string, string[]>>({});
+    let errors = $state<string[]>([]);
 
 </script>
 
@@ -198,14 +198,9 @@
     <Modal bind:open={show} title={t.system.validationError} on:close={toastError}>
         {#if (longText.length === 0)}
             <ul class="error-list">
-                {#each Object.entries(errors) as [field, messages]}
+                {#each errors as msg}
                     <li>
-                        <strong>{field}:</strong>
-                        <ul>
-                            {#each messages as msg}
-                                <li>{msg}</li>
-                            {/each}
-                        </ul>
+                        <strong>{msg}</strong>
                     </li>
                 {/each}
             </ul>

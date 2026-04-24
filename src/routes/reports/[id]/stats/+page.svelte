@@ -2,13 +2,10 @@
     import { auth, Roles, settings, toast, translations } from '$lib';
     import { onMount } from 'svelte';
     import type {
-        UserStatsModel,
-        ReportFilterParams,
-        UserReportRequest
+        UserStatsModel
     } from '$lib';
     import { env } from '$env/dynamic/public';
     import { translatePropertyType } from '$lib/i18n';
-    import { goto } from '$app/navigation';
 
     let { data } = $props();
 
@@ -22,7 +19,13 @@
         }
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Report/get-report-by-user-id/${currentUserId}`);
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/reports/get-report-by-user-id/${currentUserId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${$auth.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
             if(!response.ok){
                 return;

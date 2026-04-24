@@ -16,7 +16,7 @@
 
     const getPropertyTypes = async () => {
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/PropertyType/get-property-types`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/propertyTypes/get-property-types`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -566,9 +566,8 @@
         outline: none;
     }
 
-    /* Колір помилок під інпутами */
     :global([data-theme="dark"]) .register__form div[class*="ErrorText"] {
-        color: #fb7185; /* Ніжно-червоний */
+        color: #fb7185;
         font-size: 0.85rem;
         margin-top: 4px;
     }

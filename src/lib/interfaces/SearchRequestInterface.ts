@@ -4,5 +4,4 @@ export interface SearchRequestInterface {
     sortId: number;
     page: number;
     limit: number;
-    userId: string | null;
 }

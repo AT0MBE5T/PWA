@@ -46,7 +46,7 @@
         });
 
         try {
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/login`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -1,7 +1,4 @@
 // interfaces
-export type * from './interfaces/AddAnswerInterface.ts';
-export type * from './interfaces/AddCommentInterface.ts';
-export type * from './interfaces/AddQuestionInterface.ts';
 export type * from './interfaces/AnnouncementEditResponse.ts';
 export type * from './interfaces/AnnouncementFull.ts';
 export type * from './interfaces/AnnouncementShort.ts';
@@ -29,7 +26,6 @@ export type * from './interfaces/ToastInterface.ts';
 export type * from './interfaces/UserDto.ts';
 export type * from './interfaces/UserReportRequest.ts';
 export type * from './interfaces/UserStatsModel.ts';
-export type * from './interfaces/AddMessageInterface.ts';
 export type * from './interfaces/Message.ts';
 export type * from './interfaces/Chat.ts';
 export type * from './interfaces/PhotoInterface.ts';

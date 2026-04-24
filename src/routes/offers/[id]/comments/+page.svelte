@@ -162,17 +162,6 @@ const t = $derived(translations[settings.lang]);
         margin: auto auto;
     }
 
-    /* .comments__block::before {
-        content: "💬 ${t.offers.comments}";
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #333;
-        text-align: center;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid rgba(122, 66, 244, 0.2);
-        margin-bottom: 1rem;
-    } */
-
     .comments__block__container{
         display: flex;
         flex-direction: column;

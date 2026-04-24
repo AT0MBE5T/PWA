@@ -1,7 +1,6 @@
 <script lang="ts">
     import { env } from "$env/dynamic/public";
-    import { settings, auth, translations, type ComplaintGrid } from "$lib";
-    import { personalStore } from "$lib/stores/PersonalStore.svelte";
+    import { settings, translations, type ComplaintGrid } from "$lib";
     import getCookie from "$lib/utils/cookieData.js";
     import { onMount } from "svelte";
 
@@ -12,7 +11,7 @@
     const loadUserComplaints = async(id: string) => {
         try {
             const accessToken = getCookie('accessToken');
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Complaint/get-by-user-id/${id}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/complaints/get-by-user-id/${id}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -28,7 +27,6 @@
             settings.online = true;
         } catch (e) {
             settings.online = false;
-            //console.error("Ошибка загрузки данных", e);
         }
     }
 
@@ -200,7 +198,6 @@
         background-color: rgba(255, 255, 255, 0.5);
     }
 
-    /* Statuses Logic */
     .status-badge {
         padding: 0.4rem 0.8rem;
         border-radius: 12px;
@@ -224,7 +221,6 @@
         color: #854d0e;
     }
 
-    /* Decorative border for statuses */
     tr[class^="status-"] {
         border-left: 4px solid transparent;
     }
@@ -277,7 +273,6 @@
         margin-bottom: 1rem;
     }
 
-    /* Dark Mode Support */
     :global([data-theme="dark"]) .table-wrapper {
         background: rgba(30, 41, 59, 0.7);
         border-color: rgba(255, 255, 255, 0.1);

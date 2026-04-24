@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { auth, Roles, toast, Toast, translations, type AnnouncementsResponse, type AnnouncementStatRequest, type UserDto, type UserStatsModel } from '$lib';
+    import { auth, Roles, toast, Toast, translations } from '$lib';
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
     import { browser } from '$app/environment';
@@ -8,17 +8,11 @@
     import { onMount, untrack } from 'svelte';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
     import { env } from '$env/dynamic/public';
-    import chatState from '$lib/stores/chatStore.svelte';
-    import { online } from 'svelte/reactivity/window';
 
     let { data, children } = $props();
 
     let menuOpen = $state(false);
     let navElement = $state<HTMLElement>();
-
-    let showToast = $state(false);
-
-    const showToastClose = () => { showToast = false; };
 
     function handleOutsideClick(event: Event) {
         if (!browser) return;
@@ -67,10 +61,6 @@
             return;
 
         try{
-            // personalStore.loadBought($auth.id!, 1);
-            // personalStore.loadPlaced($auth.id!, 1);
-            // personalStore.loadSold($auth.id!, 1);
-            // personalStore.loadFavorite($auth.id!, 1);
             personalStore.loadUserDto($auth.id!);
             personalStore.loadUserStatsDto($auth.id!);
         }catch(error){
@@ -90,11 +80,6 @@
 
         if (Notification.permission !== "denied") {
             const permission = await Notification.requestPermission();
-            
-            // if (permission === "granted") {
-            //     new Notification("Ура!", { body: "Теперь вы будете получать уведомления." });
-            // }
-
             return permission;
         }
     }
@@ -108,7 +93,7 @@
                 applicationServerKey: publicVapidKey
             });
 
-            await fetch(`${env.PUBLIC_API_URL}/api/Notifications/subscribe`, {
+            await fetch(`${env.PUBLIC_API_URL}/api/notifications/subscribe`, {
                 method: 'POST',
                 body: JSON.stringify(subscription),
                 headers: {
@@ -126,17 +111,8 @@
         untrack(() => {
             requestNotificationPermission();
             subscribeUserToPush();
-            //chatState.initSignalR($auth.id!, $auth.name!);
         });
-
-        return () => {
-            untrack(() => {
-                //chatState.stopSignalR();
-            });
-        };
     });
-
-    let isOnline = $derived(settings.online);
 
         const onlineCheck = async () => {
             const result = await settings.checkServer();
@@ -168,9 +144,9 @@
         settings.isLoading = false;
     }
 
-    // setInterval(async() => {
-    //     await settings.checkServer();
-    // }, 30000);
+    setInterval(async() => {
+        await settings.checkServer();
+    }, 30000);
 
     const t = $derived(translations[settings.lang]);
 
@@ -320,7 +296,6 @@
     }
 
 .status-badge {
-    /* Сброс дефолтных стилей кнопки */
     appearance: none;
     background: none;
     border: none;
@@ -334,21 +309,18 @@
     border-radius: 20px;
     font-size: 0.875rem;
     font-weight: 600;
-    transition: all 0.2s ease; /* Плавность при наведении */
+    transition: all 0.2s ease;
 }
 
-/* Эффект при нажатии */
 .status-badge:active {
     transform: scale(0.95);
 }
 
-/* Состояние загрузки */
 .status-badge:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-/* Online */
 .status-badge.authenticated {
     background: rgba(34, 197, 94, 0.1);
     color: rgba(255, 255, 255, 0.8);
@@ -358,7 +330,6 @@
         font-family: inherit;
 }
 
-/* Offline - Исправил фон на красный */
 .status-badge.not-authenticated {
     background: rgba(239, 68, 68, 0.1); 
     color: rgba(255, 255, 255, 0.8);
@@ -377,7 +348,6 @@
 .status-dot { background: #22c55e; }
 .status-dot-offline { background: #ef4444; }
 
-/* Анимация пульсации */
 .pulse {
     animation: pulse-animation 2s infinite;
 }
@@ -387,7 +357,6 @@
     100% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
 }
 
-/* Темная тема */
 :global([data-theme="dark"]) .status-badge.authenticated {
     background: rgba(34, 197, 94, 0.15);
     color: #4ade80;

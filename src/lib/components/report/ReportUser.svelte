@@ -25,10 +25,11 @@
         };
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Report/get-report-by-user-login`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/reports/get-report-by-user-login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
                 },
                 body: JSON.stringify(requestData)
             });

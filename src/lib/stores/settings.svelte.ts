@@ -29,7 +29,7 @@ class SettingsStore {
 
     public async checkServer() {
         try {
-            const res = await fetch(`${env.PUBLIC_API_URL}/api/Account/ping`, { method: 'GET' });
+            const res = await fetch(`${env.PUBLIC_API_URL}/api/accounts/ping`);
             this.online = res.ok;
             return res.ok;
         } catch {

@@ -69,7 +69,7 @@
 
     const getDataForEdit = async () => {
         try {
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-announcement-for-edit`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/get-announcement-for-edit`, {
                 method: 'POST',
                 body: JSON.stringify(announcementId),
                 headers: {
@@ -144,7 +144,7 @@
 
     const getPropertyTypes = async () => {
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/PropertyType/get-property-types`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/propertyTypes/get-property-types`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -165,7 +165,7 @@
 
     const getStatementTypes = async () => {
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/StatementType/get-statement-types`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/statementTypes/get-statement-types`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -436,10 +436,9 @@
             formData.append("Price", priceInput.toString());
             formData.append("Content", contentInput);
             formData.append("Description", descriptionInput);
-            formData.append("UserId", $auth.id!);
 
             try{
-                const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/add-announcement`, {
+                const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/add-announcement`, {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -474,7 +473,6 @@
                     price: priceInput.toString(),
                     content: contentInput,
                     description: descriptionInput,
-                    userId: $auth.id!,
                     images: images,
                     id: crypto.randomUUID().toString()
                 }
@@ -529,7 +527,7 @@
             formData.append("AnnouncementId", announcementId);
 
             try{
-                const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/update-announcement`, {
+                const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/update-announcement`, {
                     method: 'POST',
                     body: formData,
                     headers: {

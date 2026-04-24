@@ -5,7 +5,7 @@
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte.js';
-    import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
+    import { env } from '$env/dynamic/public';
 
     let { data } = $props();
     let textInput = $state<string>('');
@@ -63,7 +63,7 @@ $effect(() => {
         };
 
         try{
-            const response = await fetch('http://localhost:5118/api/Announcement/close-announcement', {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/close-announcement`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -79,7 +79,6 @@ $effect(() => {
 
             toast.show(t.offers.closeSuccess, 'success');
             offerFullStore.offerDetails[chat?.offerId!].closedAt = new Date().toISOString();
-            //personalStore.handleDealClosed($auth.id, chat?.offerId!);
             settings.online = true;
         }catch{
             settings.online = false;

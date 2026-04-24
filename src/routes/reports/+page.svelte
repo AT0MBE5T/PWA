@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ReportFilter, ReportUser, ReportPropertyType, ReportGeneral, Toast, toast, translations, settings } from '$lib';
+    import { ReportFilter, ReportUser, ReportPropertyType, ReportGeneral, toast, translations, settings } from '$lib';
     import type { ReportFilterParams } from '$lib';
 
     let isChosen = $state<boolean>(false);

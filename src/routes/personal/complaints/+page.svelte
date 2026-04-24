@@ -166,7 +166,6 @@
         background-color: rgba(255, 255, 255, 0.5);
     }
 
-    /* Statuses Logic */
     .status-badge {
         padding: 0.4rem 0.8rem;
         border-radius: 12px;
@@ -190,7 +189,6 @@
         color: #854d0e;
     }
 
-    /* Decorative border for statuses */
     tr[class^="status-"] {
         border-left: 4px solid transparent;
     }
@@ -243,7 +241,6 @@
         margin-bottom: 1rem;
     }
 
-    /* Dark Mode Support */
     :global([data-theme="dark"]) .table-wrapper {
         background: rgba(30, 41, 59, 0.7);
         border-color: rgba(255, 255, 255, 0.1);

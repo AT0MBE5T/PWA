@@ -1,12 +1,10 @@
 import { env } from "$env/dynamic/public";
-import type { AnnouncementShort } from "$lib/interfaces/AnnouncementShort";
 import type { AnnouncementsResponse } from "$lib/interfaces/AnnouncementsResponse";
 import type { UserDto } from "$lib/interfaces/UserDto";
 import type { UserStatsModel } from "$lib/interfaces/UserStatsModel";
 import getCookie from "$lib/utils/cookieData";
 import { getItemsProfilePerPage } from "$lib/utils/paginationProfile";
 import { openDB } from "idb";
-import { offerFullStore } from "./OfferFullStore.svelte";
 import type { ComplaintGrid } from "$lib/interfaces/ComplaintGrid";
 import { settings } from "./settings.svelte";
 
@@ -29,14 +27,6 @@ class PersonalState {
         await tx.store.put(data, userId);
         await tx.done;
     }
-
-    // async setUserComplaints(data: ComplaintGrid[], userId: string) {
-    //     this.userComplaints[userId] = data;
-    //     const db = await this.getDB();
-    //     const tx = db.transaction('userComplaints', 'readwrite');
-    //     await tx.store.put(data);
-    //     await tx.done;
-    // }
 
     async setUserComplaints(userId: string, page: number, data: ComplaintGrid[]) {
         this.userComplaints[userId] = data;
@@ -159,68 +149,6 @@ class PersonalState {
         await tx.done;
     }
 
-    // async handleDealClosed(userId: string, data: AnnouncementShort) {
-    //     console.log(this.placed);
-    //     await this.moveToLastSoldPage(userId, data);
-    //     await this.removeFromPlaced(userId, data.id);
-    //     console.log(this.placed);
-    // }
-
-    // async moveToLastSoldPage(userId: string, ad: AnnouncementShort) {
-    //     const db = await this.getDB();
-
-    //     let soldData = this.sold[userId];
-        
-    //     if (!soldData) {
-    //         const firstPage = await db.get('sold', [userId, 1]);
-    //         if (firstPage) {
-    //             soldData = firstPage;
-    //         }
-    //     }
-
-    //     const lastPageNum = soldData?.totalPages || 1;
-    //     const lastPageData = await db.get('sold', [userId, lastPageNum]);
-
-    //     if (lastPageData) {
-    //         lastPageData.data.push({ ...ad });
-    //         lastPageData.totalItems += 1;
-    //         await this.setSold(userId, lastPageNum, lastPageData);
-    //     } else {
-    //         await this.setSold(userId, 1, {
-    //             data: [{ ...ad }],
-    //             totalItems: 1,
-    //             totalPages: 1
-    //         });
-    //     }
-    // }
-
-    // async removeFromPlaced(userId: string, adId: string) {
-    //     const db = await this.getDB();
-    //     const tx = db.transaction('placed', 'readwrite');
-    //     const store = tx.objectStore('placed');
-        
-    //     const range = IDBKeyRange.bound([userId, -Infinity], [userId, Infinity]);
-    //     const allPages = await store.getAll(range);
-
-    //     for (const page of allPages) {
-    //         const initialLength = page.data.length;
-    //         page.data = page.data.filter(x => x.id !== adId);
-
-    //         if (page.data.length !== initialLength) {
-    //             page.totalItems -= 1;
-    //             if (page.data.length === 0) {
-    //                 await store.delete([userId, page.page]);
-    //             } else {
-    //                 await store.put(page);
-    //             }
-    //             if (this.placed[userId]) {
-    //                 this.placed[userId] = page;
-    //             }
-    //         }
-    //     }
-    //     await tx.done;
-    // }
-
     getDB = async () => {
         return await openDB(this.DB_NAME, this.DB_VERSION, {
             upgrade(db) {
@@ -230,12 +158,6 @@ class PersonalState {
                 if (!db.objectStoreNames.contains('userStats')) {
                     db.createObjectStore('userStats');
                 }
-                // if (!db.objectStoreNames.contains('sold')) {
-                //     db.createObjectStore('sold', { keyPath: ['userId', 'page'] });
-                // }
-                // if (!db.objectStoreNames.contains('placed')) {
-                //     db.createObjectStore('placed', { keyPath: ['userId', 'page'] });
-                // }
                 if (!db.objectStoreNames.contains('placed')) {
                     const store = db.createObjectStore('placed', { keyPath: ['userId', 'page', 'pageSize'] });
                     store.createIndex('userId_pageSize', ['userId', 'pageSize'], { unique: false });
@@ -252,12 +174,6 @@ class PersonalState {
                     const store = db.createObjectStore('bought', { keyPath: ['userId', 'page', 'pageSize'] });
                     store.createIndex('userId_pageSize', ['userId', 'pageSize'], { unique: false });
                 }
-                // if (!db.objectStoreNames.contains('favorite')) {
-                //     db.createObjectStore('favorite', { keyPath: ['userId', 'page'] });
-                // }
-                // if (!db.objectStoreNames.contains('bought')) {
-                //     db.createObjectStore('bought', { keyPath: ['userId', 'page'] });
-                // }
                 if (!db.objectStoreNames.contains('userComplaints')) {
                     db.createObjectStore('userComplaints', { keyPath: ['userId', 'page'] });
                 }
@@ -275,7 +191,7 @@ class PersonalState {
 
         try {
             const accessToken = getCookie('accessToken');
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-user-dto`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/get-user-dto`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -292,7 +208,6 @@ class PersonalState {
             settings.online = true;
         } catch (e) {
             settings.online = false;
-            //console.error("Ошибка загрузки данных", e);
         }
     }
 
@@ -306,7 +221,7 @@ class PersonalState {
 
         try {
             const accessToken = getCookie('accessToken');
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Complaint/get-by-user-id/${id}`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/complaints/get-by-user-id/${id}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -323,7 +238,6 @@ class PersonalState {
             settings.online = true;
         } catch (e) {
             settings.online = false;
-            //console.error("Ошибка загрузки данных", e);
         }
     }
 
@@ -338,7 +252,7 @@ class PersonalState {
 
         try {
             const accessToken = getCookie('accessToken');
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Account/get-stats`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/get-stats`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -354,35 +268,8 @@ class PersonalState {
             settings.online = true;
         } catch (e) {
             settings.online = false;
-            //console.error("Ошибка загрузки данных", e);
         }
     }
-
-    // async loadPlaced(userId: string, page: number) {
-    //     const db = await this.getDB();
-    //     const cached = await db.get('placed', [userId, page]);
-        
-    //     if (cached) {
-    //         this.placed[userId] = cached;
-    //         return;
-    //     }
-
-    //     try {
-    //         const accessToken = getCookie('accessToken');
-    //         const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-placed?page=${page}&pageSize=${getItemsProfilePerPage()}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Authorization': `Bearer ${accessToken}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         });
-    //         const freshData: AnnouncementsResponse = await response.json();
-            
-    //         await this.setPlaced(userId, page, freshData);
-    //     } catch (e) {
-    //         console.error("Ошибка загрузки данных", e);
-    //     }
-    // }
 
     async loadPlaced(userId: string, page: number): Promise<AnnouncementsResponse | null> {
         const db = await this.getDB();
@@ -411,7 +298,7 @@ class PersonalState {
             const accessToken = getCookie('accessToken');
 
             const response = await fetch(
-                `${env.PUBLIC_API_URL}/api/Announcement/get-placed?page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                `${env.PUBLIC_API_URL}/api/announcements/get-placed?page=${page}&pageSize=${getItemsProfilePerPage()}`,
                 {
                     method: 'GET',
                     headers: {
@@ -502,7 +389,7 @@ class PersonalState {
             const accessToken = getCookie('accessToken');
 
             const response = await fetch(
-                `${env.PUBLIC_API_URL}/api/Announcement/get-sold?page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                `${env.PUBLIC_API_URL}/api/announcements/get-sold?page=${page}&pageSize=${getItemsProfilePerPage()}`,
                 {
                     method: 'GET',
                     headers: {
@@ -593,7 +480,7 @@ class PersonalState {
             const accessToken = getCookie('accessToken');
 
             const response = await fetch(
-                `${env.PUBLIC_API_URL}/api/Announcement/get-bought?page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                `${env.PUBLIC_API_URL}/api/announcements/get-bought?page=${page}&pageSize=${getItemsProfilePerPage()}`,
                 {
                     method: 'GET',
                     headers: {
@@ -684,7 +571,7 @@ class PersonalState {
             const accessToken = getCookie('accessToken');
 
             const response = await fetch(
-                `${env.PUBLIC_API_URL}/api/Favorite/get-favorites?page=${page}&pageSize=${getItemsProfilePerPage()}`,
+                `${env.PUBLIC_API_URL}/api/favorites/get-favorites?page=${page}&pageSize=${getItemsProfilePerPage()}`,
                 {
                     method: 'GET',
                     headers: {
@@ -747,81 +634,6 @@ class PersonalState {
         this.favorite[userId] = { data: [], totalPages: 0, totalItems: 0, page: 0, pageSize: 0, timestamp: Date.now(), userId: '' };
         return null;
     }
-
-    // async loadBought(userId: string, page: number) {
-    //     const db = await this.getDB();
-    //     const cached = await db.get('bought', [userId, page]);
-        
-    //     if (cached) {
-    //         this.bought[userId] = cached;
-    //     }
-
-    //     try {
-    //         const accessToken = getCookie('accessToken');
-    //         const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-bought?page=${page}&pageSize=${getItemsProfilePerPage()}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Authorization': `Bearer ${accessToken}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         });
-    //         const freshData: AnnouncementsResponse = await response.json();
-            
-    //         await this.setBought(userId, page, freshData);
-    //     } catch (e) {
-    //         //console.error("Ошибка загрузки данных", e);
-    //     }
-    // }
-
-    // async loadFavorite(userId: string, page: number) {
-    //     const db = await this.getDB();
-    //     const cached = await db.get('favorite', [userId, page]);
-        
-    //     if (cached) {
-    //         this.favorite[userId] = cached;
-    //     }
-
-    //     try {
-    //         const accessToken = getCookie('accessToken');
-    //         const response = await fetch(`${env.PUBLIC_API_URL}/api/Favorite/get-favorites?page=${page}&pageSize=${getItemsProfilePerPage()}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Authorization': `Bearer ${accessToken}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         });
-    //         const freshData: AnnouncementsResponse = await response.json();
-            
-    //         await this.setFavorite(userId, page, freshData);
-    //     } catch (e) {
-    //         //console.error("Ошибка загрузки данных", e);
-    //     }
-    // }
-
-    // async loadSold(userId: string, page: number) {
-    //     const db = await this.getDB();
-    //     const cached = await db.get('sold', [userId, page]);
-        
-    //     if (cached) {
-    //         this.sold[userId] = cached;
-    //     }
-
-    //     try {
-    //         const accessToken = getCookie('accessToken');
-    //         const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-sold?page=${page}&pageSize=${getItemsProfilePerPage()}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Authorization': `Bearer ${accessToken}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         });
-    //         const freshData: AnnouncementsResponse = await response.json();
-            
-    //         await this.setSold(userId, page, freshData);
-    //     } catch (e) {
-    //         //console.error("Ошибка загрузки данных", e);
-    //     }
-    // }
 
     async clearAllData() {
         this.userDto = undefined;

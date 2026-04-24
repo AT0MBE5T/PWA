@@ -50,15 +50,6 @@
     });
 
     function updatePagination(newPageSize: number) {
-        // const oldPageSize = itemsPerPage;
-        // const globalIndex = (currentPage - 1) * oldPageSize;
-        // const newPage = Math.floor(globalIndex / newPageSize) + 1;
-
-        // itemsPerPage = newPageSize;
-        // currentPage = newPage;
-
-        // goToPage(newPage, false);
-
         limit = newPageSize;
         currentPage = currentPage;
 
@@ -106,7 +97,6 @@
             const newLimit = getItemsPerPage();
             if (newLimit !== limit) {
                 limit = newLimit;
-                //currentPage = 1;
                 await confirmInteraction();
             }
         };
@@ -165,14 +155,6 @@
         { id: '85e328df-e568-43b4-9c95-bf266fa63dc0', name: t.offers.room }
     ]);
 
-    // const goToPage = async (page: number) => {
-    //     if (page >= 1 && page <= totalPages) {
-    //         currentPage = page;
-    //         await confirmInteraction();
-    //         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-    //     }
-    // };
-
     const goToPage = (page: number, isClicked: boolean) => {
         if (currentPage === undefined || (isClicked && currentPage === page))
             return;
@@ -183,9 +165,7 @@
         const url = new URL(window.location.href);
         url.searchParams.set('page', page.toString());
         
-        //goto(url.toString(), { keepFocus: true, noScroll: true });
         currentPage = page;
-        //goto(url.toString(), { invalidateAll: true });
         window.location.href = url.toString();
     };
 
@@ -213,8 +193,7 @@
             filters: selectedFiltration,
             sortId: checkedSortId,
             page: currentPage,
-            limit: limit,
-            userId: $auth.id
+            limit: limit
         };
 
         offerState.setFilters(searchValues);

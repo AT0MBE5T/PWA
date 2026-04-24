@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/public';
 import { settings, type AnnouncementFull } from '$lib';
+import getCookie from '$lib/utils/cookieData';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ params, locals, fetch }) => {
@@ -10,7 +11,7 @@ export const load: LayoutServerLoad = async ({ params, locals, fetch }) => {
   
   try{
       if (userId)
-        await addViewer(id, userId, fetch);
+        await addViewer(id, fetch);
 
       const offer = await getAnnouncementFullInfoById(id, userId, fetch);
 
@@ -33,7 +34,7 @@ const getAnnouncementFullInfoById = async (
   userId: string | null,
   fetch: typeof globalThis.fetch 
 ): Promise<AnnouncementFull | undefined> => {
-  const response = await fetch(`${env.PUBLIC_API_URL}/api/Announcement/get-announcement-full-by-id`, {
+  const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/get-announcement-full-by-id`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -47,15 +48,14 @@ const getAnnouncementFullInfoById = async (
 };
 
 const addViewer = async (
-  announcementId: string, 
-  userId: string,
+  announcementId: string,
   fetch: typeof globalThis.fetch 
 ): Promise<void> => {
-  await fetch(`${env.PUBLIC_API_URL}/api/View/add-view`, {
+  const accessToken = getCookie('accessToken');
+  await fetch(`${env.PUBLIC_API_URL}/api/views/add-view`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
     body: JSON.stringify({
-      userId,
       announcementId
     })
   });

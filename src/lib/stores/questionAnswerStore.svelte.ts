@@ -20,7 +20,7 @@ function createQuestionAnswerState() {
 async function setup(currentId: string) {
     try {
         const response = await fetch(
-            `${env.PUBLIC_API_URL}/api/Question/get-all-by-announcement-id/${currentId}`
+            `${env.PUBLIC_API_URL}/api/questions/get-all-by-announcement-id/${currentId}`
         );
 
         if (response.ok) {

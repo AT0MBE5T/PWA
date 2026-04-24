@@ -14,10 +14,11 @@
         }
 
         try{
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Report/get-general-report`, {
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/reports/get-general-report`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
                 }
             });
 

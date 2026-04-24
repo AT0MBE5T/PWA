@@ -145,7 +145,7 @@ async function initSignalR(chatId: string, userName: string) {
 
     async function setupChat(currentId: string) {
         try {
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/Comment/get-comments-by-announcement-id/${currentId}`);
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/comments/get-comments-by-announcement-id/${currentId}`);
             if (response.ok) {
                 const initialComments = await response.json();
                 offerFullStore.setComments(currentId, initialComments);
