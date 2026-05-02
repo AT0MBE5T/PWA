@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { onMount } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import type {
         PropertyTypeInterface,
         StatementTypeInterface,
@@ -9,9 +9,29 @@
         ImageItem,
         AnnouncementAddModel,
         AnnouncementUpdateModel
+
+    ,
+
+    AnnouncementFull
+
+    ,
+
+    AnnouncementShort
+
+    ,
+
+    CommentInterface
+
+    ,
+
+    QuestionAnswer
+
+    ,
+
+    SearchRequestInterface
     } from '$lib';
     import { Modal, Toast, auth, settings, translations } from '$lib';
-    import { goto } from '$app/navigation';
+    import { goto, invalidateAll } from '$app/navigation';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import offerState from '$lib/stores/offerStore.svelte';
     import { env } from '$env/dynamic/public';
@@ -540,13 +560,35 @@
                     toastType = 'success';
                     toastText = t.system.updatedSuccessfully;
                     showToast = true;
+
+                    const statementType = statementTypes.filter(x => x.id === statementTypeId)[0];
+                    const propertyType = propertyTypes.filter(x => x.id === propertyTypeId)[0];
+
+                    let main_img = ''
+
+                    if (images[0].type === 'existing'){
+                        main_img = images[0].url;
+                    }
+                    else{
+                        main_img = images[0].preview;
+                    }
+
+                await offerFullStore.updateCachedAnnouncement(announcementId, {
+                        title: titleInput,
+                        location: locationInput,
+                        area: Number(areaInput),
+                        photoUrl: main_img,
+                        price: Number(priceInput),
+                        propertyTypeName: propertyType.name,
+                        statementTypeName: statementType.name
+                    });
                 }
                 else{
                     toastType = 'error';
                     toastText = t.system.errorOccurred;
                     showToast = true;
                 }
-                goto('/offers');
+                await goto('/offers');
                 settings.online = true;
             }catch{
                 settings.online = false;
@@ -633,7 +675,7 @@
 </script>
 
 {#if showToast}
-    <Toast message={toastText} type={toastType} showToastCallback={showToastClose} />
+    <Toast show={showToast} message={toastText} type={toastType} showToastCallback={showToastClose} duration={2500} />
 {/if}
 
 <div class="announcement__wrapper">

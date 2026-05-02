@@ -102,6 +102,22 @@ class OfferState {
         });
     }
 
+async updateCachedAnnouncement(announcementId: string, updatedData: Partial<AnnouncementShort>) {
+    const db = await this.getDB();
+    
+    const allPages = await db.getAll('announcements_pages');
+
+    for (const page of allPages) {
+        const index = page.items.findIndex((item: { id: string | number }) => item.id === announcementId);
+        
+        if (index !== -1) {
+            page.items[index] = { ...page.items[index], ...updatedData };
+            await db.put('announcements_pages', page);
+            break;
+        }
+    }
+}
+
     async fetchAndCache(searchData: SearchRequestInterface, cacheKey: string) {
         try{
             const token = getCookie('accessToken');
@@ -351,6 +367,7 @@ class OfferState {
     }
 
     async loadDetails(id: string) {
+        await this.fetchAndCacheFullData(id);
         if (this.offerDetails[id]) return;
 
         const db = await this.getDB();
