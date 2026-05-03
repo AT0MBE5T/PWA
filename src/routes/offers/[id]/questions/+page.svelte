@@ -3,7 +3,8 @@
     import questionAnswerState from '$lib/stores/questionAnswerStore.svelte';
     import ConfirmModal from '$lib/modals/ConfirmModal.svelte';
     import { auth, Roles, settings, translations } from '$lib';
-    import { tick } from 'svelte';
+    import { getContext, tick } from 'svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
 
     let { data } = $props();
 
@@ -109,7 +110,8 @@
         }
     };
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 
@@ -232,6 +234,7 @@
 
     .question__answer__container{
         display: flex;
+        height: 100%;
         flex-direction: column;
         overflow-y: scroll;
     }

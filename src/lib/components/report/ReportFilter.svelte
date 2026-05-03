@@ -2,7 +2,8 @@
     import { env } from '$env/dynamic/public';
     import { type ReportFilterParams, type PropertyTypeInterface, Roles, translations, settings, toast } from '$lib';
     import { auth } from '$lib';
-    import { onMount } from 'svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { getContext, onMount } from 'svelte';
 
     let { callBack }: {callBack: (data: ReportFilterParams, action: Action) => void} = $props();
 
@@ -136,7 +137,8 @@
         }
     };
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

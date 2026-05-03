@@ -1,8 +1,11 @@
 <script lang='ts'>
-    import { auth, settings, translations } from '$lib';
+    import { auth, translations } from '$lib';
     import { goto } from '$app/navigation';
+    import { getContext } from 'svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
 
-const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

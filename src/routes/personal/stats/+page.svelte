@@ -2,7 +2,8 @@
     import { auth, settings, translations } from '$lib';
     import { translatePropertyType } from '$lib/i18n';
     import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
-    import { onMount } from 'svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { getContext, onMount } from 'svelte';
 
     onMount(async () => {
         settings.isLoading = true;
@@ -12,7 +13,8 @@
 
     const userStats = $derived(personalStore.userStatsModel);
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="greeting-container">

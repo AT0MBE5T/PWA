@@ -1,6 +1,8 @@
 <script lang="ts">
     import { ReportFilter, ReportUser, ReportPropertyType, ReportGeneral, toast, translations, settings } from '$lib';
     import type { ReportFilterParams } from '$lib';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { getContext } from 'svelte';
 
     let isChosen = $state<boolean>(false);
 
@@ -22,7 +24,8 @@
             toast.show(t.validation.userNotFound, 'error');
     };
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="report__container">

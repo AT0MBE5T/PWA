@@ -4,6 +4,8 @@ import * as signalR from "@microsoft/signalr";
 import { chatOfflineState } from "./ChatOfflineStore.svelte";
 import getCookie from "$lib/utils/cookieData";
 import { env } from "$env/dynamic/public";
+import { getContext } from "svelte";
+import type SettingsStore from "./settingsStore.svelte";
 
 const chatState = createChatState();
 export default chatState;
@@ -13,6 +15,7 @@ function createChatState() {
     let chats = $state<Chat[]>([]);
     let connection = $state<signalR.HubConnection | null>(null);
     let isConnecting = false;
+
     const t = $derived(translations[settings.lang]);
 
     async function initSignalR(userId: string, userName: string, chatIdd?: string) {
@@ -225,7 +228,7 @@ function createChatState() {
 
                 if (connection?.state === signalR.HubConnectionState.Connected) {
                     try {
-                        await connection.invoke("SendMessage", chatId, text, userName, offerId, realtorId);
+                        await connection.invoke("SendMessage", chatId, text, userName, offerId);
                     } catch (e) {
                         await chatOfflineState.savePendingMessage(pendingMsg);
                     }

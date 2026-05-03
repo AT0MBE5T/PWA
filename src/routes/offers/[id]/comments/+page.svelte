@@ -2,8 +2,9 @@
     import { auth, ConfirmModal, Roles, settings, translations } from '$lib';
     import { format } from 'date-fns';
     import type { PageData } from './$types';
-    import { tick, untrack } from 'svelte';
+    import { getContext, tick, untrack } from 'svelte';
     import commentState from '$lib/stores/commentStore.svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
 
     let { data }: { data: PageData } = $props();
 
@@ -72,7 +73,8 @@
         }
     };
 
-const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 
@@ -163,10 +165,11 @@ const t = $derived(translations[settings.lang]);
     }
 
     .comments__block__container{
+        height: 100%;
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
-        padding: 2rem;
+        padding: 1rem 2rem;
         overflow-y: scroll;
     }
 

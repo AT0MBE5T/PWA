@@ -1,6 +1,7 @@
 <script lang="ts">
     import { translations, settings } from '$lib';
-    import { createEventDispatcher } from 'svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { createEventDispatcher, getContext } from 'svelte';
     import { fade } from 'svelte/transition';
 
     let { open = $bindable(false), title = null, description = null, closeOnBackdrop = true } = $props();
@@ -58,7 +59,8 @@
         }
     }
 
-    const t = $derived(translations[settings.lang]);
+        const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 {#if open}

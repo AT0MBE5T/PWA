@@ -44,7 +44,7 @@ export { default as Toast }from './modals/Toast.svelte';
 
 // stores
 export * from './stores/AuthStore';
-export * from './stores/toast';
+export * from './stores/toast.js';
 export * from './stores/settings.svelte';
 export * from './stores/chatStore.svelte';
 export * from './stores/commentStore.svelte';

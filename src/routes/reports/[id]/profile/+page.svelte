@@ -4,9 +4,10 @@
         ChangePasswordResponse,
         UserDto} from '$lib';
     import { settings, translations } from '$lib';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
     import getCookie from '$lib/utils/cookieData';
     import { format } from 'date-fns';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
 
     let { data } = $props();
 
@@ -52,7 +53,8 @@
     // svelte-ignore state_referenced_locally
     let imagePreview = $state<string>(userInfo?.avatar ?? '');
 
-const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

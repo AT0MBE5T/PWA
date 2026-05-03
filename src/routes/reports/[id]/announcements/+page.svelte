@@ -2,8 +2,9 @@
     import { goto } from '$app/navigation';
     import { env } from '$env/dynamic/public';
     import { AnnouncementItem, auth, translations, settings, Roles, getItemsProfilePerPage, type AnnouncementsResponse } from '$lib';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
     import getCookie from '$lib/utils/cookieData.js';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
 
     const { data } = $props();
     let currentUserId = $derived<string | undefined | null>(data.userUrl);
@@ -221,7 +222,8 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
         goto(`/offers/${id}/description`);
     };
 
-const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

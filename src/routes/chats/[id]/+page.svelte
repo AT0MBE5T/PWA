@@ -1,11 +1,12 @@
 <script lang='ts'>
     import { format } from 'date-fns';
     import { auth, ConfirmModal, settings, toast, translations, type BuyRequest } from '$lib';
-    import { tick } from 'svelte';
+    import { getContext, tick } from 'svelte';
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte.js';
     import { env } from '$env/dynamic/public';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
 
     let { data } = $props();
     let textInput = $state<string>('');
@@ -115,7 +116,8 @@ $effect(() => {
         }
     });
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

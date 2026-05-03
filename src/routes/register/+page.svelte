@@ -3,8 +3,11 @@
     import { env } from '$env/dynamic/public';
     import { Modal, auth, toast, translations, settings } from '$lib';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { getContext } from 'svelte';
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
     let loginInput = $state<string>('');
     let nameInput = $state<string>('');

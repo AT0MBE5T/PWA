@@ -1,8 +1,9 @@
 <script lang='ts'>
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     import { auth, settings, toast, translations } from '$lib';
     import type { GeneralStats } from '$lib';
     import { env } from '$env/dynamic/public';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
 
     let { callBack }: { callBack: () => void } = $props();
 
@@ -38,7 +39,8 @@
         await getGeneralStats();
     });
 
-    const t = $derived(translations[settings.lang]);
+        const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="report__container">

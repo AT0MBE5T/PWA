@@ -1,11 +1,12 @@
 <script lang='ts'>
     import { auth, settings, toast, translations } from '$lib';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     import type {
         PropertyTypeReportRequest,
         ReportFilterParams,
         PropertyTypeStats} from '$lib';
     import { env } from '$env/dynamic/public';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
 
     let { data, callBack }: { data: ReportFilterParams, callBack: () => void } = $props();
 
@@ -48,7 +49,8 @@
         await getPropertyTypeStats();
     });
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="report__container">

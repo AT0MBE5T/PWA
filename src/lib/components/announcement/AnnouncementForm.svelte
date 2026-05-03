@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { onMount, tick } from 'svelte';
+    import { getContext, onMount, tick } from 'svelte';
     import type {
         PropertyTypeInterface,
         StatementTypeInterface,
@@ -35,6 +35,7 @@
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import offerState from '$lib/stores/offerStore.svelte';
     import { env } from '$env/dynamic/public';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
 
     let { isUpdate, announcementId }: { isUpdate: boolean, announcementId: string } = $props();
 
@@ -610,7 +611,7 @@
                 }
                 await offerFullStore.savePendingOfferUpdate(dataToUpdate);
                 await offerState.updateOffer(dataToUpdate);
-
+                
                 goto('/offers');
             } finally {
                 settings.isLoading = false;
@@ -670,7 +671,8 @@
         showToast = false;
     };
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

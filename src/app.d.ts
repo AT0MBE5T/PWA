@@ -11,6 +11,8 @@ declare global {
             } | null;
 
 			token: string;
+			theme: string;
+			lang: string;
 		}
 	}
 }

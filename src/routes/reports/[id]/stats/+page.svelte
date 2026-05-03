@@ -1,11 +1,12 @@
 <script lang='ts'>
     import { auth, Roles, settings, toast, translations } from '$lib';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     import type {
         UserStatsModel
     } from '$lib';
     import { env } from '$env/dynamic/public';
     import { translatePropertyType } from '$lib/i18n';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
 
     let { data } = $props();
 
@@ -43,7 +44,8 @@
         await getUserStats();
     });
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

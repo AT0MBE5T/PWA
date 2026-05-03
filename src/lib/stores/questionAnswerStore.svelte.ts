@@ -5,6 +5,8 @@ import offerState from "./offerStore.svelte";
 import { env } from "$env/dynamic/public";
 import { translations } from "$lib/i18n";
 import { settings } from "./settings.svelte";
+import { getContext } from "svelte";
+import type SettingsStore from "./settingsStore.svelte";
 
 const questionAnswerState = createQuestionAnswerState();
 export default questionAnswerState;
@@ -15,7 +17,6 @@ function createQuestionAnswerState() {
     let currentChatId = $state<string | null>(null);
     let isConnecting = false;
     let isSyncing = false;
-    const t = $derived(translations[settings.lang]);
 
 async function setup(currentId: string) {
     try {
@@ -35,6 +36,7 @@ async function setup(currentId: string) {
         settings.online = false;
         await offerFullStore.loadQuestions(currentId);
         const pendingQuestions = await offerFullStore.getPendingQuestions();
+
         let arrToAdd = offerFullStore.questions[currentId].concat(pendingQuestions);
 
         const sortedArr = [...arrToAdd].sort((a, b) => {

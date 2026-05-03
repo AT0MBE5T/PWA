@@ -1,10 +1,13 @@
 <script lang='ts'>
     import { settings, translations, type AnnouncementShort } from '$lib';
     import { translatePropertyType, translateStatementType } from '$lib/i18n';
-    import type { Snippet } from 'svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { getContext, type Snippet } from 'svelte';
 
     let { item, btn_ok_name }: { item: AnnouncementShort, btn_ok_name: Snippet } = $props();
-    const t = $derived(translations[settings.lang]);
+
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="shop__item">

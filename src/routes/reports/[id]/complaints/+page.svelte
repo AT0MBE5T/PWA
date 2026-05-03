@@ -1,8 +1,9 @@
 <script lang="ts">
     import { env } from "$env/dynamic/public";
     import { settings, translations, type ComplaintGrid } from "$lib";
+    import type SettingsStore from "$lib/stores/settingsStore.svelte.js";
     import getCookie from "$lib/utils/cookieData.js";
-    import { onMount } from "svelte";
+    import { getContext, onMount } from "svelte";
 
     let { data } = $props();
     let currentUserId = $derived<string | undefined | null>(data.userUrl);
@@ -55,7 +56,8 @@
         }
     }
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="complaints-container">

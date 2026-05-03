@@ -5,9 +5,11 @@
     import { browser } from '$app/environment';
     import { settings } from '$lib';
     import '../app.css';
-    import { onMount, untrack } from 'svelte';
+    import { onMount, setContext, untrack } from 'svelte';
     import { personalStore } from '$lib/stores/PersonalStore.svelte';
     import { env } from '$env/dynamic/public';
+    import SettingsStore from '$lib/stores/settingsStore.svelte';
+    import type { Language } from '$lib/i18n';
 
     let { data, children } = $props();
 
@@ -149,7 +151,18 @@
         await settings.checkServer();
     }, 30000);
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = new SettingsStore({
+        theme: data.theme ?? "light",
+        lang: (data.lang ?? "UA") as Language
+    });
+
+    settingsStore.setupEffects();
+
+    setContext('settings', settingsStore);
+
+    settings.lang = settingsStore.lang;
+
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 
@@ -158,7 +171,7 @@
     message={$toast.message} 
     type={$toast.type}
     duration={$toast.duration}
-    showToastCallback={toast.hide} 
+    showToastCallback={toast.hide}
 />
 
 {#if settings.isLoading}
@@ -227,12 +240,12 @@
                             <span class="status-dot {settings.online ? 'pulse' : ''} {settings.online ? '' : 'status-dot-offline'}"></span>
                             {settings.online ? t.authorized.online : t.authorized.offline}
                         </button>
-                        <button class="control-btn" onclick={() => settings.toggleLang()} title="{ t.system.changeLang }">
-                            🌐 {settings.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}
+                        <button class="control-btn" onclick={() => settingsStore.toggleLang()} title="{ t.system.changeLang }">
+                            🌐 {settingsStore.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}
                         </button>
                         
-                        <button class="control-btn" onclick={() => settings.toggleTheme()} title="{ t.system.changeLang }">
-                            {settings.theme === 'dark' ? '🌙' : '☀️'} {settings.theme === 'dark' ? t.header.theme_dark : t.header.theme_light}
+                        <button class="control-btn" onclick={() => settingsStore.toggleTheme()} title="{ t.system.changeLang }">
+                            {settingsStore.theme === 'dark' ? '🌙' : '☀️'} {settingsStore.theme === 'dark' ? t.header.theme_dark : t.header.theme_light}
                         </button>
 
                         <div class="divider"></div>

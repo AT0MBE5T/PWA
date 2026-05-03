@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { onMount, untrack } from 'svelte';
-    import { AnnouncementItem, auth, getItemsPerPage, settings, translations, type LookupItem, type LookupItemFilter } from '$lib';
+    import { getContext, onMount, untrack } from 'svelte';
+    import { AnnouncementItem, auth, getItemsPerPage, settings, toast, translations, type LookupItem, type LookupItemFilter } from '$lib';
     import {
         type AnnouncementShort,
         type SearchRequestInterface,
@@ -12,6 +12,7 @@
     import offerState from '$lib/stores/offerStore.svelte';
     import { browser } from '$app/environment';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
 
     const props = $props();
     let currentPage = $derived(props.data?.currentPage ?? 1);
@@ -33,7 +34,8 @@
     let limit = $state(getItemsPerPage());
     let totalPages = $state<number>(0);
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
     onMount(() => {
         const handleResize = () => {
@@ -51,7 +53,6 @@
 
     function updatePagination(newPageSize: number) {
         limit = newPageSize;
-        currentPage = currentPage;
 
         goToPage(currentPage, false);
     }
@@ -62,11 +63,13 @@
         settings.isLoading = true;
         const results = await offerFullStore.syncAnnouncements(searchData);
         offerState.setOffers(results.data);
+
         totalPages = results.totalPages;
         settings.isLoading = false;
 
         if (results.page !== currentPage && results.page !== undefined){
             goToPage(results.page, false);
+            toast.show(t.system.noData, "error", 2500);
         }
     }
 
@@ -196,12 +199,14 @@
             limit: limit
         };
 
-        offerState.setFilters(searchValues);
+            offerState.setFilters(searchValues);
+            await searchTransferData(searchValues);
 
-        await searchTransferData(searchValues);
+            filtrationDropdownOpen = false;
+            sortingDropdownOpen = false;
 
-        filtrationDropdownOpen = false;
-        sortingDropdownOpen = false;
+            // const { data } = await offerFullStore.searchInCache(searchValues);
+            // allOffers = data as AnnouncementShort[];
     }
 
     function switchFull(id: string) {
@@ -283,6 +288,7 @@
                                 type="text"
                                 placeholder={t.offers.searchProperties}
                                 class="search-input"
+                               // disabled="{!settings.online}"
                         />
                         <svg class="search-icon" viewBox="0 0 24 24">
                             <circle cx="11" cy="11" r="8"/>
@@ -294,6 +300,7 @@
                         <button
                                 class="filter-button {filtrationDropdownOpen ? 'active' : ''}"
                                 onclick={toggleFiltrationDropdown}
+                                //disabled="{!settings.online}"
                         >
                             <svg class="filter-icon" viewBox="0 0 24 24">
                                 <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
@@ -349,6 +356,7 @@
                         <button
                                 class="filter-button {sortingDropdownOpen ? 'active' : ''}"
                                 onclick={toggleSortingDropdown}
+                                //disabled="{!settings.online}"
                         >
                             <svg class="filter-icon" viewBox="0 0 24 24">
                                 <path d="M3 6h18M7 12h10M10 18h4"/>
@@ -397,7 +405,7 @@
                         {/if}
                     </div>
 
-                    <button class="search-button" disabled={!settings.online} onclick={confirmInteraction}>
+                    <button class="search-button" /*disabled={!settings.online}*/ onclick={confirmInteraction}>
                         <svg class="search-button-icon" viewBox="0 0 24 24">
                             <circle cx="11" cy="11" r="8"/>
                             <path d="m21 21-4.35-4.35"/>

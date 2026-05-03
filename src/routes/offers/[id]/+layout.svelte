@@ -1,6 +1,8 @@
 <script lang='ts'>
     import { page } from '$app/stores';
     import { settings, translations } from '$lib';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
+    import { getContext } from 'svelte';
 
     let { data, children } = $props();
 
@@ -25,7 +27,8 @@
         };
     });
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="wrapper">

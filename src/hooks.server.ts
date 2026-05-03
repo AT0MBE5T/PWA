@@ -56,6 +56,9 @@ export const handle: Handle = async ({ event, resolve }) => {
     const user = event.locals.user;
     const url = event.url.pathname;
 
+    event.locals.lang = event.cookies.get('lang') ?? 'UA';
+    event.locals.theme = event.cookies.get('theme') ?? 'light';
+
     if (url.startsWith('/personal') && !user) {
         throw redirect(303, '/login');
     }

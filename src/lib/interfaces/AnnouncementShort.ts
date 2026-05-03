@@ -12,4 +12,5 @@ export type AnnouncementShort = {
     viewsCnt: number;
     isPending: boolean;
     closedAt: string | null;
+    publishedAt: Date;
 };

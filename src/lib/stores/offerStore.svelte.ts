@@ -276,6 +276,7 @@ async function stopSignalR() {
                 isPending: true,
                 isVerified: false,
                 location: data.location,
+                publishedAt: new Date(),
                 photoUrl: data.images
                     .filter(i => i.type === 'existing' || (i.type === 'new' && i.preview))
                     .map(i => {
@@ -386,6 +387,21 @@ async function stopSignalR() {
         const db = await offerFullStore.getDB();
         await db.put('announcementDetails', $state.snapshot(found));
         await db.put('announcements', $state.snapshot(offer));
+    },
+
+    switchVerificationById: async (offerId: string, isVerify: boolean) => {
+        const db = await offerFullStore.getDB();        
+        const allPages = await db.getAll('announcements_pages');
+
+        for (const page of allPages) {
+            const index = page.items.findIndex((item: { id: string | number }) => item.id === offerId);
+            
+            if (index !== -1) {
+                page.items[index].isVerified = isVerify;
+                await db.put('announcements_pages', page);
+                break;
+            }
+        }
     },
 
         get offerDetails() { return offerDetails; },

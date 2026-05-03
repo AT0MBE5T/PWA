@@ -7,13 +7,16 @@
     import { goto } from '$app/navigation';
     import Modal from '$lib/modals/Modal.svelte';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     import { env } from '$env/dynamic/public';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import offerState from '$lib/stores/offerStore.svelte';
 
     let { data }: { data: PageData } = $props();
     let offer = $derived(offerFullStore.offerDetails[data.id!]);
 
     onMount(async () => {
+        settings.isLoading = true;
         await offerFullStore.loadDetails(data.id!);
         setTimeout(() =>
         {
@@ -21,10 +24,12 @@
                 history.back();
                 toast.show(t.system.noData, 'error');
             }
-        }, 1000);
+            settings.isLoading = false;
+        }, 100);
     });
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
     const onCloseAnnouncementClick = async () => {
         if($auth.id == null){
@@ -73,7 +78,8 @@
                     propertyTypeName: offer.propertyTypeName,
                     statementTypeName: offer.statementTypeName,
                     title: offer.title,
-                    viewsCnt: offer.viewsCnt
+                    viewsCnt: offer.viewsCnt,
+                    publishedAt: new Date(offer.createdAt)
                 };
 
                 offer.closedAt = currentDate;
@@ -139,8 +145,8 @@
             }
 
             toast.show(offer?.isVerified ? t.offers.unverifiedSuccessfully : t.offers.verifiedSuccessfully, 'success');
-
             offer!.isVerified = !offer?.isVerified;
+            offerState.switchVerificationById(offer.id, offer.isVerified);
             settings.online = true;
         }catch{
             settings.online = false;

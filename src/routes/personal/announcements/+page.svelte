@@ -2,7 +2,8 @@
     import { goto } from '$app/navigation';
     import { AnnouncementItem, auth, translations, settings, Roles, toast, getItemsProfilePerPage } from '$lib';
     import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
-    import { onMount } from 'svelte';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
+    import { getContext, onMount } from 'svelte';
 
     const { data } = $props();
 
@@ -107,7 +108,8 @@
         goto(`/offers/${id}/edit`);
     };
 
-const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

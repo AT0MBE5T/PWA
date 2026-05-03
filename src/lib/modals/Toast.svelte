@@ -16,7 +16,7 @@
         showToastCallback: () => void
     } = $props();
 
-    let visible = $state<boolean>(true);
+    let visible = $state<boolean>(false);
     let timer: any;
 
 $effect(() => {

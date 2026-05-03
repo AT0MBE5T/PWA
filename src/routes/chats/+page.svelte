@@ -1,7 +1,10 @@
 <script lang="ts">
     import { settings, translations } from "$lib";
+    import type SettingsStore from "$lib/stores/settingsStore.svelte";
+    import { getContext } from "svelte";
     
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="placeholder">

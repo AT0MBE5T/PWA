@@ -3,8 +3,9 @@
     import { auth, settings, translations } from '$lib';
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
     import { format } from 'date-fns';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     const { children } = $props();
 
     let allChats = $derived(chatState.chats);
@@ -28,7 +29,8 @@
         }
     });
 
-    const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 </script>
 
 <div class="chat-wrapper">

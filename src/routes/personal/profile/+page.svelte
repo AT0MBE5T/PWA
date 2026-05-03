@@ -7,8 +7,9 @@
         ChangePhoneRequest} from '$lib';
     import { auth, Modal, settings, toast, translations } from '$lib';
     import { personalStore } from '$lib/stores/PersonalStore.svelte.js';
+    import type SettingsStore from '$lib/stores/settingsStore.svelte';
     import {format} from 'date-fns';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
 
     onMount(async () => {
         await personalStore.loadUserDto($auth.id!);
@@ -278,7 +279,8 @@
         }
     };
 
-const t = $derived(translations[settings.lang]);
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

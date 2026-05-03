@@ -70,27 +70,29 @@ class OfferState {
         try{
             return await this.fetchAndCache(searchData, cacheKey);
         }catch {
-            const all = await db.getAllFromIndex(
-                'announcements_pages',
-                'cacheKey',
-                cacheKey
-            );
+            // const all = await db.getAllFromIndex(
+            //     'announcements_pages',
+            //     'cacheKey',
+            //     cacheKey
+            // );
 
-            if (all.length > 0) {
-                const closest = all.sort((a, b) =>
-                    Math.abs(a.page - searchData.page) - Math.abs(b.page - searchData.page)
-                )[0];
+            // if (all.length > 0) {
+            //     const closest = all.sort((a, b) =>
+            //         Math.abs(a.page - searchData.page) - Math.abs(b.page - searchData.page)
+            //     )[0];
 
-                return {
-                    data: closest.items,
-                    totalPages: closest.totalPages,
-                    page: closest.page
-                };
-            }
+            //     return {
+            //         data: closest.items,
+            //         totalPages: closest.totalPages,
+            //         page: closest.page
+            //     };
+            // }
 
+            const { data } = await this.searchInCache(searchData);
+            
             return {
-                data: [],
-                totalPages: 0
+                data: data,
+                totalPages: 1
             };
         }
     }
@@ -150,6 +152,92 @@ async updateCachedAnnouncement(announcementId: string, updatedData: Partial<Anno
             throw new Error();
         }
     }
+
+async searchInCache(searchData: SearchRequestInterface) {
+    const db = await this.getDB();
+
+    const allPages = await db.getAllFromIndex(
+        'announcements_pages',
+        'cacheKey'
+    );
+
+    const allItems = Array.from(
+        new Map(allPages.flatMap(page => page.items).map(item => [item.id, item])).values()
+    );
+
+    let filteredText = allItems.filter(item => {
+        const query = searchData.text?.toLowerCase() || '';
+        return item.title.toLowerCase().includes(query);
+    });
+
+    const propertyTypes = await this.getPropertyTypes();
+    const statementTypes = await this.getStatementTypes();
+
+const selectedPropertyNames = propertyTypes
+    .filter(pt => searchData.filters.includes(pt.id))
+    .map(pt => pt.name);
+
+const selectedStatementNames = statementTypes
+    .filter(st => searchData.filters.includes(st.id))
+    .map(st => st.name);
+
+const filteredResults = filteredText.filter(item => {
+    if (searchData.filters.length === 0) return true;
+
+    const propertyMatch = selectedPropertyNames.length === 0 || 
+                          selectedPropertyNames.includes(item.propertyTypeName);
+
+    const statementMatch = selectedStatementNames.length === 0 || 
+                           selectedStatementNames.includes(item.statementTypeName);
+
+    return propertyMatch && statementMatch;
+});
+
+    if (searchData.sortId > 0){
+        switch (searchData.sortId){
+            case 1:
+                filteredResults.sort((a, b) => b.price - a.price);
+                break;
+            case 2:
+                filteredResults.sort((a, b) => b.area - a.area);
+                break;
+            case 3:
+                filteredResults.sort((a, b) => b.rooms - a.rooms);
+                break;
+            case 4:
+                filteredResults.sort((a, b) => b.floors - a.floors);
+                break;
+            case 5:
+                filteredResults.sort((a, b) => b.viewsCnt - a.viewsCnt);
+                break;
+            case 6:
+                filteredResults.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+                break;
+            case 7:
+                filteredResults.sort((a, b) => a.price - b.price);
+                break;
+            case 8:
+                filteredResults.sort((a, b) => a.area - b.area);
+                break;
+            case 9:
+                filteredResults.sort((a, b) => a.rooms - b.rooms);
+                break;
+            case 10:
+                filteredResults.sort((a, b) => a.floors - b.floors);
+                break;
+            case 11:
+                filteredResults.sort((a, b) => a.viewsCnt - b.viewsCnt);
+                break;
+            case 12:
+                filteredResults.sort((a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime());
+                break;
+        }
+    }
+
+    return {
+        data: filteredResults
+    };
+}
 
     async backgroundFetch(searchData: SearchRequestInterface) {
         try {
