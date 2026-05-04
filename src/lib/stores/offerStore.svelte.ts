@@ -10,6 +10,7 @@ import getCookie from "$lib/utils/cookieData";
 import type { AnnouncementUpdateModel } from "$lib/interfaces/AnnouncementUpdateModel";
 import { env } from "$env/dynamic/public";
 import { settings } from "./settings.svelte";
+import { tick } from "svelte";
 
 const offerState = createOfferState();
 export default offerState;
@@ -35,10 +36,13 @@ async function initSignalR(chatId: string, userName: string) {
         .withAutomaticReconnect()
         .build();
 
-    newConnection.on("ReceiveOffer", (offer: AnnouncementShort) => {
+    newConnection.on("ReceiveOffer", async (offer: AnnouncementShort) => {
         if (!currentFilters || matchesFilters(offer, currentFilters)) {
             offers = [offer, ...offers];
         }
+
+        await offerFullStore.addNewShortOffer(offer);
+        await offerFullStore.syncAnnouncements(offerFullStore.searchDataVar!);
     });
 
     newConnection.on("UpdateOffer", (offer: AnnouncementShort) => {
@@ -59,14 +63,16 @@ async function initSignalR(chatId: string, userName: string) {
         existData.viewsCnt = offer.viewsCnt;
     });
 
-    newConnection.on("DeleteOffer", (offerId: string) => {
-        const existData = offers.find(x => x.id === offerId);
+    newConnection.on("DeleteOffer", async (offerId: string) => {
+        // const existData = offers.find(x => x.id === offerId);
 
-        if (existData === undefined)
-            return;
+        // if (existData === undefined)
+        //     return;
 
-        const index = offers.indexOf(existData);
-        offers.splice(index, 1);
+        // const index = offers.indexOf(existData);
+        // offers.splice(index, 1);
+        await offerFullStore.removeOffer(offerId);
+        const newData = await offerFullStore.syncAnnouncements(offerFullStore.searchDataVar!);
     });
 
     newConnection.onreconnected(async () => {

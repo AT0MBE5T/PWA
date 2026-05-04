@@ -7,7 +7,7 @@
     import { goto } from '$app/navigation';
     import Modal from '$lib/modals/Modal.svelte';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
-    import { getContext, onMount } from 'svelte';
+    import { getContext, onMount, tick } from 'svelte';
     import { env } from '$env/dynamic/public';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
     import offerState from '$lib/stores/offerStore.svelte';
@@ -211,6 +211,8 @@
             offerFullStore.removeOffer(data.id);
             offerFullStore.removeOfferFull(data.id);
 
+            await tick();
+            await offerFullStore.syncAnnouncements(offerFullStore.searchDataVar!);
             toast.show(t.offers.deletedSuccessfully, 'success');
             goto('/offers');
             settings.online = true;

@@ -17,6 +17,8 @@ class OfferState {
     offerDetails = $state<Record<string, AnnouncementFull>>({});
     comments = $state<Record<string, CommentInterface[]>>({});
     questions = $state<Record<string, QuestionAnswer[]>>({});
+    
+    searchDataVar = $state<SearchRequestInterface>();
 
     DB_NAME = 'OffersDB';
     DB_VERSION = 1;
@@ -51,6 +53,7 @@ class OfferState {
     }
 
     async syncAnnouncements(searchData: SearchRequestInterface) {
+        this.searchDataVar = searchData;
         const db = await this.getDB();
         const cacheKey = await this.getCacheKey(searchData);
 
@@ -310,9 +313,6 @@ const filteredResults = filteredText.filter(item => {
                 if (!db.objectStoreNames.contains('propertyTypes')) {
                     db.createObjectStore('propertyTypes', { keyPath: 'id' });
                 }
-                if (!db.objectStoreNames.contains('announcements')) {
-                    db.createObjectStore('announcements', { keyPath: 'id' });
-                }
                 if (!db.objectStoreNames.contains('announcements_pages')) {
                     const store = db.createObjectStore('announcements_pages', { keyPath: 'id' });
                     store.createIndex('cacheKey', 'cacheKey', { unique: false });
@@ -353,14 +353,6 @@ const filteredResults = filteredText.filter(item => {
         store.put(offerFullStore.offerDetails[adId], adId);
     }
 
-    async updateAnnouncements(adId: string) {
-        offerState.offers.find(x => x.id === adId)!.closedAt = (new Date()).toISOString();
-        const db = await this.getDB();
-        const tx = db.transaction('announcements', 'readwrite');
-        const store = tx.objectStore('announcements');
-        store.put(offerState.offers.find(x => x.id === adId), adId);
-    }
-
     async getPropertyTypes(): Promise<PropertyTypeInterface[]> {
         const db = await this.getDB();
         return await db.getAll('propertyTypes');
@@ -377,21 +369,69 @@ const filteredResults = filteredText.filter(item => {
         await db.put('outboxOffers', cleanData);
     }
 
-    async addNewShortOffer(data: AnnouncementShort) {
-        const db = await this.getDB();
-        const cleanData = $state.snapshot(data);
-        await db.put('announcements', cleanData);
-    }
+async addNewShortOffer(data: AnnouncementShort) {
+    const db = await this.getDB();
+    const cleanData = $state.snapshot(data);
 
-    async addNewFullOffer(data: AnnouncementFull) {
-        const db = await this.getDB();
-        await db.put('announcementDetails', $state.snapshot(data));
+    const allPages = await db.getAll('announcements_pages');
+    
+    if (allPages.length > 0) {
+        const firstPage = allPages[0];
+        firstPage.items.unshift(cleanData);
+        await db.put('announcements_pages', firstPage);
+    } else {
+        await db.put('announcements_pages', {
+            id: 1,
+            items: [cleanData]
+        });
     }
+}
 
-    async removeOffer(id: string) {
-        const db = await this.getDB();
-        await db.delete('announcements', id);
+async addNewFullOffer(data: AnnouncementFull) {
+    const db = await this.getDB();
+    const cleanData = $state.snapshot(data);
+    
+    await db.put('announcementDetails', cleanData);
+}
+
+async removeOffer(id: string) {
+    const db = await this.getDB();
+
+    // 1. Обязательно удаляем полную версию из хранилища деталей
+    // Используем Promise.all для параллельного запуска, если нужно, 
+    // но здесь важна последовательность или просто надежность.
+    await db.delete('announcementDetails', id);
+
+    // 2. Получаем все страницы для поиска и удаления из списка
+    const allPages = await db.getAll('announcements_pages');
+
+    for (const page of allPages) {
+        // Ищем индекс элемента. 
+        // Приводим к string, чтобы избежать проблем сравнения string vs number
+        const index = page.items.findIndex((item: any) => String(item.id) === String(id));
+
+        if (index !== -1) {
+            // Создаем копию массива/объекта, чтобы избежать проблем с мутацией $state
+            const updatedItems = [...page.items];
+            updatedItems.splice(index, 1);
+
+            if (updatedItems.length === 0) {
+                // Если страница опустела — удаляем её полностью
+                // ВАЖНО: проверь, что ключ в базе называется 'id'
+                await db.delete('announcements_pages', page.id);
+            } else {
+                // Сохраняем обновленную страницу с новым массивом items
+                await db.put('announcements_pages', {
+                    ...page,
+                    items: updatedItems
+                });
+            }
+            
+            // Как только нашли и удалили — выходим из цикла
+            break; 
+        }
     }
+}
 
     async removeOfferFull(id: string) {
         const db = await this.getDB();

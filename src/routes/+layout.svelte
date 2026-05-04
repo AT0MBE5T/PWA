@@ -10,6 +10,7 @@
     import { env } from '$env/dynamic/public';
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
+    import { Home, Hand, ScrollText, ChartColumnDecreasing } from 'lucide-svelte';
 
     let { data, children } = $props();
 
@@ -187,23 +188,23 @@
                 <nav class="header__nav" bind:this={navElement}>
                     <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
-                    <div class="header__logo" onclick={() => goto('/')}>🏠 Realsy</div>
+                    <div class="header__logo" onclick={() => goto('/')}>🏠 <Home /> <span>Realsy</span></div>
 
                     <ul class="header__nav__list {menuOpen ? 'open' : ''}">
                         <li class="header__nav__list__item">
                             <button class={$page.url.pathname === '/' ? 'active' : ''} onclick={() => { menuOpen = false; goto('/'); }}>
-                                👋 {t.header.page_main}
+                                👋 <Hand/> {t.header.page_main}
                             </button>
                         </li>
                         <li class="header__nav__list__item">
                             <button class={$page.route.id?.startsWith('/offers') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/offers?page=1'); }}>
-                                📋 {t.header.page_offers}
+                                📋 <ScrollText/> {t.header.page_offers}
                             </button>
                         </li>
                         {#if $auth.isAuthenticated && (auth.hasRole(Roles.Realtor) || auth.hasRole(Roles.Admin))}
                             <li class="header__nav__list__item">
                                 <button class={$page.route.id?.startsWith('/reports') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/reports'); }}>
-                                    📊 {t.header.page_reports}
+                                    📊 <ChartColumnDecreasing/> {t.header.page_reports}
                                 </button>
                             </li>
                         {/if}
