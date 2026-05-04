@@ -1,8 +1,9 @@
 <script lang='ts'>
-    import { auth, translations } from '$lib';
+    import { auth, settings, translations } from '$lib';
     import { goto } from '$app/navigation';
     import { getContext } from 'svelte';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { Building2, CircleUser, Home, KeyRound, Lock, PartyPopper, Rocket } from 'lucide-svelte';
 
     const settingsStore = getContext<SettingsStore>('settings');
     const t = $derived(translations[settingsStore.lang]);
@@ -14,36 +15,36 @@
         <div class="greeting-authenticated">
             <div class="greeting-header">
                 <div class="company-logo">
-                    <div class="logo-icon">🏢</div>
+                    <div class="logo-icon"><Building2 class="logo-icon-ui" size={40} color={settingsStore.theme === 'dark' ? '#ccc' : '#252525'} /></div>
                     <h1 class="company-name">{t.authorized.title}</h1>
-                </div>
-                <div class="status-badge authenticated">
-                    <span class="status-dot"></span>
-                    {t.authorized.online}
                 </div>
             </div>
             <div class="welcome-section">
                 <div class="welcome-content">
                     <h2 class="welcome-message">
                         {t.authorized.hello} <span class="user-name">{$auth.personName}</span>!
-                        <span class="welcome-emoji">🎉</span>
+                        <span class="welcome-emoji"><PartyPopper class="icon-accent bounce" /></span>
                     </h2>
                     <p class="welcome-subtitle">{t.authorized.welcome}</p>
                 </div>
                 <div class="welcome-animation">
-                    <div class="floating-house">🏠</div>
+                    <div class="floating-house"><Home class="floating-icon gradient-icon" size={64} color={settingsStore.theme === 'dark' ? '#ccc' : '#252525'} /></div>
                 </div>
             </div>
             <div class="user-info">
                 <div class="info-card">
-                    <img src="{$auth.avatarUrl}" style="width: 3rem;" alt="👤">
+                    {#if ($auth.avatarUrl === null || $auth.avatarUrl.length === 0)}
+                        <CircleUser size={50} color={settingsStore.theme === 'dark' ? '#ccc' : '#252525'}/>
+                    {:else}
+                        <img src="{$auth.avatarUrl}" style="width: 3rem;" alt="#">
+                    {/if}
                     <div class="info-content">
                         <h3 class="info-title">{t.authorized.name}</h3>
                         <p class="info-value">{$auth.name}</p>
                     </div>
                 </div>
                 <div class="info-card">
-                    <div class="info-icon">🔑</div>
+                    <div class="info-icon"><KeyRound size={50} color={settingsStore.theme === 'dark' ? '#ccc' : '#252525'}/></div>
                     <div class="info-content">
                         <h3 class="info-title">{t.authorized.roles}</h3>
                         <div class="roles-container">
@@ -58,19 +59,18 @@
     {:else}
         <div class="greeting-not-authorized">
             <div class="unauthorized-content">
-                <div class="lock-icon">🔒</div>
+                <div class="lock-icon"><Lock class="lock-icon-ui" size={64} /></div>
                 <h2 class="unauthorized-title">{t.unauthorized.title}</h2>
                 <p class="unauthorized-message">
                     {t.unauthorized.message}
                 </p>
                 <button class="login-button" onclick={() => goto('/login')}>
-                    <span class="login-icon">🚀</span>
+                    <Rocket class="btn-icon" />
                     {t.unauthorized.loginBtn}
                 </button>
             </div>
             <div class="unauthorized-decoration">
-                <div class="floating-key">🗝️</div>
-                <div class="floating-door">🚪</div>
+                <div class="floating-key"><KeyRound class="floating-decor" size={48} /></div>
             </div>
         </div>
     {/if}
@@ -114,6 +114,34 @@
         margin-bottom: 2rem;
     }
 
+    .icon-accent {
+        color: #f59e0b;
+        filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.4));
+    }
+
+    .gradient-icon {
+        stroke: url(#iconGradient);
+        filter: drop-shadow(0 10px 25px rgba(99, 102, 241, 0.4));
+    }
+
+    .floating-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .lock-icon-ui {
+        color: #fbbf24;
+        animation: shake 2s infinite;
+        filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.4));
+    }
+
+    .btn-icon {
+        transition: transform 0.2s ease;
+    }
+
+    .login-button:hover .btn-icon {
+        transform: translateX(4px) scale(1.1);
+    }
+
     .company-logo {
         display: flex;
         align-items: center;
@@ -134,30 +162,6 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
         letter-spacing: -0.02em;
-    }
-
-    .status-badge {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-
-    .status-badge.authenticated {
-        background: rgba(34, 197, 94, 0.1);
-        color: #16a34a;
-        border: 1px solid rgba(34, 197, 94, 0.2);
-    }
-
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        background: #22c55e;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
     }
 
     .welcome-section {
@@ -231,11 +235,6 @@
     .info-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .info-icon {
-        font-size: 2rem;
-        opacity: 0.8;
     }
 
     .info-title {
@@ -389,12 +388,6 @@
 :global([data-theme="dark"]) .role-badge {
     background: linear-gradient(135deg, #818cf8 0%, #a855f7 100%);
     box-shadow: 0 2px 10px rgba(129, 140, 248, 0.2);
-}
-
-:global([data-theme="dark"]) .status-badge.authenticated {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border-color: rgba(74, 222, 128, 0.3);
 }
 
 :global([data-theme="dark"]) .logo-icon,

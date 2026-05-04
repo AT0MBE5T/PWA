@@ -13,6 +13,7 @@
     import { browser } from '$app/environment';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { ChevronLeft, ChevronRight } from 'lucide-svelte';
 
     const props = $props();
     let currentPage = $derived(props.data?.currentPage ?? 1);
@@ -433,7 +434,7 @@
                     onclick={() => goToPage(currentPage - 1, true)}
                     disabled={currentPage === 1 || allOffers.length === 0}
             >
-                ⬅️
+                <ChevronLeft size={20}/>
             </button>
 
             {#each Array(totalPages).fill(0).map((_, i) => i + 1) as page}
@@ -450,7 +451,7 @@
                     onclick={() => goToPage(currentPage + 1, true)}
                     disabled={currentPage === totalPages || allOffers.length === 0}
             >
-                ➡️
+                <ChevronRight size={20} />
             </button>
         </div>
         {#if auth.hasRole(Roles.Realtor) || auth.hasRole(Roles.Admin)}
@@ -828,7 +829,6 @@
     }
 
     .pagination-btn {
-        padding: 0.5rem 1rem;
         border: 2px solid #e2e8f0;
         background-color: white;
         color: #374151;
@@ -836,6 +836,12 @@
         cursor: pointer;
         font-weight: 500;
         transition: all 0.3s ease;
+        font-size: 1rem;
+        width: 44px;
+        height: 37.5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .pagination-btn.active {

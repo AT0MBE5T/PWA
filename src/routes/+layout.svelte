@@ -10,7 +10,7 @@
     import { env } from '$env/dynamic/public';
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
-    import { Home, Hand, ScrollText, ChartColumnDecreasing } from 'lucide-svelte';
+    import { Home, Hand, ScrollText, ChartColumnDecreasing, ChevronLeft, ChevronRight, Globe, Moon, Sun, CircleUser, MessageCircleMore } from 'lucide-svelte';
 
     let { data, children } = $props();
 
@@ -188,23 +188,23 @@
                 <nav class="header__nav" bind:this={navElement}>
                     <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
-                    <div class="header__logo" onclick={() => goto('/')}>🏠 <Home /> <span>Realsy</span></div>
+                    <div class="header__logo" onclick={() => goto('/')}> <img style="width: 2rem; height: 2rem;" src='icon512_rounded.png' alt="#"/> Realsy</div>
 
                     <ul class="header__nav__list {menuOpen ? 'open' : ''}">
                         <li class="header__nav__list__item">
                             <button class={$page.url.pathname === '/' ? 'active' : ''} onclick={() => { menuOpen = false; goto('/'); }}>
-                                👋 <Hand/> {t.header.page_main}
+                                <Hand/> {t.header.page_main}
                             </button>
                         </li>
                         <li class="header__nav__list__item">
                             <button class={$page.route.id?.startsWith('/offers') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/offers?page=1'); }}>
-                                📋 <ScrollText/> {t.header.page_offers}
+                                <ScrollText/> {t.header.page_offers}
                             </button>
                         </li>
                         {#if $auth.isAuthenticated && (auth.hasRole(Roles.Realtor) || auth.hasRole(Roles.Admin))}
                             <li class="header__nav__list__item">
                                 <button class={$page.route.id?.startsWith('/reports') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/reports'); }}>
-                                    📊 <ChartColumnDecreasing/> {t.header.page_reports}
+                                    <ChartColumnDecreasing/> {t.header.page_reports}
                                 </button>
                             </li>
                         {/if}
@@ -212,7 +212,7 @@
                         {#if $auth.isAuthenticated}
                             <li class="header__nav__list__item">
                                 <button class={$page.route.id?.startsWith('/chats') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/chats'); }}>
-                                    💬 {t.header.page_chats}
+                                    <MessageCircleMore/> {t.header.page_chats}
                                 </button>
                             </li>
                         {/if}
@@ -220,13 +220,13 @@
                         {#if $auth.isAuthenticated}
                             <li class="header__nav__list__item login-logout-btn">
                                 <button onclick={logout}>
-                                    ⬅️ {t.header.logout}
+                                    <ChevronLeft/> {t.header.logout}
                                 </button>
                             </li>
                         {:else}
                             <li class="header__nav__list__item login-logout-btn">
                                 <button class={$page.route.id?.startsWith('/login') ? 'active' : ''} onclick={() => goto('/login')}>
-                                    ➡️ {t.header.login}
+                                    <ChevronRight/> {t.header.login}
                                 </button>
                             </li>
                         {/if}
@@ -242,11 +242,16 @@
                             {settings.online ? t.authorized.online : t.authorized.offline}
                         </button>
                         <button class="control-btn" onclick={() => settingsStore.toggleLang()} title="{ t.system.changeLang }">
-                            🌐 {settingsStore.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}
+                            <Globe/> {settingsStore.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}
                         </button>
                         
-                        <button class="control-btn" onclick={() => settingsStore.toggleTheme()} title="{ t.system.changeLang }">
-                            {settingsStore.theme === 'dark' ? '🌙' : '☀️'} {settingsStore.theme === 'dark' ? t.header.theme_dark : t.header.theme_light}
+                        <button class="control-btn" onclick={() => settingsStore.toggleTheme()} title="{ t.system.changeTheme }">
+                            {#if (settingsStore.theme === 'dark')}
+                                <Moon/>
+                            {:else}
+                                <Sun/>
+                            {/if}
+                            {settingsStore.theme === 'dark' ? t.header.theme_dark : t.header.theme_light}
                         </button>
 
                         <div class="divider"></div>
@@ -261,7 +266,7 @@
                                             class="avatar-img" 
                                         />
                                     {:else}
-                                        <div class="default-avatar">👤</div>
+                                        <div class="default-avatar"><CircleUser size={30}/></div>
                                     {/if}
                                 </div>
                                 <h3 class="profile-name">{$auth.name}</h3>
@@ -452,6 +457,9 @@
         color: white;
         cursor: pointer;
         letter-spacing: -0.5px;
+        display: flex;
+        gap: .3rem;
+        align-items: center;
     }
 
     .header__controls {
@@ -468,6 +476,9 @@
         border-radius: 6px;
         cursor: pointer;
         font-size: 0.9rem;
+        display: flex;
+        gap: .3rem;
+        align-items: center;
     }
 
     .control-btn:hover {
@@ -534,7 +545,7 @@
 }
 
 .default-avatar {
-    font-size: 1.2rem;
+    display: flex;
 }
 
 .profile-name {
@@ -609,6 +620,9 @@
         font-size: 1.1rem;
         font-weight: 500;
         font-family: inherit;
+
+        display: flex;
+        gap: .3rem;
     }
 
     .header__nav__list__item button:hover {

@@ -8,33 +8,11 @@
         LookupItem,
         ImageItem,
         AnnouncementAddModel,
-        AnnouncementUpdateModel
-
-    ,
-
-    AnnouncementFull
-
-    ,
-
-    AnnouncementShort
-
-    ,
-
-    CommentInterface
-
-    ,
-
-    QuestionAnswer
-
-    ,
-
-    SearchRequestInterface,
-
-    LookupItemFilter
-
+        AnnouncementUpdateModel,
+        LookupItemFilter
     } from '$lib';
     import { Modal, Toast, auth, settings, translations } from '$lib';
-    import { goto, invalidateAll } from '$app/navigation';
+    import { goto } from '$app/navigation';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import offerState from '$lib/stores/offerStore.svelte';
     import { env } from '$env/dynamic/public';
@@ -780,9 +758,10 @@
                             <input
                                     bind:value={propertyTypeSearch}
                                     oninput={handlePropertyTypeSearch}
-                                    onfocus={() => propertyTypeDropdownOpen = true}
+                                    onfocus={() => { propertyTypeDropdownOpen = true; statementTypeDropdownOpen = false; }}
                                     name="propertyType"
                                     type="text"
+                                    readonly={true}
                                     placeholder={t.offers.searchPropertyType}
                                     autocomplete="off"
                             />
@@ -868,9 +847,10 @@
                             <input
                                     bind:value={statementTypeSearch}
                                     oninput={handleStatementTypeSearch}
-                                    onfocus={() => statementTypeDropdownOpen = true}
+                                    onfocus={() => { statementTypeDropdownOpen = true; propertyTypeDropdownOpen = false; }}
                                     name="statementType"
                                     type="text"
+                                    readonly={true}
                                     placeholder={t.offers.searchStatementType}
                                     autocomplete="off"
                             />
@@ -952,6 +932,7 @@
         max-width: 800px;
         width: 100%;
         margin: 2rem 0;
+        padding: 2.5rem;
     }
 
     .announcement__form__title {
@@ -1205,7 +1186,6 @@
         background: #1e293b;
         border: 1px solid #334155;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        padding: 2.5rem;
         border-radius: 20px;
     }
 
