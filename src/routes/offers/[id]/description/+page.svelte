@@ -384,7 +384,13 @@ let currentIndex = $state(0);
                             </div>
                         {/if}
                         <div class="header__container__verification__text">
-                            {offer?.isVerified ? `✅ ${t.offers.verified}` : `❌ ${t.offers.unverified}`}
+                            {#if offer?.isVerified}
+                                <img src="/icons/check.svg" height="25" width="25" alt="#">
+                                {t.offers.verified}
+                            {:else}
+                                <img src="/icons/cross.svg" height="25" width="25" alt="#">
+                                {t.offers.unverified}
+                            {/if}
                         </div>
                     </div>
                     <div class="header__container__favoriting">
@@ -394,7 +400,13 @@ let currentIndex = $state(0);
                             </div>
                         {/if}
                         <div class="header__container__favorite__text">
-                            {offer?.isFavorite ? `🌟 ${t.offers.inFavorite}` : `⭐ ${t.offers.addInFavorite}`}
+                            {#if offer?.isFavorite}
+                                <img src="/icons/stars.svg" height="25" width="25" alt="#">
+                                {t.offers.inFavorite}
+                            {:else}
+                                <img src="/icons/star.svg" height="25" width="25" alt="#">
+                                {t.offers.addInFavorite}
+                            {/if}
                         </div>
                     </div>
                 </div>
@@ -406,7 +418,7 @@ let currentIndex = $state(0);
                                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                                 <div class="carousel__main" onclick={toggleLightbox} role="button" tabindex="0">
                                     <img src={photos[currentIndex]} alt="Property" />
-                                    <div class="zoom-hint">🔍 {t.offers.clickToEnlarge}</div>
+                                    <div class="zoom-hint"><img src="/icons/magnifier.svg" alt="#"> {t.offers.clickToEnlarge}</div>
                                     
                                     {#if photos.length > 1}
                                         <button class="nav-btn prev" onclick={prevPhoto}>❮</button>
@@ -428,10 +440,10 @@ let currentIndex = $state(0);
                         </div>
                     </div>
                     <div class="description__item__right__main_info_block">
-                        <div class="description__item__right__main_info_block__item">💵 {t.offers.price}: {offer?.price} ₴</div>
-                        <div class="description__item__right__main_info_block__item">🔐 {t.offers.statementType}: {offer?.statementTypeName}</div>
-                        <div class="description__item__right__main_info_block__item">🏠 {t.offers.propertyType}: {offer?.propertyTypeName}</div>
-                        <div class="description__item__right__main_info_block__item">👁️ {t.offers.viewsCnt}: {offer?.viewsCnt}</div>
+                        <div class="description__item__right__main_info_block__item"><img src="/icons/money.svg" height="25" width="25" alt="#"> {t.offers.price}: {offer?.price} ₴</div>
+                        <div class="description__item__right__main_info_block__item"><img src="/icons/lock.svg" height="25" width="25" alt="#"> {t.offers.statementType}: {offer?.statementTypeName}</div>
+                        <div class="description__item__right__main_info_block__item"><img src="/icons/house.svg" height="25" width="25" alt="#"> {t.offers.propertyType}: {offer?.propertyTypeName}</div>
+                        <div class="description__item__right__main_info_block__item"><img src="/icons/eye.svg" height="25" width="25" alt="#"> {t.offers.viewsCnt}: {offer?.viewsCnt}</div>
                     </div>    
                 </div>
 
@@ -466,47 +478,47 @@ let currentIndex = $state(0);
 
         <main>
             <div class="main__container">
-                <div class="shop__item__description__block__item item__location">📌 {t.offers.location}: {offer?.location}</div>
+                <div class="shop__item__description__block__item item__location"><img src="/icons/pin.svg" height="25" width="25" alt="#"> {t.offers.location}: {offer?.location}</div>
                 <div class="main__container__content">
-                    <div class="shop__item__description__block__item">🪜 {t.offers.floors}: {offer?.floors}</div>
-                    <div class="shop__item__description__block__item item__rooms">🛏 {t.offers.rooms}: {offer?.rooms}</div>
-                    <div class="shop__item__description__block__item item__area">📐 {t.offers.area}: {offer?.area} {t.offers.sqm}</div>
+                    <div class="shop__item__description__block__item"><img src="/icons/ladder.svg" height="25" width="25" alt="#"> {t.offers.floors}: {offer?.floors}</div>
+                    <div class="shop__item__description__block__item item__rooms"><img src="/icons/bed.svg" height="25" width="25" alt="#"> {t.offers.rooms}: {offer?.rooms}</div>
+                    <div class="shop__item__description__block__item item__area"><img src="/icons/ruler.svg" height="25" width="25" alt="#"> {t.offers.area}: {offer?.area} {t.offers.sqm}</div>
                 </div>
-                <div class="shop__item__description__block__item item__content">📃 {t.offers.content}: {offer?.content}</div>
+                <div class="shop__item__description__block__item item__content"><img src="/icons/description.svg" height="25" width="25" alt="#"> {t.offers.content}: {offer?.content}</div>
             </div>
         </main>️
 
         <footer>
             <div class="footer__container">
-                <div class="shop__item__description__block__item item__description">📄 {t.offers.description}: {offer?.description}</div>
+                <div class="shop__item__description__block__item item__description"><img src="/icons/description.svg" height="25" width="25" alt="#"> {t.offers.description}: {offer?.description}</div>
                 <div class="footer__container__publisher_info_block">
-                    <div class="shop__item__description__block__item">🦰 {t.offers.author}: {offer?.author}</div>
+                    <div class="shop__item__description__block__item"><img src="/icons/user.svg" height="25" width="25" alt="#"> {t.offers.author}: {offer?.author}</div>
                     <div class="shop__item__description__block__item">
-                        ⌚ {t.offers.createdAt}: 
+                        <img src="/icons/clock.svg" height="25" width="25" alt="#"> {t.offers.createdAt}: 
                         {offer?.createdAt ? format(offer.createdAt, 'dd.MM.yyyy HH:mm') : ''}
                     </div>
                 </div>
                 {#if $auth.isAuthenticated && offer?.closedAt === null}
                     <div class="footer__container__buy">
-                        <button onclick={onContactAuthor}>💰 {t.offers.contactRealtor}</button>
+                        <button onclick={onContactAuthor}><img src="/icons/chat.svg" height="25" width="25" alt="#"> {t.offers.contactRealtor}</button>
                     </div>
                     <div class="footer__container__complain">
-                        <button onclick={() => showComplaint = true}>💢 {t.offers.complain}</button>
+                        <button onclick={() => showComplaint = true}><img src="/icons/complaint.svg" height="25" width="25" alt="#"> {t.offers.complain}</button>
                     </div>
                 {/if}
                 {#if (auth.hasRole(Roles.Admin) || $auth.id === data.authorId) && offer?.closedAt === null}
                     <div class="footer__container__edit">
-                        <button onclick={() => goto(`/offers/${data.id}/edit`)}>✏️ {t.offers.edit}</button>
+                        <button onclick={() => goto(`/offers/${data.id}/edit`)}><img src="/icons/pencil.svg" height="25" width="25" alt="#"> {t.offers.edit}</button>
                     </div>
                     <div class="footer__container__close">
-                        <button onclick={onCloseAnnouncementClick}>🔒 {t.offers.close}</button>
+                        <button onclick={onCloseAnnouncementClick}><img src="/icons/lock.svg" height="25" width="25" alt="#"> {t.offers.close}</button>
                     </div>
                 {/if}
             </div>
         </footer>
         {#if auth.hasRole(Roles.Admin) && offer?.closedAt === null}
             <div class="delete__item">
-                <button onclick={onDeleteClick}>🗑️ {t.offers.deleteAnnouncement}</button>
+                <button onclick={onDeleteClick}><img src="/icons/bin.svg" height="25" width="25" alt="#"> {t.offers.deleteAnnouncement}</button>
             </div>
         {/if}
     </div>
@@ -1064,6 +1076,11 @@ let currentIndex = $state(0);
         font-size: 0.7rem;
         opacity: 0;
         transition: opacity 0.3s;
+    }
+
+    .zoom-hint img{
+        width: 10px;
+        height: 10px;
     }
 
     .carousel__main:hover .zoom-hint {

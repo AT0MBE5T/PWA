@@ -88,7 +88,11 @@ $effect(() => {
 
     async function sendMessage() {
         if (!textInput.trim()) return;
-        await chatState.sendMessage($auth.id!, `${$auth.name} ${$auth.personSurname}`, data.chatId, textInput, chat?.offerId!, chat?.realtorId!);
+        if (data.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f'){
+            await chatState.sendMessageInCommon(data.chatId, $auth.id!, `${$auth.name} ${$auth.personSurname}`, textInput);
+        }else{
+            await chatState.sendMessage($auth.id!, `${$auth.name} ${$auth.personSurname}`, data.chatId, textInput, chat?.offerId!, chat?.realtorId!);
+        }
         textInput = "";
     }
 
@@ -128,7 +132,11 @@ $effect(() => {
         {#each allMessages as msg}
             <div class="msg-wrapper" class:mine={msg.senderId === $auth.id}>
                 <div class="msg-bubble">
-                    <p>{msg.content}</p>
+                    {#if msg.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
+                        <p>{msg.senderName} | {msg.content}</p>   
+                    {:else}
+                        <p>{msg.content}</p>
+                    {/if}
                     <span class="msg-time">
                         {format(new Date(msg.createdAt), format(msg.createdAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm')}
                     </span>
@@ -139,12 +147,12 @@ $effect(() => {
                 <p>{t.chats.noMessages}</p>
             </div>
         {/each}
-        {#if chat?.closedAt !== null}
+        {#if chat?.closedAt !== null && chat?.chatId !== '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
             <div class="closed_text">[{t.chats.closed}]</div>
         {/if}
-        {#if chat?.closedAt === null && $auth.id === chat?.realtorId}
+        {#if chat?.closedAt === null && $auth.id === chat?.realtorId && chat?.chatId !== '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
             <div class="footer__container__close">
-                <button onclick={onCloseAnnouncementClick}>🔒 {t.offers.close}</button>
+                <button onclick={onCloseAnnouncementClick}><img src="/icons/lock.svg" height="25" width="25" alt="#"> {t.offers.close}</button>
             </div>
         {/if}
     </div>
@@ -154,7 +162,7 @@ $effect(() => {
             placeholder={t.chats.typeMessage}
             bind:value={textInput}
             onkeydown={handleKeydown}
-            disabled={chat?.closedAt !== null}
+            disabled={chat?.closedAt !== null && chat?.chatId !== '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
         ></textarea>
         <button onclick={addMessage} disabled={!textInput.trim()}>
             <span>➤</span>

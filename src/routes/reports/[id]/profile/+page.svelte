@@ -62,7 +62,7 @@
     <div class="greeting-authenticated">
         <div class="greeting-header">
             <div class="company-logo">
-                <div class="logo-icon">🏢</div>
+                <div class="logo-icon"><img src="/icons/houses.svg" height="25" width="25" alt="#"></div>
                 <h1 class="company-name">{t.authorization.realEstate}</h1>
             </div>
             <div class="status-badge authenticated">
@@ -84,42 +84,42 @@
             </div>
 
             <div class="info-card">
-                <div class="info-icon">🪪</div>
+                <div class="info-icon"><img src="/icons/login.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.authorization.login}</h3>
                     <p class="info-value">{userInfo?.login}</p>
                 </div>
             </div>
             <div class="info-card">
-                <div class="info-icon">👤</div>
+                <div class="info-icon"><img src="/icons/name.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.authorization.name}</h3>
                     <p class="info-value">{userInfo?.name}</p>
                 </div>
             </div>
             <div class="info-card">
-                <div class="info-icon">👨‍👩‍👦</div>
+                <div class="info-icon"><img src="/icons/surname.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.authorization.surname}</h3>
                     <p class="info-value">{userInfo?.surname}</p>
                 </div>
             </div>
             <div class="info-card">
-                <div class="info-icon">🔢</div>
+                <div class="info-icon"><img src="/icons/age.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.authorization.age}</h3>
                     <p class="info-value">{userInfo?.age}</p>
                 </div>
             </div>
             <div class="info-card">
-                <div class="info-icon">📩</div>
+                <div class="info-icon"><img src="/icons/mail.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.authorization.email}</h3>
                     <p class="info-value">{userInfo?.email}</p>
                 </div>
             </div>
             <div class="info-card">
-                <div class="info-icon">📱</div>
+                <div class="info-icon"><img src="/icons/smartphone.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.authorization.phoneNumber}</h3>
                     <p class="info-value">{userInfo?.phoneNumber}</p>
@@ -127,7 +127,7 @@
             </div>
             {#if userInfo !== undefined}
                 <div class="info-card">
-                    <div class="info-icon">⌚</div>
+                    <div class="info-icon"><img src="/icons/clock.svg" height="25" width="25" alt="#"></div>
                     <div class="info-content">
                         <h3 class="info-title">{t.personal.registerDate}</h3>
                         <div class="info-value">
@@ -137,7 +137,7 @@
                 </div>
             {/if}
             <div class="info-card">
-                <div class="info-icon">📋</div>
+                <div class="info-icon"><img src="/icons/description_profile.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.authorized.roles}</h3>
                     <div class="roles-container">

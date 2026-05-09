@@ -98,6 +98,7 @@ export interface TranslationKeys {
         closed: string;
         newMessageFrom: string;
         messageInChat: string;
+        common: string;
     };
 
     authorization: {
@@ -400,7 +401,8 @@ export const translations: Record<Language, TranslationKeys> = {
             noMessages: 'Ще немає повідомлень. Почніть розмову!',
             closed: 'ЗАЧИНЕНО',
             newMessageFrom: 'Нове повідомлення від',
-            messageInChat: 'Повідомлення у чаті'
+            messageInChat: 'Повідомлення у чаті',
+            common: 'Загальний'
         },
         authorization: {
             realEstate: 'Агенство керування нерухомістю',
@@ -696,7 +698,8 @@ export const translations: Record<Language, TranslationKeys> = {
             noMessages: 'No messages yet. Start a conversation!',
             closed: 'CLOSED',
             newMessageFrom: 'New message from',
-            messageInChat: 'Message in chat'
+            messageInChat: 'Message in chat',
+            common: 'Common'
         },
         authorization: {
             realEstate: 'Real Estate Agency',
@@ -903,7 +906,7 @@ export const translations: Record<Language, TranslationKeys> = {
     }
 };
 
-    export const translateStatementType = (type: string): string => {
+    export const translateStatementType = (type: string, lang: Language): string => {
         const translation: Record<string, string> = {
             'For Rent': translations[settings.lang].offers.rent,
             'For Sale': translations[settings.lang].offers.sale,
@@ -913,15 +916,15 @@ export const translations: Record<Language, TranslationKeys> = {
         return translation[type] ?? type;
     };
 
-    export const translatePropertyType = (type: string): string => {
+    export const translatePropertyType = (type: string, lang: Language): string => {
         const translation: Record<string, string> = {
-            'Apartment': translations[settings.lang].offers.apartment,
-            'House': translations[settings.lang].offers.house,
-            'Commercial': translations[settings.lang].offers.commercial,
-            'Office': translations[settings.lang].offers.office,
-            'Warehouse': translations[settings.lang].offers.warehouse,
-            'Land': translations[settings.lang].offers.land,
-            'Room': translations[settings.lang].offers.room,
+            'Apartment': translations[lang].offers.apartment,
+            'House': translations[lang].offers.house,
+            'Commercial': translations[lang].offers.commercial,
+            'Office': translations[lang].offers.office,
+            'Warehouse': translations[lang].offers.warehouse,
+            'Land': translations[lang].offers.land,
+            'Room': translations[lang].offers.room,
         };
 
         return translation[type] ?? type;

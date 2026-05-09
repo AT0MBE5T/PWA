@@ -61,7 +61,7 @@
     <div class="greeting-authenticated">
         <div class="greeting-header">
             <div class="company-logo">
-                <div class="logo-icon">🏢</div>
+                <div class="logo-icon"><img src="/icons/house.svg" height="25" width="25" alt="#"></div>
                 <h1 class="company-name">{t.authorization.realEstate}</h1>
             </div>
             <div class="status-badge authenticated">
@@ -72,7 +72,7 @@
 
         <div class="user-info">
             <div class="info-card">
-                <div class="info-icon">🪪</div>
+                <div class="info-icon"><img src="/icons/tag.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numAnnouncementPlaced}</h3>
                     <p class="info-value">{userStats?.placedCnt}</p>
@@ -80,7 +80,7 @@
             </div>
 
             <div class="info-card">
-                <div class="info-icon">👁️</div>
+                <div class="info-icon"><img src="/icons/eye.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.reports.views}</h3>
                     <p class="info-value">{userStats?.views}</p>
@@ -88,7 +88,7 @@
             </div>
 
             <div class="info-card">
-                <div class="info-icon">👨</div>
+                <div class="info-icon"><img src="/icons/money.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numAnnouncementSold}</h3>
                     <p class="info-value">{userStats?.soldCnt}</p>
@@ -96,7 +96,7 @@
             </div>
 
             <div class="info-card">
-                <div class="info-icon">👨‍👩‍👦</div>
+                <div class="info-icon"><img src="/icons/dollars-bag.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numAnnouncementBought}</h3>
                     <p class="info-value">{userStats?.boughtCnt}</p>
@@ -104,7 +104,7 @@
             </div>
 
             <div class="info-card">
-                <div class="info-icon">🔢</div>
+                <div class="info-icon"><img src="/icons/calendar.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numDays}</h3>
                     <p class="info-value">{userStats?.daysFromRegistration}</p>
@@ -112,7 +112,7 @@
             </div>
 
             <div class="info-card">
-                <div class="info-icon">💳</div>
+                <div class="info-icon"><img src="/icons/dollars-bag.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numPayments}</h3>
                     <p class="info-value">{userStats?.paymentsCnt}</p>
@@ -120,42 +120,42 @@
             </div>
 
             <div class="info-card">
-                <div class="info-icon">❓</div>
+                <div class="info-icon"><img src="/icons/question.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numQuestions}</h3>
                     <p class="info-value">{userStats?.questionsCnt}</p>
                 </div>
             </div>
             <div class="info-card">
-                <div class="info-icon">❗</div>
+                <div class="info-icon"><img src="/icons/exclamation.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numAnswers}</h3>
                     <p class="info-value">{userStats?.answersCnt}</p>
                 </div>
             </div>
             <div class="info-card">
-                <div class="info-icon">💬</div>
+                <div class="info-icon"><img src="/icons/chat.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.numComments}</h3>
                     <p class="info-value">{userStats?.commentsCnt}</p>
                 </div>
             </div>
             <div class="info-card">
-                <div class="info-icon">💬</div>
+                <div class="info-icon"><img src="/icons/star.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.favoriteCategory}</h3>
-                    <p class="info-value">{translatePropertyType(userStats?.favoriteCategory ?? '')}</p>
+                    <p class="info-value">{translatePropertyType(userStats?.favoriteCategory ?? '', settingsStore.lang)}</p>
                 </div>
             </div>
             <div class="info-card info-card__wide">
-                <div class="info-icon">💰</div>
+                <div class="info-icon"><img src="/icons/dollars-bag.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.earned}</h3>
                     <p class="info-value">{userStats?.totalMoneyEarned} ₴</p>
                 </div>
             </div>
             <div class="info-card info-card__wide">
-                <div class="info-icon">💵</div>
+                <div class="info-icon"><img src="/icons/money.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.personal.spent}</h3>
                     <p class="info-value">{userStats?.totalMoneySpent} ₴</p>

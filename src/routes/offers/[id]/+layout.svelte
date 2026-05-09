@@ -1,6 +1,7 @@
 <script lang='ts'>
     import { page } from '$app/stores';
     import { settings, translations } from '$lib';
+    import { offerFullStore } from '$lib/stores/OfferFullStore.svelte.js';
     import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
     import { getContext } from 'svelte';
 
@@ -27,6 +28,13 @@
         };
     });
 
+    let offer = $derived(offerFullStore.offerDetails[data.id!]);
+
+    const formatLocation = (location: string) => {
+        if (!location) return '';
+        return encodeURIComponent(location);
+    };
+
     const settingsStore = getContext<SettingsStore>('settings');
     const t = $derived(translations[settingsStore.lang]);
 </script>
@@ -47,19 +55,19 @@
                     <li class='header__nav__list__item'>
                         <a href="/offers/{data.id}/description" 
                         class={isActive('/description') ? 'highlighted_page' : ''}>
-                        📃 {t.offers.description}
+                        <img src="/icons/description.svg" height="25" width="25" alt="#"> {t.offers.description}
                         </a>
                     </li>
                     <li class='header__nav__list__item'>
                         <a href="/offers/{data.id}/comments" 
                         class={isActive('/comments') ? 'highlighted_page' : ''}>
-                        💬 {t.offers.comments}
+                        <img src="/icons/chat.svg" height="25" width="25" alt="#"> {t.offers.comments}
                         </a>
                     </li>
                     <li class='header__nav__list__item'>
                         <a href="/offers/{data.id}/questions" 
                         class={isActive('/questions') ? 'highlighted_page' : ''}>
-                        ❓ {t.offers.questions}
+                        <img src="/icons/question.svg" height="25" width="25" alt="#"> {t.offers.questions}
                         </a>
                     </li>
                 </ul>
@@ -68,6 +76,17 @@
         <main class="container__main main">
             {@render children()}
         </main>
+        {#if offer?.location && settings.online}
+            <div class="container__map">
+                <iframe
+                    title="MAP"
+                    loading="lazy"
+                    width="100%"
+                    height="100%"
+                    src='https://www.google.com/maps?q=${formatLocation(offer?.location)}&output=embed'>
+                </iframe>
+            </div>
+        {/if}
     </div>
 </div>
 
@@ -98,6 +117,56 @@
         align-items: center;
         z-index: 99;
         top: 0;
+    }
+
+    .container__map {
+        width: var(--sidebar-width);
+        position: fixed;
+        height: 93%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        bottom: 0;
+        right: 0;
+        box-sizing: border-box;
+    }
+
+    .container__map iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 21px;
+
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+
+        box-shadow: 
+            0 10px 30px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+
+        transition: all 0.3s ease;
+    }
+
+    .container__map iframe:hover {
+        transform: scale(1.01);
+    }
+
+    .container__map::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        background: linear-gradient(
+            to bottom,
+            rgba(0,0,0,0.2),
+            rgba(0,0,0,0.4)
+        );
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .container__map:hover::after {
+        opacity: 0;
     }
 
     .header__nav {
@@ -140,7 +209,7 @@
 
     .container__main {
         flex: 1;
-        padding: 2rem;
+        padding: 2rem 2rem 0 2rem;
         display: flex;
         justify-content: center;
         overflow-y: auto;
@@ -182,8 +251,15 @@
             gap: 4px;
         }
 
-        .container__main {
-            padding-bottom: 80px;
+        .container__map {
+            position: relative;
+            width: 100%;
+            height: 30rem;
+            margin-bottom: 6rem;
+        }
+
+        .container__map iframe {
+            border-radius: 21px;
         }
     }
 </style>

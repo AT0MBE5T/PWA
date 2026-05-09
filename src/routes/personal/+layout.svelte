@@ -1,5 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
+    import { page } from '$app/stores';
     import { settings, translations } from '$lib';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
     import { getContext } from 'svelte';
@@ -15,7 +16,9 @@
         menuOpen = false;
     };
 
-    let currentPage = $state<Pages>('Profile');
+    const isActive = (path: string) => $page.url.pathname.includes(path);
+
+    let currentPage = $state<Pages>(isActive('profile') ? 'Profile' : isActive('stats') ? 'Stats' : isActive('announcements') ? 'Announcements' : isActive('complaints') ? 'Complaints' : 'Profile');
 
     let navElement = $state<HTMLElement>();
 
@@ -56,28 +59,28 @@ $effect(() => {
                         <a href="#" class={currentPage === 'Profile' ? 'highlighted_page' : ''} onclick={() => {
                             pageClicked('Profile');
                             goto('/personal/profile');
-                            }}>🧑 {t.personal.profile}</a>
+                            }}><img src="/icons/user.svg" height="25" width="25" alt="#"> {t.personal.profile}</a>
                     </li>
                     <li class='header__nav__list__item'>
                         <!-- svelte-ignore a11y_invalid_attribute -->
                         <a href="#" class={currentPage === 'Stats' ? 'highlighted_page' : ''} onclick={() => {
                             pageClicked('Stats');
                             goto('/personal/stats');
-                        }}>📊 {t.personal.stats}</a>
+                        }}><img src="/icons/chart.svg" height="25" width="25" alt="#"> {t.personal.stats}</a>
                     </li>
                     <li class='header__nav__list__item'>
                         <!-- svelte-ignore a11y_invalid_attribute -->
                         <a href="#" class={currentPage === 'Announcements' ? 'highlighted_page' : ''} onclick={() => {
                             pageClicked('Announcements');
                             goto('/personal/announcements?tab=Favorite&page=1');
-                            }}>📢 {t.personal.announcements}</a>
+                            }}><img src="/icons/bull-horn.svg" height="25" width="25" alt="#"> {t.personal.announcements}</a>
                     </li>
                     <li class='header__nav__list__item'>
                         <!-- svelte-ignore a11y_invalid_attribute -->
                         <a href="#" class={currentPage === 'Complaints' ? 'highlighted_page' : ''} onclick={() => {
                             pageClicked('Complaints');
                             goto('/personal/complaints');
-                            }}>💢 {t.personal.complaints}</a>
+                            }}><img src="/icons/complaint.svg" height="25" width="25" alt="#"> {t.personal.complaints}</a>
                     </li>
                 </ul>
             </nav>

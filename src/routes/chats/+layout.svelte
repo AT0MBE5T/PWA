@@ -53,12 +53,16 @@
                                 class="avatar-img" 
                             />
                         {:else}
-                            <div class="default-avatar">👤</div>
+                            <div class="default-avatar"><img src="/icons/user.svg" height="35" width="35" alt="#"></div>
                         {/if}
                     </div>
                     <div class="contact-info">
-                        <span class="contact-name">{chat.chatName}</span>
-                        <span class="contact-role">{chat.closedAt !== null ? `[${t.chats.closed}]` : chat.lastMessage}</span>
+                        {#if chat.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
+                            <span class="contact-name">{t.chats.common}</span>
+                        {:else}
+                            <span class="contact-name">{chat.chatName}</span>
+                        {/if}
+                        <span class="contact-role">{chat.closedAt !== null ? `[${t.chats.closed}]` : chat.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f' ? `${chat.lastMessageBy} | ${chat.lastMessage}` : chat.lastMessage}</span>
                         <span class="contact-role">{chat.closedAt !== null ? format(new Date(chat.closedAt), format(chat.closedAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm') : (chat.lastMessageAt === null ? '' : format(new Date(chat.lastMessageAt), format(chat.lastMessageAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm'))}</span>
                     </div>
                 </a>
@@ -145,7 +149,7 @@
     }
 
     .default-avatar {
-        font-size: 1.2rem;
+        display: flex;
     }
 
     .contact-info {

@@ -3,6 +3,7 @@ export interface Chat {
     chatName: string;
     lastMessage: string;
     lastMessageAt: string | null;
+    lastMessageBy: string | null;
     unreadCount: string;
     avatarUrl: string;
     closedAt: string | null;

@@ -40,7 +40,7 @@ const getAnnouncementFullInfoById = async (
   const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/get-announcement-full-by-id`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ announcementId, userId })
+    body: JSON.stringify({ announcementId })
   });
 
   if (!response.ok) return;

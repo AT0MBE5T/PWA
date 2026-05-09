@@ -46,25 +46,25 @@
 <div class="report__container">
     {#if generalStats !== undefined}
         <div>
-            <h1 class="section-title">📊 {t.reports.report}</h1>
+            <h1 class="section-title"><img src="/icons/chart.svg" height="25" width="25" alt="#"> {t.reports.report}</h1>
             <div class="report__container__summary">
                 <div class="report__container__item">
-                    <h3>💼 {t.reports.completedDeals}</h3>
+                    <h3><img src="/icons/suitcase.svg" height="25" width="25" alt="#"> {t.reports.completedDeals}</h3>
                     <div style="font-size: 2rem; font-weight: bold; color: #4CAF50; margin-top: 10px;">{generalStats.totalClosedAnnouncements}</div>
                 </div>
                 <div class="report__container__item">
-                    <h3>💰 {t.reports.totalProfit}</h3>
+                    <h3><img src="/icons/dollars-bag.svg" height="25" width="25" alt="#"> {t.reports.totalProfit}</h3>
                     <div style="font-size: 2rem; font-weight: bold; color: #2196F3; margin-top: 10px;">{generalStats.totalIncome}</div>
                 </div>
                 <div class="report__container__item">
-                    <h3>👁️ {t.reports.views}</h3>
+                    <h3><img src="/icons/eye.svg" height="25" width="25" alt="#"> {t.reports.views}</h3>
                     <div style="font-size: 2rem; font-weight: bold; color: #2196F3; margin-top: 10px;">{generalStats.views}</div>
                 </div>
             </div>
         </div>
 
         <div>
-            <h2 class="section-title">🏆 {t.reports.topDeal}</h2>
+            <h2 class="section-title"><img src="/icons/cup.svg" height="25" width="25" alt="#"> {t.reports.topDeal}</h2>
             <div class="report__container__top_property">
                 <div class="report__container__item"><strong>{t.reports.name}:</strong> <span>{generalStats.topDealName}</span></div>
                 <div class="report__container__item"><strong>{t.reports.statementType}:</strong> <span>{generalStats.topDealStatementType}</span></div>
@@ -76,7 +76,7 @@
         </div>
 
         <div>
-            <h2 class="section-title">👥 {t.reports.topRealtors}</h2>
+            <h2 class="section-title"><img src="/icons/users.svg" height="25" width="25" alt="#"> {t.reports.topRealtors}</h2>
             <div class="report__container__top_realtors">
                 <div class="realtor-card">
                     <div class="report__container__item"><strong>{t.reports.name}:</strong> <span>{generalStats.topRealtorNameFirst}</span></div>
@@ -92,7 +92,7 @@
         </div>
 
         <div>
-            <h2 class="section-title">🏠 {t.reports.propertyTypes}</h2>
+            <h2 class="section-title"><img src="/icons/house.svg" height="25" width="25"> {t.reports.propertyTypes}</h2>
             <div class="report__container__top_property_types">
                 <div class="property-type-card">
                     <div class="report__container__item"><strong>{t.reports.type}:</strong> <span>{generalStats.topPropertyTypeNameFirst}</span></div>
@@ -108,7 +108,7 @@
         </div>
 
         <div>
-            <h2 class="section-title">🎯 {t.reports.topClients}</h2>
+            <h2 class="section-title"><img src="/icons/target.svg" height="25" width="25" alt="#"> {t.reports.topClients}</h2>
             <div class="report__container__top_clients">
                 <div class="client-card">
                     <div class="report__container__item"><strong>{t.reports.name}:</strong> <span>{generalStats.topClientNameFirst}</span></div>

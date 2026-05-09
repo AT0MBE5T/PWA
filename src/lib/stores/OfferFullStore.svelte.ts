@@ -252,8 +252,16 @@ const filteredResults = filteredText.filter(item => {
         const db = await this.getDB();
 
         try {
+            const token = getCookie('accessToken');
             const [resFull, resComm, resQuest] = await Promise.all([
-                fetch(`${env.PUBLIC_API_URL}/api/announcements/get-announcement-full-by-id/${id}`),
+                fetch(`${env.PUBLIC_API_URL}/api/announcements/get-announcement-full-by-id/${id}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                ),
                 fetch(`${env.PUBLIC_API_URL}/api/comments/get-comments-by-announcement-id/${id}`),
                 fetch(`${env.PUBLIC_API_URL}/api/questions/get-all-by-announcement-id/${id}`)
             ]);

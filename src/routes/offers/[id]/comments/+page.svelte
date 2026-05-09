@@ -81,7 +81,7 @@
 <ConfirmModal bind:this={confirmModal} />
 
 <div class="comments__block">
-    <h2 class="comments__title">💬 {t.offers.comments}</h2>
+    <h2 class="comments__title"><img src="/icons/chat.svg" height="25" width="25" alt="#"> {t.offers.comments}</h2>
     <div class="comments__block__container" bind:this={commentContainer}>
         {#each allComments as i}
             <div class="comments__item">
@@ -96,13 +96,13 @@
                         onkeydown={
                             (e) => (e.key === 'Enter' || e.key === ' ') && deleteComment(i.id)
                         }>
-                        ➖
+                        -
                     </div>
                 {/if}
                 {#if i.isPending}
-                    🔃
+                    <img src="/icons/refresh.svg" height="25" width="25" alt="#">
                 {/if}
-                ⌚ {format(i.createdAt, 'dd.MM.yyyy HH:mm')} | 🦰 {i.author}: {i.text}
+                <img src="/icons/clock.svg" height="25" width="25" alt="#"> {format(i.createdAt, 'dd.MM.yyyy HH:mm')} | <img src="/icons/user.svg" height="25" width="25" alt="#"> {i.author}: {i.text}
             </div>
         {/each}
     </div>

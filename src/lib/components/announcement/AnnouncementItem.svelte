@@ -11,8 +11,13 @@
 </script>
 
 <div class="shop__item">
-    <div class="shop__item__description__block__verification">{item.isVerified ? '✅' : ''}</div>
-    <div class="shop__item__description__block__favoriting">{item.isFavorite ? '⭐' : ''}</div>
+    
+    {#if item.isVerified}
+        <div class="shop__item__description__block__verification"><img src="/icons/check.svg" height="50" width="50" alt="#"></div>
+    {/if}
+    {#if item.isFavorite}
+        <div class="shop__item__description__block__favoriting"><img src="/icons/star.svg" height="50" width="50" alt="#"></div>
+    {/if}
     <div class="shop__item__image_block">
         <img src={item.photoUrl} alt={item.title} />
     </div>
@@ -23,13 +28,13 @@
 
     <div class="shop__item__description__block">
         <div class="shop__item__description__block__short-description">
-            <div class="shop__item__description__block__short-description__item">🔐 {translateStatementType(item.statementTypeName)}</div>
-            <div class="shop__item__description__block__short-description__item align-end">🏠 {translatePropertyType(item.propertyTypeName)}</div>
-            <div class="shop__item__description__block__short-description__item">💵 {item.price} ₴</div>
-            <div class="shop__item__description__block__short-description__item align-end">📐 {item.area} {t.offers.sqm}</div>
+            <div class="shop__item__description__block__short-description__item"><img src="/icons/lock.svg" height="20" width="20" alt="#"> {translateStatementType(item.statementTypeName, settingsStore.lang)}</div>
+            <div class="shop__item__description__block__short-description__item align-end"><img src="/icons/house.svg" height="20" width="20" alt="#"> {translatePropertyType(item.propertyTypeName, settingsStore.lang)}</div>
+            <div class="shop__item__description__block__short-description__item"><img src="/icons/money.svg" height="20" width="20" alt="#"> {item.price} ₴</div>
+            <div class="shop__item__description__block__short-description__item align-end"><img src="/icons/ruler.svg" height="20" width="20" alt="#"> {item.area} {t.offers.sqm}</div>
         </div>
-        <div class="shop__item__description__block__item">📌 {item.location}</div>
-        <div class="shop__item__description__block__item">👁️ {item.viewsCnt}</div>
+        <div class="shop__item__description__block__item" title="{item.location}"><img src="/icons/pin.svg" height="20" width="20" alt="#"> {item.location}</div>
+        <div class="shop__item__description__block__item"><img src="/icons/eye.svg" height="20" width="20" alt="#"> {item.viewsCnt}</div>
     </div>
 
     <div class="shop__item__button__block">
@@ -90,10 +95,6 @@
         line-height: 1.2;
         height: 3rem;
         overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
         margin-top: 0.5rem;
         padding: 0 0.5rem;
     }
@@ -123,14 +124,16 @@
 
     .shop__item__description__block__verification{
         position: absolute;
-        right: 1rem;
+        right: 0;
+        top: 0;
         font-size: 1.5rem;
         z-index: 1;
     }
 
-        .shop__item__description__block__favoriting{
+    .shop__item__description__block__favoriting{
         position: absolute;
-        left: 1rem;
+        left: 0;
+        top: 0;
         font-size: 1.5rem;
         z-index: 1;
     }
@@ -162,6 +165,17 @@
     .shop__item__button__block__buy_button:hover {
         background-color: #ff9900;
         transform: scale(1.03);
+    }
+
+    .shop__item__description__block__item {
+        padding: 4px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     :global([data-theme="dark"]) .shop__item {

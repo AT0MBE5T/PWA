@@ -10,8 +10,6 @@
     import { env } from '$env/dynamic/public';
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
-    import { Home, Hand, ScrollText, ChartColumnDecreasing, ChevronLeft, ChevronRight, Globe, Moon, Sun, CircleUser, MessageCircleMore } from 'lucide-svelte';
-
     let { data, children } = $props();
 
     let menuOpen = $state(false);
@@ -188,23 +186,23 @@
                 <nav class="header__nav" bind:this={navElement}>
                     <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
-                    <div class="header__logo" onclick={() => goto('/')}> <img style="width: 2rem; height: 2rem;" src='icon512_rounded.png' alt="#"/> Realsy</div>
+                    <div class="header__logo" onclick={() => goto('/')}> <img style="width: 2rem; height: 2rem;" src='/icon512_rounded.png' alt="#"/> Realsy</div>
 
                     <ul class="header__nav__list {menuOpen ? 'open' : ''}">
                         <li class="header__nav__list__item">
                             <button class={$page.url.pathname === '/' ? 'active' : ''} onclick={() => { menuOpen = false; goto('/'); }}>
-                                <Hand/> {t.header.page_main}
+                                <img src="/icons/house.svg" height="25" width="25" alt="#"> {t.header.page_main}
                             </button>
                         </li>
                         <li class="header__nav__list__item">
                             <button class={$page.route.id?.startsWith('/offers') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/offers?page=1'); }}>
-                                <ScrollText/> {t.header.page_offers}
+                                <img src="/icons/houses.svg" height="25" width="25" alt="#"> {t.header.page_offers}
                             </button>
                         </li>
                         {#if $auth.isAuthenticated && (auth.hasRole(Roles.Realtor) || auth.hasRole(Roles.Admin))}
                             <li class="header__nav__list__item">
                                 <button class={$page.route.id?.startsWith('/reports') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/reports'); }}>
-                                    <ChartColumnDecreasing/> {t.header.page_reports}
+                                    <img src="/icons/chart.svg" height="25" width="25" alt="#"> {t.header.page_reports}
                                 </button>
                             </li>
                         {/if}
@@ -212,7 +210,7 @@
                         {#if $auth.isAuthenticated}
                             <li class="header__nav__list__item">
                                 <button class={$page.route.id?.startsWith('/chats') ? 'active' : ''} onclick={() => { menuOpen = false; goto('/chats'); }}>
-                                    <MessageCircleMore/> {t.header.page_chats}
+                                    <img src="/icons/chat.svg" height="25" width="25" alt="#"> {t.header.page_chats}
                                 </button>
                             </li>
                         {/if}
@@ -220,18 +218,17 @@
                         {#if $auth.isAuthenticated}
                             <li class="header__nav__list__item login-logout-btn">
                                 <button onclick={logout}>
-                                    <ChevronLeft/> {t.header.logout}
+                                    <img src="/icons/chevron-left.svg" height="25" width="25" alt="#"> {t.header.logout}
                                 </button>
                             </li>
                         {:else}
                             <li class="header__nav__list__item login-logout-btn">
                                 <button class={$page.route.id?.startsWith('/login') ? 'active' : ''} onclick={() => goto('/login')}>
-                                    <ChevronRight/> {t.header.login}
+                                    <img src="/icons/chevron-right.svg" height="25" width="25" alt="#"> {t.header.login}
                                 </button>
                             </li>
                         {/if}
                     </ul>
-
                     <div class="header__controls">
                         <button 
                             class="status-badge {settings.online ? 'authenticated' : 'not-authenticated'}" 
@@ -242,14 +239,14 @@
                             {settings.online ? t.authorized.online : t.authorized.offline}
                         </button>
                         <button class="control-btn" onclick={() => settingsStore.toggleLang()} title="{ t.system.changeLang }">
-                            <Globe/> {settingsStore.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}
+                            <img src="/icons/globe.svg" height="25" width="25" alt="#"> {settingsStore.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}
                         </button>
                         
                         <button class="control-btn" onclick={() => settingsStore.toggleTheme()} title="{ t.system.changeTheme }">
                             {#if (settingsStore.theme === 'dark')}
-                                <Moon/>
+                                <img src="/icons/moon.svg" height="25" width="25" alt="#">
                             {:else}
-                                <Sun/>
+                                <img src="/icons/sun.svg" height="25" width="25" alt="#">
                             {/if}
                             {settingsStore.theme === 'dark' ? t.header.theme_dark : t.header.theme_light}
                         </button>
@@ -266,7 +263,7 @@
                                             class="avatar-img" 
                                         />
                                     {:else}
-                                        <div class="default-avatar"><CircleUser size={30}/></div>
+                                        <div class="default-avatar"><img src="/icons/user.svg" height="40" width="40" alt="#"></div>
                                     {/if}
                                 </div>
                                 <h3 class="profile-name">{$auth.name}</h3>

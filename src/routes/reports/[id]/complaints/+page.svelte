@@ -62,7 +62,7 @@
 
 <div class="complaints-container">
     <div class="complaints-header">
-        <div class="header-icon">📢</div>
+        <div class="header-icon"><img src="/icons/bull-horn.svg" height="25" width="25" alt="#"></div>
         <h2>{t.personal.complaints}</h2>
     </div>
 
@@ -119,7 +119,7 @@
                     <tr>
                         <td colspan="6" class="empty-state">
                             <div class="empty-content">
-                                <span>📭</span>
+                                <span><img src="/icons/empty.svg" height="25" width="25" alt="#"></span>
                                 <p>{t.personal.emptyComplaints}</p>
                             </div>
                         </td>

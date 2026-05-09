@@ -124,9 +124,9 @@
             <div class="question_answer__item">
                 <div class="question_answer__item__question">
                     {#if i.isQuestionPending}
-                        🔃
+                        <img src="/icons/refresh.svg" height="25" width="25" alt="#">
                     {/if}
-                    ⌚ {i.createdAtQuestion ? format(i.createdAtQuestion, 'dd.MM.yyyy HH:mm') : ''} | 🦰 {i.createdByQuestion}: {i.textQuestion}
+                    <img src="/icons/clock.svg" height="25" width="25" alt="#"> {i.createdAtQuestion ? format(i.createdAtQuestion, 'dd.MM.yyyy HH:mm') : ''} | <img src="/icons/user.svg" height="25" width="25" alt="#"> {i.createdByQuestion}: {i.textQuestion}
                 </div>
                 {#if auth.hasRole(Roles.Admin)}
                     <div role="button"
@@ -135,7 +135,7 @@
                          onclick={() => deleteQuestion(i.questionId)}
                          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && deleteQuestion(i.questionId)}
                     >
-                        ➖
+                        -
                     </div>
                 {/if}
                 {#if i.createdAtAnswer !== null}
@@ -146,14 +146,14 @@
                                 onclick={() => deleteAnswer(i.answerId)}
                                 onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && deleteAnswer(i.answerId)}
                         >
-                            ➖
+                            -
                         </div>
                     {/if}
                     <div class="question_answer__item__answer">
                         {#if i.isAnswerPending}
-                            🔃
+                            <img src="/icons/refresh.svg" height="25" width="25" alt="#">
                         {/if}
-                        ⌚ {format(i.createdAtAnswer, 'dd.MM.yyyy HH:mm')} | 🦰 {i.createdByAnswer}: {i.textAnswer}
+                        <img src="/icons/clock.svg" height="25" width="25" alt="#"> {format(i.createdAtAnswer, 'dd.MM.yyyy HH:mm')} | <img src="/icons/user.svg" height="25" width="25" alt="#"> {i.createdByAnswer}: {i.textAnswer}
                     </div>
                 {:else}
                     {#if auth.hasRole(Roles.Admin) || data.authorId === $auth.id}
@@ -163,7 +163,7 @@
                                 class="question_answer__item__button"
                                 onclick={() => isAnswering ? switchToCommentBack() : switchToAnswer(i.questionId)}
                                 onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && isAnswering ? switchToCommentBack() : switchToAnswer(i.questionId)}>
-                            ➕
+                            +
                         </div>
                     {/if}
                 {/if}

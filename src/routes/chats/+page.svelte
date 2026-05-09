@@ -8,7 +8,7 @@
 </script>
 
 <div class="placeholder">
-    <div class="icon">💬</div>
+    <div class="icon"><img src="/icons/chat.svg" height="25" width="25" alt="#"></div>
     <h2>{t.chats.messages}</h2>
     <p>{t.chats.selectContact}</p>
 </div>

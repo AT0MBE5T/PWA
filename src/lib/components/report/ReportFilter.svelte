@@ -145,7 +145,7 @@
 <div class="filter-container">
     <div class="filter-header">
         <h3 class="filter-title">{t.reports.searchFilters}</h3>
-        <div class="filter-icon">🔍</div>
+        <div class="filter-icon"><img src="/icons/magnifier.svg" height="25" width="25" alt="#"></div>
     </div>
 
     <header class="container__header header">
@@ -227,12 +227,12 @@
     </div>
     <div class="filter-actions">
         <button class="btn btn-secondary" class:hidden={!cleanButtonVisible} onclick={clearFilter} type="button">
-            <span class="btn-icon">🗑️</span>
+            <span class="btn-icon"><img src="/icons/bin.svg" height="25" width="25" alt="#"></span>
             Clear
         </button>
         <button class="btn btn-primary" class:btn-max-width={!cleanButtonVisible} onclick={applyFilter}>
             <span class="btn-icon">✓</span>
-            Form
+            {t.reports.form}
         </button>
     </div>
 </div>

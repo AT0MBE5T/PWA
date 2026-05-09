@@ -3,7 +3,6 @@
     import { goto } from '$app/navigation';
     import { getContext } from 'svelte';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
-    import { Building2, CircleUser, Home, KeyRound, Lock, PartyPopper, Rocket } from 'lucide-svelte';
 
     const settingsStore = getContext<SettingsStore>('settings');
     const t = $derived(translations[settingsStore.lang]);
@@ -15,7 +14,7 @@
         <div class="greeting-authenticated">
             <div class="greeting-header">
                 <div class="company-logo">
-                    <div class="logo-icon"><Building2 class="logo-icon-ui" size={40} color={settingsStore.theme === 'dark' ? '#ccc' : '#252525'} /></div>
+                    <div class="logo-icon"> <img src="/icons/building.svg" style="width: 50px; height: 50px;" alt="#"></div>
                     <h1 class="company-name">{t.authorized.title}</h1>
                 </div>
             </div>
@@ -23,18 +22,18 @@
                 <div class="welcome-content">
                     <h2 class="welcome-message">
                         {t.authorized.hello} <span class="user-name">{$auth.personName}</span>!
-                        <span class="welcome-emoji"><PartyPopper class="icon-accent bounce" /></span>
+                        <span class="welcome-emoji"><img src="/icons/party-popper.svg" width="40rem" height="40rem" class="icon-accent bounce" alt="#"></span>
                     </h2>
                     <p class="welcome-subtitle">{t.authorized.welcome}</p>
                 </div>
                 <div class="welcome-animation">
-                    <div class="floating-house"><Home class="floating-icon gradient-icon" size={64} color={settingsStore.theme === 'dark' ? '#ccc' : '#252525'} /></div>
+                    <div class="floating-house"><img src="/icons/house.svg" style="width: 50px; height: 50px;" class="floating-icon gradient-icon" alt="#"></div>
                 </div>
             </div>
             <div class="user-info">
                 <div class="info-card">
                     {#if ($auth.avatarUrl === null || $auth.avatarUrl.length === 0)}
-                        <CircleUser size={50} color={settingsStore.theme === 'dark' ? '#ccc' : '#252525'}/>
+                        <img src="/icons/user.svg" width="50px" height="50px" alt="#">
                     {:else}
                         <img src="{$auth.avatarUrl}" style="width: 3rem;" alt="#">
                     {/if}
@@ -44,7 +43,7 @@
                     </div>
                 </div>
                 <div class="info-card">
-                    <div class="info-icon"><KeyRound size={50} color={settingsStore.theme === 'dark' ? '#ccc' : '#252525'}/></div>
+                    <div class="info-icon"><img src="/icons/key.svg" width="50" height="50" alt="#"></div>
                     <div class="info-content">
                         <h3 class="info-title">{t.authorized.roles}</h3>
                         <div class="roles-container">
@@ -59,18 +58,18 @@
     {:else}
         <div class="greeting-not-authorized">
             <div class="unauthorized-content">
-                <div class="lock-icon"><Lock class="lock-icon-ui" size={64} /></div>
+                <div class="lock-icon"><img src="/icons/lock.svg" class="lock-icon-ui" height="64" width="64" alt="#"></div>
                 <h2 class="unauthorized-title">{t.unauthorized.title}</h2>
                 <p class="unauthorized-message">
                     {t.unauthorized.message}
                 </p>
                 <button class="login-button" onclick={() => goto('/login')}>
-                    <Rocket class="btn-icon" />
+                    <img src="/icons/rocket.svg" class="btn-icon" height="25" width="25" alt="#">
                     {t.unauthorized.loginBtn}
                 </button>
             </div>
             <div class="unauthorized-decoration">
-                <div class="floating-key"><KeyRound class="floating-decor" size={48} /></div>
+                <div class="floating-key"><img src="/icons/key.svg" class="floating-decor" height="48" width="48" alt="#"></div>
             </div>
         </div>
     {/if}

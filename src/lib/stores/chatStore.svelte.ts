@@ -55,6 +55,7 @@ function createChatState() {
             if (chatIndex !== -1) {
                 chats[chatIndex].lastMessage = message;
                 chats[chatIndex].lastMessageAt = new Date().toISOString();
+                chats[chatIndex].lastMessageBy = userName;
 
                 const [updatedChat] = chats.splice(chatIndex, 1);
                 chats.unshift(updatedChat);
@@ -68,7 +69,8 @@ function createChatState() {
                     unreadCount: '1',
                     closedAt: null,
                     offerId: offerId,
-                    realtorId: realtorId
+                    realtorId: realtorId,
+                    lastMessageBy: null
                 });
             }
         });
@@ -112,6 +114,11 @@ function createChatState() {
         isConnecting = false;
 
         await connection.invoke("JoinChat", { ChatRoom: userId, UserName: userName });
+        try{
+            await connection.invoke("JoinCommonChat", userName);
+        }catch(e){
+            console.log(e);
+        }
     }
 
     if (chatIdd) {
@@ -211,6 +218,29 @@ function createChatState() {
             stopSignalR,
             loadData,
             loadMessages,
+            sendMessageInCommon: async (chatId: string, userId: string, userName: string, text: string) => {
+                const tempId = crypto.randomUUID();
+                const pendingMsg: Message = {
+                    id: tempId,
+                    chatId: chatId,
+                    senderId: userId,
+                    content: text,
+                    createdAt: new Date().toISOString(),
+                    isRead: false,
+                    senderName: userName,
+                    isPending: false
+                };
+
+                messages = [...messages, pendingMsg]; 
+
+                if (connection?.state === signalR.HubConnectionState.Connected) {
+                    try {
+                        await connection.invoke("SendMessageInCommon", text, userName);
+                    } catch (e) {
+                        
+                    }
+                }
+            },
             sendMessage: async (userId: string, userName: string, chatId: string, text: string, offerId: string, realtorId: string) => {
                 const tempId = crypto.randomUUID();
                 const pendingMsg: Message = {

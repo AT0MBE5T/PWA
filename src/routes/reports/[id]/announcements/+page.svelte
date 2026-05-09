@@ -241,23 +241,23 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
             <li class='header__nav__list__item'>
                 <button class={currentAction === 'Favorite' ? 'highlighted_page' : ''} onclick={() => {
                     pageClicked('Favorite');
-                    }}>🏷️ {t.personal.favorite}</button>
+                    }}><img src="/icons/star.svg" height="25" width="25" alt="#"> {t.personal.favorite}</button>
             </li>
             <li class='header__nav__list__item'>
                 <button class={currentAction === 'Bought' ? 'highlighted_page' : ''} onclick={() => {
                     pageClicked('Bought');
-                    }}>🛒 {t.personal.bought}</button>
+                    }}><img src="/icons/cart.svg" height="25" width="25" alt="#"> {t.personal.bought}</button>
             </li>
             {#if $auth.roles.includes(Roles.Realtor) || $auth.roles.includes(Roles.Admin)}
                 <li class='header__nav__list__item'>
                     <button class={currentAction === 'Sold' ? 'highlighted_page' : ''} onclick={() => {
                         pageClicked('Sold');
-                        }}>💲 {t.personal.sold}</button>
+                        }}><img src="/icons/dollar.svg" height="25" width="25" alt="#"> {t.personal.sold}</button>
                 </li>
                 <li class='header__nav__list__item'>
                     <button class={currentAction === 'Placed' ? 'highlighted_page' : ''} onclick={() => {
                         pageClicked('Placed');
-                        }}>🏷️ {t.personal.placed}</button>
+                        }}><img src="/icons/tag.svg" height="25" width="25" alt="#"> {t.personal.placed}</button>
                 </li>
             {/if}
         </ul>
@@ -278,7 +278,7 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
                     onclick={() => goToPage(currentPage - 1, true)}
                     disabled={currentPage === 1 || offers?.totalItems === 0}
             >
-                ⬅️
+                <img src="/icons/chevron-left.svg" height="25" width="25" alt="#">
             </button>
             {#each Array(totalPages).fill(0).map((_, i) => i + 1) as page}
                 <button
@@ -293,7 +293,7 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
                     onclick={() => goToPage(currentPage + 1, true)}
                     disabled={currentPage === totalPages || offers?.totalItems === 0}
             >
-                ➡️
+                <img src="/icons/chevron-right.svg" height="25" width="25" alt="#">
             </button>
         </div>
     </div>
