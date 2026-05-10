@@ -54,6 +54,7 @@ export * from './stores/offerStore.svelte';
 // components
 export { default as AnnouncementForm } from './components/announcement/AnnouncementForm.svelte';
 export { default as AnnouncementItem } from './components/announcement/AnnouncementItem.svelte';
+export { default as SupportChat } from './components/SupportChat.svelte';
 
 export { default as ReportFilter } from './components/report/ReportFilter.svelte';
 export { default as ReportGeneral } from './components/report/ReportGeneral.svelte';

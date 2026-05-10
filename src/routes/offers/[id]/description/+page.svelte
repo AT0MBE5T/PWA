@@ -204,7 +204,7 @@
 
             if(!response.ok){
                 toast.show(t.offers.deletingError, 'error');
-                goto('/offers');
+                await goto('/offers?page=1');
                 return;
             }
 
@@ -214,7 +214,7 @@
             await tick();
             await offerFullStore.syncAnnouncements(offerFullStore.searchDataVar!);
             toast.show(t.offers.deletedSuccessfully, 'success');
-            goto('/offers');
+            await goto('/offers?page=1');
             settings.online = true;
         }catch{
             settings.online = false;

@@ -37,12 +37,9 @@ async function initSignalR(chatId: string, userName: string) {
         .build();
 
     newConnection.on("ReceiveOffer", async (offer: AnnouncementShort) => {
-        if (!currentFilters || matchesFilters(offer, currentFilters)) {
-            offers = [offer, ...offers];
-        }
-
+        offers.splice(offers.length - 1, 1);
+        offers = [...offers, offer];
         await offerFullStore.addNewShortOffer(offer);
-        await offerFullStore.syncAnnouncements(offerFullStore.searchDataVar!);
     });
 
     newConnection.on("UpdateOffer", (offer: AnnouncementShort) => {
@@ -52,7 +49,6 @@ async function initSignalR(chatId: string, userName: string) {
             return;
 
         existData.area = offer.area;
-        existData.isFavorite = offer.isFavorite;
         existData.isVerified = offer.isVerified;
         existData.location = offer.location;
         existData.photoUrl = offer.photoUrl;
@@ -64,15 +60,18 @@ async function initSignalR(chatId: string, userName: string) {
     });
 
     newConnection.on("DeleteOffer", async (offerId: string) => {
-        // const existData = offers.find(x => x.id === offerId);
+        const existData = offers.find(x => x.id === offerId);
 
-        // if (existData === undefined)
-        //     return;
+        if (existData === undefined)
+            return;
 
-        // const index = offers.indexOf(existData);
-        // offers.splice(index, 1);
+        const index = offers.indexOf(existData);
+        offers.splice(index, 1);
         await offerFullStore.removeOffer(offerId);
-        const newData = await offerFullStore.syncAnnouncements(offerFullStore.searchDataVar!);
+
+        const offer = await offerFullStore.getAnnouncementToFill();
+
+        offers.splice(index, 0, offer);
     });
 
     newConnection.onreconnected(async () => {

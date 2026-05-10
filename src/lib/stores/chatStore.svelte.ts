@@ -70,7 +70,9 @@ function createChatState() {
                     closedAt: null,
                     offerId: offerId,
                     realtorId: realtorId,
-                    lastMessageBy: null
+                    lastMessageBy: null,
+                    supportId: null,
+                    chatTypeId: 'c80e92eb-b14d-4258-bf31-e44b1d3e8bc7'
                 });
             }
         });
@@ -117,7 +119,7 @@ function createChatState() {
         try{
             await connection.invoke("JoinCommonChat", userName);
         }catch(e){
-            console.log(e);
+            
         }
     }
 
@@ -218,6 +220,10 @@ function createChatState() {
             stopSignalR,
             loadData,
             loadMessages,
+            updateChatClosedAt: async (chatId: string) => {
+                const index = chats.findIndex(x => x.chatId === chatId);
+                chats[index].closedAt = new Date().toISOString();
+            },
             sendMessageInCommon: async (chatId: string, userId: string, userName: string, text: string) => {
                 const tempId = crypto.randomUUID();
                 const pendingMsg: Message = {
@@ -241,7 +247,7 @@ function createChatState() {
                     }
                 }
             },
-            sendMessage: async (userId: string, userName: string, chatId: string, text: string, offerId: string, realtorId: string) => {
+            sendMessage: async (userId: string, userName: string, chatId: string, text: string, offerId: string | null, realtorId: string) => {
                 const tempId = crypto.randomUUID();
                 const pendingMsg: Message = {
                     id: tempId,

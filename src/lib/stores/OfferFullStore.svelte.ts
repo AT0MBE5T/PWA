@@ -12,6 +12,7 @@ import { env } from '$env/dynamic/public';
 import offerState from './offerStore.svelte';
 import { settings } from './settings.svelte';
 import getCookie from '$lib/utils/cookieData';
+import { getItemsPerPage } from '$lib/utils/pagination';
 
 class OfferState {
     offerDetails = $state<Record<string, AnnouncementFull>>({});
@@ -52,6 +53,32 @@ class OfferState {
         await tx.done;
     }
 
+    async getAnnouncementToFill() {
+        const searchData = this.searchDataVar ?? { filters: [] , limit: getItemsPerPage(), page: 1, sortId: 0, text: '' };
+        const db = await this.getDB();
+        const cacheKey = await this.getCacheKey(searchData);
+
+        const cachedPage = await db.get(
+            'announcements_pages',
+            `${cacheKey}_${searchData.page + 1}`
+        );
+
+        if (cachedPage && cachedPage.items.length === 0){
+            const cachedPagePrev = await db.get(
+                'announcements_pages',
+                `${cacheKey}_${searchData.page - 1}`
+            );
+
+            if (cachedPagePrev && cachedPagePrev.items.length === 0){
+                return null;
+            }
+
+            return cachedPagePrev.items[cachedPagePrev.items.length - 1];
+        }
+
+        return cachedPage.items[0];
+    }
+
     async syncAnnouncements(searchData: SearchRequestInterface) {
         this.searchDataVar = searchData;
         const db = await this.getDB();
@@ -63,41 +90,77 @@ class OfferState {
         );
 
         if (cachedPage) {
-            this.backgroundFetch(searchData);
-            return {
-                data: cachedPage.items,
-                totalPages: cachedPage.totalPages
-            };
+            try{
+                const onlineData = await this.fetchAndCache(searchData, cacheKey);
+                return {
+                    data: onlineData.data,
+                    totalPages: onlineData.totalPages,
+                    page: searchData.page
+                };
+            }catch{
+                return {
+                    data: cachedPage.items,
+                    totalPages: cachedPage.totalPages,
+                    page: searchData.page
+                };
+            }
         }
 
         try{
-            return await this.fetchAndCache(searchData, cacheKey);
-        }catch {
-            // const all = await db.getAllFromIndex(
-            //     'announcements_pages',
-            //     'cacheKey',
-            //     cacheKey
-            // );
-
-            // if (all.length > 0) {
-            //     const closest = all.sort((a, b) =>
-            //         Math.abs(a.page - searchData.page) - Math.abs(b.page - searchData.page)
-            //     )[0];
-
-            //     return {
-            //         data: closest.items,
-            //         totalPages: closest.totalPages,
-            //         page: closest.page
-            //     };
-            // }
-
-            const { data } = await this.searchInCache(searchData);
-            
+            if (searchData.filters.length !== 0 || searchData.sortId > 0 || searchData.text !== ""){
+                searchData.page = 1;
+            }
+            const onlineData = await this.fetchAndCache(searchData, cacheKey);
+            if (onlineData === undefined){
+                return await this.getNearestPage(searchData);
+            }
             return {
-                data: data,
-                totalPages: 1
+                data: onlineData.data,
+                totalPages: onlineData.totalPages,
+                page: searchData.page
+            };
+        }catch {
+            if (searchData.filters.length === 0 && searchData.sortId === 0 && searchData.text === ''){
+                return await this.getNearestPage(searchData);
+            }
+            else{
+                searchData.page = 1;
+                const { data } = await this.searchInCache(searchData);            
+                return {
+                    data: data,
+                    totalPages: 1,
+                    page: 1
+                };
+            }            
+        }
+    }
+
+    private async getNearestPage(searchData: SearchRequestInterface){
+        const db = await this.getDB();
+        const cacheKey = await this.getCacheKey(searchData);
+        const all = await db.getAllFromIndex(
+                'announcements_pages',
+                'cacheKey',
+                cacheKey
+            );
+
+        if (all.length > 0) {
+            const closest = all.sort((a, b) =>
+                Math.abs(a.page - searchData.page) - Math.abs(b.page - searchData.page)
+            )[0];
+
+            return {
+                data: closest.items,
+                totalPages: closest.totalPages,
+                page: closest.page
             };
         }
+
+        return {
+            data: [],
+            totalPages: 1,
+            page: 1
+        };
     }
 
     private async getCacheKey(searchData: SearchRequestInterface) {
@@ -118,7 +181,6 @@ async updateCachedAnnouncement(announcementId: string, updatedData: Partial<Anno
         if (index !== -1) {
             page.items[index] = { ...page.items[index], ...updatedData };
             await db.put('announcements_pages', page);
-            break;
         }
     }
 }
@@ -137,6 +199,13 @@ async updateCachedAnnouncement(announcementId: string, updatedData: Partial<Anno
 
             if (!response.ok) throw new Error("Server unreachable");
             const data = await response.json();
+
+            if (searchData.page > data.totalPages || searchData.page < 1)
+                return undefined;
+
+            if (searchData.filters.length !== 0 || searchData.sortId > 0 || searchData.text !== ""){
+                return data;
+            }
 
             const db = await this.getDB();
 
@@ -241,12 +310,6 @@ const filteredResults = filteredText.filter(item => {
         data: filteredResults
     };
 }
-
-    async backgroundFetch(searchData: SearchRequestInterface) {
-        try {
-            await this.fetchAndCache(searchData, await this.getCacheKey(searchData));
-        } catch {}
-    }
 
     private async fetchAndCacheFullData(id: string) {
         const db = await this.getDB();
@@ -404,39 +467,26 @@ async addNewFullOffer(data: AnnouncementFull) {
 
 async removeOffer(id: string) {
     const db = await this.getDB();
-
-    // 1. Обязательно удаляем полную версию из хранилища деталей
-    // Используем Promise.all для параллельного запуска, если нужно, 
-    // но здесь важна последовательность или просто надежность.
     await db.delete('announcementDetails', id);
-
-    // 2. Получаем все страницы для поиска и удаления из списка
     const allPages = await db.getAll('announcements_pages');
 
     for (const page of allPages) {
-        // Ищем индекс элемента. 
-        // Приводим к string, чтобы избежать проблем сравнения string vs number
         const index = page.items.findIndex((item: any) => String(item.id) === String(id));
 
         if (index !== -1) {
-            // Создаем копию массива/объекта, чтобы избежать проблем с мутацией $state
             const updatedItems = [...page.items];
             updatedItems.splice(index, 1);
 
             if (updatedItems.length === 0) {
-                // Если страница опустела — удаляем её полностью
-                // ВАЖНО: проверь, что ключ в базе называется 'id'
                 await db.delete('announcements_pages', page.id);
             } else {
-                // Сохраняем обновленную страницу с новым массивом items
                 await db.put('announcements_pages', {
                     ...page,
                     items: updatedItems
                 });
             }
-            
-            // Как только нашли и удалили — выходим из цикла
-            break; 
+
+            //break;
         }
     }
 }

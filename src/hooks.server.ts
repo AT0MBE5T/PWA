@@ -44,7 +44,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             id: decoded.sub,
             name: decoded.name ?? null,
             roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.roles],
-            avatarUrl: userDto?.avatar ?? null,
+            avatarUrl: userDto?.avatarUrl ?? null,
             personName: decoded.name,
             personSurname: decoded.surname
         };

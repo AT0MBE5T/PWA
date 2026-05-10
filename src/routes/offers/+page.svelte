@@ -13,6 +13,7 @@
     import { browser } from '$app/environment';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { page } from '$app/state';
 
     const props = $props();
     let currentPage = $derived(props.data?.currentPage ?? 1);
@@ -68,10 +69,16 @@
         settings.isLoading = false;
 
         if (results.page !== currentPage && results.page !== undefined){
-            goToPage(results.page, false);
-            toast.show(t.system.noData, "error", 2500);
+            changePage(results.page);
+            //toast.show(t.system.noData, "error", 2500);
         }
     }
+
+    const changePage = (nextPage: Number) => {
+        const url = new URL(page.url);
+        url.searchParams.set('page', nextPage.toString());
+        goto(url.href, { replaceState: false, noScroll: true, keepFocus: true });
+    };
 
     async function loadInitialData() {
         propertyTypes = await offerFullStore.fetchLookupData('PropertyType');
@@ -162,9 +169,6 @@
         if (currentPage === undefined || (isClicked && currentPage === page))
             return;
 
-        if (page < 1 || page > totalPages)
-            page = 1;
-
         const url = new URL(window.location.href);
         url.searchParams.set('page', page.toString());
         
@@ -204,9 +208,6 @@
 
             filtrationDropdownOpen = false;
             sortingDropdownOpen = false;
-
-            // const { data } = await offerFullStore.searchInCache(searchValues);
-            // allOffers = data as AnnouncementShort[];
     }
 
     function switchFull(id: string) {
@@ -856,7 +857,7 @@
 
     .question_answer__item__button {
         position: fixed;
-        right: 2rem;
+        left: 2rem;
         bottom: 2rem;
         width: 4rem;
         height: 4rem;
@@ -865,7 +866,7 @@
         border: none;
         border-radius: 50%;
         font-size: 3rem;
-        box-shadow: 0 4px 12px rgba(255, 153, 0, 0.3);
+        box-shadow: 0 4px 12px #7a42f4;
         transition: all 0.3s ease;
         cursor: pointer;
         display: flex;

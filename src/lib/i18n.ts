@@ -99,6 +99,9 @@ export interface TranslationKeys {
         newMessageFrom: string;
         messageInChat: string;
         common: string;
+        support: string;
+        supportText: string;
+        send: string;
     };
 
     authorization: {
@@ -402,7 +405,10 @@ export const translations: Record<Language, TranslationKeys> = {
             closed: 'ЗАЧИНЕНО',
             newMessageFrom: 'Нове повідомлення від',
             messageInChat: 'Повідомлення у чаті',
-            common: 'Загальний'
+            common: 'Загальний',
+            support: 'Допомога',
+            supportText: 'Ви отримаєте відповідь протягом години',
+            send: 'Відправити'
         },
         authorization: {
             realEstate: 'Агенство керування нерухомістю',
@@ -699,7 +705,10 @@ export const translations: Record<Language, TranslationKeys> = {
             closed: 'CLOSED',
             newMessageFrom: 'New message from',
             messageInChat: 'Message in chat',
-            common: 'Common'
+            common: 'Common',
+            send: 'Send',
+            support: 'Support',
+            supportText: "You'll receive a response within an hour"
         },
         authorization: {
             realEstate: 'Real Estate Agency',
@@ -810,9 +819,9 @@ export const translations: Record<Language, TranslationKeys> = {
             popularByAsc: 'Unpopular',
             newest: 'New',
             oldest: 'Old',
-            rent: 'For rent',
-            lease: 'For lease',
-            sale: 'For sale',
+            rent: 'For Rent',
+            lease: 'For Lease',
+            sale: 'For Sale',
             apartment: 'Apartment',
             house: 'House',
             commercial: 'Commercial',

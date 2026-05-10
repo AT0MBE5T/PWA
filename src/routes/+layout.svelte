@@ -10,6 +10,7 @@
     import { env } from '$env/dynamic/public';
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
+    import SupportChat from '$lib/components/SupportChat.svelte';
     let { data, children } = $props();
 
     let menuOpen = $state(false);
@@ -181,6 +182,7 @@
 {/if}
 
 <div class="wrapper">
+    <SupportChat/>
     <div class="wrapper__container">
             <header class="container__header">
                 <nav class="header__nav" bind:this={navElement}>

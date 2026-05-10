@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { format } from 'date-fns';
-    import { auth, ConfirmModal, settings, toast, translations, type BuyRequest } from '$lib';
+    import { auth, ConfirmModal, Roles, settings, toast, translations, type BuyRequest } from '$lib';
     import { getContext, tick } from 'svelte';
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
@@ -86,12 +86,46 @@ $effect(() => {
         }
     };
 
+    const onCloseSupportClick = async () => {
+        if($auth.id == null){
+            return;
+        }
+
+        const confirmed = await confirmModal.ask();
+
+        if(!confirmed){
+            return;
+        }
+
+        try{
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/supports/close-support`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${$auth.accessToken}`
+                },
+                body: JSON.stringify(chat?.supportId)
+            });
+
+            if(!response.ok){
+                toast.show(t.offers.closeError, 'error');
+                return;
+            }
+
+            toast.show(t.offers.closeSuccess, 'success');
+            chatState.updateChatClosedAt(chat?.chatId ?? '');
+            settings.online = true;
+        }catch{
+            settings.online = false;
+        }
+    };
+
     async function sendMessage() {
         if (!textInput.trim()) return;
         if (data.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f'){
             await chatState.sendMessageInCommon(data.chatId, $auth.id!, `${$auth.name} ${$auth.personSurname}`, textInput);
         }else{
-            await chatState.sendMessage($auth.id!, `${$auth.name} ${$auth.personSurname}`, data.chatId, textInput, chat?.offerId!, chat?.realtorId!);
+            await chatState.sendMessage($auth.id!, `${$auth.name} ${$auth.personSurname}`, data.chatId, textInput, chat?.offerId ?? null, chat?.realtorId!);
         }
         textInput = "";
     }
@@ -153,6 +187,12 @@ $effect(() => {
         {#if chat?.closedAt === null && $auth.id === chat?.realtorId && chat?.chatId !== '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
             <div class="footer__container__close">
                 <button onclick={onCloseAnnouncementClick}><img src="/icons/lock.svg" height="25" width="25" alt="#"> {t.offers.close}</button>
+            </div>
+        {/if}
+
+        {#if chat?.closedAt === null && auth.hasRole(Roles.Admin) && chat.chatTypeId === '17631888-462b-4be8-975d-7332cce11dfb'}
+            <div class="footer__container__close">
+                <button onclick={onCloseSupportClick}><img src="/icons/lock.svg" height="25" width="25" alt="#"> {t.offers.close}</button>
             </div>
         {/if}
     </div>
@@ -254,6 +294,9 @@ $effect(() => {
         width: 100%;
         border: none;
         border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .footer__container__close button:hover{

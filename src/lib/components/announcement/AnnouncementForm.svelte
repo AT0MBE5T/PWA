@@ -361,7 +361,7 @@
             isValid = false;
         }
 
-        if (!propertyTypeId || !propertyTypes.some(t => t.name === propertyTypeSearch)) {
+        if (!propertyTypeId) {
             propertyTypeIdError = true;
             propertyTypeErrorText = t.validation.selectPropertyType;
             isValid = false;
@@ -403,7 +403,7 @@
             isValid = false;
         }
 
-        if (!statementTypeId || !statementTypes.some(t => t.name === statementTypeSearch)) {
+        if (!statementTypeId) {
             statementTypeError = true;
             statementTypeErrorText = t.validation.selectStatementType;
             isValid = false;
@@ -508,7 +508,7 @@
                     showToast = true;
                 }
 
-                goto('/offers');
+                goto('/offers?page=1');
                 settings.online = true;
             }catch{
                 settings.online = false;
@@ -516,7 +516,7 @@
                 await offerState.addOffer(dataToAdd);
                 await offerState.addFullOffer(dataToAdd, $auth.id!, `${$auth.name} ${$auth.personSurname}`);
 
-                goto('/offers');
+                await goto('/offers?page=1');
             } finally {
                 settings.isLoading = false;
             }
@@ -605,7 +605,7 @@
                     toastText = t.system.errorOccurred;
                     showToast = true;
                 }
-                await goto('/offers');
+                await await goto('/offers?page=1');
                 settings.online = true;
             }catch{
                 settings.online = false;
@@ -628,7 +628,7 @@
                 await offerFullStore.savePendingOfferUpdate(dataToUpdate);
                 await offerState.updateOffer(dataToUpdate);
                 
-                goto('/offers');
+                await goto('/offers?page=1');
             } finally {
                 settings.isLoading = false;
             }
@@ -944,6 +944,7 @@
     .announcement__form__sides {
         display: flex;
         gap: 2rem;
+        margin-top: 1.5rem;
     }
 
     .announcement__form-left,

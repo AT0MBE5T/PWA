@@ -9,4 +9,6 @@ export interface Chat {
     closedAt: string | null;
     offerId: string | null;
     realtorId: string | null;
+    chatTypeId: string;
+    supportId: string | null;
 }

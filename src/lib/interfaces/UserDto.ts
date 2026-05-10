@@ -6,6 +6,6 @@ export interface UserDto {
     email: string;
     phoneNumber: string;
     login: string;
-    avatar: string;
+    avatarUrl: string;
     roles: string[];
 }
