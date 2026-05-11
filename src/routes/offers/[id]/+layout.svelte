@@ -76,7 +76,7 @@
         <main class="container__main main">
             {@render children()}
         </main>
-        {#if offer?.location && settings.online}
+        {#if offer?.location && settings.online && isActive('/description')}
             <div class="container__map">
                 <iframe
                     title="MAP"
