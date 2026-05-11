@@ -498,29 +498,40 @@ let currentIndex = $state(0);
                         {offer?.createdAt ? format(offer.createdAt, 'dd.MM.yyyy HH:mm') : ''}
                     </div>
                 </div>
-                {#if $auth.isAuthenticated && offer?.closedAt === null}
-                    <div class="footer__container__buy">
-                        <button onclick={onContactAuthor}><img src="/icons/chat.svg" height="25" width="25" alt="#"> {t.offers.contactRealtor}</button>
-                    </div>
-                    <div class="footer__container__complain">
-                        <button onclick={() => showComplaint = true}><img src="/icons/complaint.svg" height="25" width="25" alt="#"> {t.offers.complain}</button>
-                    </div>
-                {/if}
-                {#if (auth.hasRole(Roles.Admin) || $auth.id === data.authorId) && offer?.closedAt === null}
-                    <div class="footer__container__edit">
-                        <button onclick={() => goto(`/offers/${data.id}/edit`)}><img src="/icons/pencil.svg" height="25" width="25" alt="#"> {t.offers.edit}</button>
-                    </div>
-                    <div class="footer__container__close">
-                        <button onclick={onCloseAnnouncementClick}><img src="/icons/lock.svg" height="25" width="25" alt="#"> {t.offers.close}</button>
-                    </div>
-                {/if}
+<div class="actions__panel">
+    {#if $auth.isAuthenticated && offer?.closedAt === null}
+        <button class="action primary" onclick={onContactAuthor}>
+            <img src="/icons/chat.svg" width="25" height="25" alt="#">
+            {t.offers.contactRealtor}
+        </button>
+
+        <button class="action secondary" onclick={() => showComplaint = true}>
+            <img src="/icons/complaint.svg" width="25" height="25" alt="#">
+            {t.offers.complain}
+        </button>
+    {/if}
+
+    {#if (auth.hasRole(Roles.Admin) || $auth.id === data.authorId) && offer?.closedAt === null}
+        <button class="action warning" onclick={() => goto(`/offers/${data.id}/edit`)}>
+            <img src="/icons/pencil.svg" width="25" height="25" alt="#">
+            {t.offers.edit}
+        </button>
+
+        <button class="action danger" onclick={onCloseAnnouncementClick}>
+            <img src="/icons/lock.svg" width="25" height="25" alt="#">
+            {t.offers.close}
+        </button>
+    {/if}
+
+    {#if auth.hasRole(Roles.Admin) && offer?.closedAt === null}
+        <button class="action delete" onclick={onDeleteClick}>
+            <img src="/icons/bin.svg" width="25" height="25" alt="#">
+            {t.offers.deleteAnnouncement}
+        </button>
+    {/if}
+</div>
             </div>
         </footer>
-        {#if auth.hasRole(Roles.Admin) && offer?.closedAt === null}
-            <div class="delete__item">
-                <button onclick={onDeleteClick}><img src="/icons/bin.svg" height="25" width="25" alt="#"> {t.offers.deleteAnnouncement}</button>
-            </div>
-        {/if}
     </div>
 </div>
 
@@ -847,6 +858,61 @@ let currentIndex = $state(0);
         gap: 5rem;
         align-items: flex-start;
     }
+
+.actions__panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+
+    margin-top: 2rem;
+}
+
+.action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.action:hover {
+    transform: translateY(-2px);
+}
+
+.primary {
+    background: #7a42f4;
+    color: white;
+}
+
+.secondary {
+    background: #6366f1;
+    color: white;
+}
+
+.warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.danger {
+    background: #ef4444;
+    color: white;
+}
+
+.delete {
+    background: #991b1b;
+    color: white;
+}
 
     .description__item__left__image_block {
         flex: 0 0 300px;

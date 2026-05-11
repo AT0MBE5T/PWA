@@ -102,6 +102,7 @@ export interface TranslationKeys {
         support: string;
         supportText: string;
         send: string;
+        privates: string;
     };
 
     authorization: {
@@ -408,7 +409,8 @@ export const translations: Record<Language, TranslationKeys> = {
             common: 'Загальний',
             support: 'Допомога',
             supportText: 'Ви отримаєте відповідь протягом години',
-            send: 'Відправити'
+            send: 'Відправити',
+            privates: 'Приватні'
         },
         authorization: {
             realEstate: 'Агенство керування нерухомістю',
@@ -708,7 +710,8 @@ export const translations: Record<Language, TranslationKeys> = {
             common: 'Common',
             send: 'Send',
             support: 'Support',
-            supportText: "You'll receive a response within an hour"
+            supportText: "You'll receive a response within an hour",
+            privates: 'Privates'
         },
         authorization: {
             realEstate: 'Real Estate Agency',

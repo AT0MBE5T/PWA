@@ -299,7 +299,7 @@ async function stopSignalR() {
                 closedAt: null
             }
             offers = [...offers, short];
-            offerFullStore.addNewShortOffer(short);
+            await offerFullStore.addNewShortOffer(short);
         },
 
         addFullOffer: async (data: AnnouncementAddModel, authorId: string, authorName: string) => {
@@ -391,7 +391,7 @@ async function stopSignalR() {
 
         const db = await offerFullStore.getDB();
         await db.put('announcementDetails', $state.snapshot(found));
-        await db.put('announcements', $state.snapshot(offer));
+        await offerFullStore.updateCachedAnnouncement(offer.id, offer);
     },
 
     switchVerificationById: async (offerId: string, isVerify: boolean) => {

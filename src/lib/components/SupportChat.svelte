@@ -199,4 +199,14 @@
         background: #1e293b;
         border-top: 1px solid #334155;
     }
+
+	@media(max-width: 1300px){
+		.trigger-btn {
+			bottom: 6rem;
+		}
+
+		.chat-window {
+			bottom: 10rem;
+		}
+	}
 </style>

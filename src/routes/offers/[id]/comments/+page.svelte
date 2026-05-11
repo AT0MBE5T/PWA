@@ -81,7 +81,7 @@
 <ConfirmModal bind:this={confirmModal} />
 
 <div class="comments__block">
-    <h2 class="comments__title"><img src="/icons/chat.svg" height="25" width="25" alt="#"> {t.offers.comments}</h2>
+    <h2 class="comments__title"><img src="/icons/chat.svg" height="30" width="30" alt="#"> {t.offers.comments}</h2>
     <div class="comments__block__container" bind:this={commentContainer}>
         {#each allComments as i}
             <div class="comments__item">
@@ -102,7 +102,7 @@
                 {#if i.isPending}
                     <img src="/icons/refresh.svg" height="25" width="25" alt="#">
                 {/if}
-                <img src="/icons/clock.svg" height="25" width="25" alt="#"> {format(i.createdAt, 'dd.MM.yyyy HH:mm')} | <img src="/icons/user.svg" height="25" width="25" alt="#"> {i.author}: {i.text}
+                {format(i.createdAt, 'dd.MM.yyyy HH:mm')} | {i.author}: {i.text}
             </div>
         {/each}
     </div>
@@ -162,6 +162,11 @@
         width: 50%;
         height: 80vh;
         margin: auto auto;
+    }
+
+    .comments__title{
+        gap: .5rem;
+        display: flex;
     }
 
     .comments__block__container{
@@ -283,6 +288,12 @@
         box-shadow: 0 4px 12px rgba(209, 18, 24, 0.3);
         transition: all 0.3s ease;
         cursor: pointer;
+
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .comments__block__item__delete:hover {

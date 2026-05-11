@@ -28,6 +28,16 @@ function createChatState() {
             .withAutomaticReconnect()
             .build();
 
+        if (newConnection && newConnection.state === signalR.HubConnectionState.Connected){
+            const pending = await chatOfflineState.getPendingMessages();
+            for (const msg of pending) {
+                await newConnection.invoke("SendMessage", msg.chatId, msg.content, msg.senderName);
+                await chatOfflineState.removePendingMessage(msg.id);
+            }
+
+            messages = messages.filter(x => !x.isPending);
+        }
+
         newConnection.on("ReceiveMessage", (uId, uName, content, chatId) => {
             if (uName !== userName){
                 messages = [...messages, {
@@ -98,21 +108,31 @@ function createChatState() {
                     UserName: userName
                 });
 
-                const pending = await chatOfflineState.getPendingMessages();
+                await syncPendingMessages(newConnection);
 
-                for (const msg of pending) {
-                    await newConnection.invoke("SendMessage", msg.chatId, msg.content, userName);
-                    await chatOfflineState.removePendingMessage(msg.id);
-                }
-
-                messages = messages.filter(x => !x.isPending);
             } catch (e) {
                 console.error("[App] Sync error:", e);
             }
         });
 
+        async function syncPendingMessages(conn: signalR.HubConnection) {
+            if (conn.state !== signalR.HubConnectionState.Connected) return;
+
+            const pending = await chatOfflineState.getPendingMessages();
+            for (const msg of pending) {
+                try {
+                    await conn.invoke("SendMessage", msg.chatId, msg.content, msg.senderName, null);
+                    await chatOfflineState.removePendingMessage(msg.id);
+                } catch (err) {
+                    console.error("Failed to send pending message", err);
+                    break;
+                }
+            }
+        }
+
         await newConnection.start();
         connection = newConnection;
+        await syncPendingMessages(connection);
         isConnecting = false;
 
         await connection.invoke("JoinChat", { ChatRoom: userId, UserName: userName });

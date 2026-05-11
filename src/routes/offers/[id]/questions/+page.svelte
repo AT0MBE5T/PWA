@@ -118,7 +118,7 @@
 <ConfirmModal bind:this={confirmModal} />
 
 <div class="question_answer__block">
-    <h2 class="question_answer">❓ {t.offers.questions}</h2>
+    <h2 class="question_answer"><img src="/icons/question.svg" height="30" width="30" alt="#"/> {t.offers.questions}</h2>
     <div class="question__answer__container" bind:this={questionContainer}>
         {#each questionAnswers as i}
             <div class="question_answer__item">
@@ -126,7 +126,7 @@
                     {#if i.isQuestionPending}
                         <img src="/icons/refresh.svg" height="25" width="25" alt="#">
                     {/if}
-                    <img src="/icons/clock.svg" height="25" width="25" alt="#"> {i.createdAtQuestion ? format(i.createdAtQuestion, 'dd.MM.yyyy HH:mm') : ''} | <img src="/icons/user.svg" height="25" width="25" alt="#"> {i.createdByQuestion}: {i.textQuestion}
+                    {i.createdAtQuestion ? format(i.createdAtQuestion, 'dd.MM.yyyy HH:mm') : ''} | {i.createdByQuestion}: {i.textQuestion}
                 </div>
                 {#if auth.hasRole(Roles.Admin)}
                     <div role="button"
@@ -153,7 +153,7 @@
                         {#if i.isAnswerPending}
                             <img src="/icons/refresh.svg" height="25" width="25" alt="#">
                         {/if}
-                        <img src="/icons/clock.svg" height="25" width="25" alt="#"> {format(i.createdAtAnswer, 'dd.MM.yyyy HH:mm')} | <img src="/icons/user.svg" height="25" width="25" alt="#"> {i.createdByAnswer}: {i.textAnswer}
+                        {format(i.createdAtAnswer, 'dd.MM.yyyy HH:mm')} | {i.createdByAnswer}: {i.textAnswer}
                     </div>
                 {:else}
                     {#if auth.hasRole(Roles.Admin) || data.authorId === $auth.id}
@@ -230,6 +230,11 @@
         width: 50%;
         margin: auto auto;
         height: 80vh;
+    }
+
+    .question_answer{
+        display: flex;
+        gap: .5rem;
     }
 
     .question__answer__container{
@@ -353,6 +358,12 @@
         box-shadow: 0 4px 12px rgba(122, 66, 244, 0.3);
         transition: all 0.3s ease;
         cursor: pointer;
+
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .question_answer__item__button:hover {
@@ -374,6 +385,12 @@
         box-shadow: 0 4px 12px rgba(209, 18, 24, 0.3);
         transition: all 0.3s ease;
         cursor: pointer;
+
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .question_answer__item__delete__question__button:hover {
@@ -397,6 +414,12 @@
         transition: all 0.3s ease;
         cursor: pointer;
         z-index: 1;
+
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .question_answer__item__delete__answer__button:hover {

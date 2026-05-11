@@ -70,7 +70,6 @@
 
         if (results.page !== currentPage && results.page !== undefined){
             changePage(results.page);
-            //toast.show(t.system.noData, "error", 2500);
         }
     }
 
@@ -1012,6 +1011,12 @@
             box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15);
         }
     }
+
+    @media(max-width: 1300px){
+		.question_answer__item__button {
+			bottom: 6rem;
+		}
+	}
 
     @media (max-width: 671px){
         .shop__interaction{

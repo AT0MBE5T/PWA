@@ -11,6 +11,7 @@
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
     import SupportChat from '$lib/components/SupportChat.svelte';
+    import chatState from '$lib/stores/chatStore.svelte';
     let { data, children } = $props();
 
     let menuOpen = $state(false);

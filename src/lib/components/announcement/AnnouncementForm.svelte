@@ -605,7 +605,7 @@
                     toastText = t.system.errorOccurred;
                     showToast = true;
                 }
-                await await goto('/offers?page=1');
+                await goto('/offers?page=1');
                 settings.online = true;
             }catch{
                 settings.online = false;

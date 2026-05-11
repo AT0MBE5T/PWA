@@ -485,8 +485,6 @@ async removeOffer(id: string) {
                     items: updatedItems
                 });
             }
-
-            //break;
         }
     }
 }
