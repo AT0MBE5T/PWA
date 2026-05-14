@@ -4,6 +4,7 @@
     import type { GeneralStats } from '$lib';
     import { env } from '$env/dynamic/public';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { format } from 'date-fns';
 
     let { callBack }: { callBack: () => void } = $props();
 
@@ -71,7 +72,7 @@
                 <div class="report__container__item"><strong>{t.reports.price}:</strong> <span>{generalStats.topDealPrice}</span></div>
                 <div class="report__container__item"><strong>{t.reports.realtor}:</strong> <span>{generalStats.topDealRealtorName}</span></div>
                 <div class="report__container__item"><strong>{t.reports.customer}:</strong> <span>{generalStats.topDealCustomerName}</span></div>
-                <div class="report__container__item"><strong>{t.reports.soldDate}:</strong> <span>{generalStats.topDealSoldDate}</span></div>
+                <div class="report__container__item"><strong>{t.reports.soldDate}:</strong> <span>{format(generalStats.topDealSoldDate, 'MM.dd.yyyy')}</span></div>
             </div>
         </div>
 
@@ -92,17 +93,17 @@
         </div>
 
         <div>
-            <h2 class="section-title"><img src="/icons/house.svg" height="25" width="25"> {t.reports.propertyTypes}</h2>
+            <h2 class="section-title"><img src="/icons/house.svg" height="25" width="25" alt="#"> {t.reports.propertyTypes}</h2>
             <div class="report__container__top_property_types">
                 <div class="property-type-card">
-                    <div class="report__container__item"><strong>{t.reports.type}:</strong> <span>{generalStats.topPropertyTypeNameFirst}</span></div>
-                    <div class="report__container__item"><strong>{t.reports.count}:</strong> <span>{generalStats.topPropertyTypeCntFirst}</span></div>
-                    <div class="report__container__item"><strong>{t.reports.avgPrice}:</strong> <span>{generalStats.topPropertyTypeAvgPriceFirst}</span></div>
+                    <div class="report__container__item color-white"><strong>{t.reports.type}:</strong> <span>{generalStats.topPropertyTypeNameFirst}</span></div>
+                    <div class="report__container__item color-white"><strong>{t.reports.count}:</strong> <span>{generalStats.topPropertyTypeCntFirst}</span></div>
+                    <div class="report__container__item color-white"><strong>{t.reports.avgPrice}:</strong> <span>{generalStats.topPropertyTypeAvgPriceFirst}</span></div>
                 </div>
                 <div class="property-type-card">
-                    <div class="report__container__item"><strong>{t.reports.type}:</strong> <span>{generalStats.topPropertyTypeNameSecond}</span></div>
-                    <div class="report__container__item"><strong>{t.reports.count}:</strong> <span>{generalStats.topPropertyTypeCntSecond}</span></div>
-                    <div class="report__container__item"><strong>{t.reports.avgPrice}:</strong> <span>{generalStats.topPropertyTypeAvgPriceSecond}</span></div>
+                    <div class="report__container__item color-white"><strong>{t.reports.type}:</strong> <span>{generalStats.topPropertyTypeNameSecond}</span></div>
+                    <div class="report__container__item color-white"><strong>{t.reports.count}:</strong> <span>{generalStats.topPropertyTypeCntSecond}</span></div>
+                    <div class="report__container__item color-white"><strong>{t.reports.avgPrice}:</strong> <span>{generalStats.topPropertyTypeAvgPriceSecond}</span></div>
                 </div>
             </div>
         </div>
@@ -324,7 +325,11 @@
     }
 
     .report__container__item strong {
-        color: var(--card-secondary-text);
+        color: var(--card-text);
+    }
+
+    .color-white strong {
+        color: white;
     }
 
     :global([data-theme="dark"]) .report__container {

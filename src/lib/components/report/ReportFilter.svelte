@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { env } from '$env/dynamic/public';
-    import { type ReportFilterParams, type PropertyTypeInterface, Roles, translations, settings, toast } from '$lib';
+    import { type ReportFilterParams, type PropertyTypeInterface, Roles, translations, settings, toast, type LookupItemFilter } from '$lib';
     import { auth } from '$lib';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
     import { getContext, onMount } from 'svelte';
@@ -140,6 +140,23 @@
     const settingsStore = getContext<SettingsStore>('settings');
     const t = $derived(translations[settingsStore.lang]);
 
+let filterData = $derived<LookupItemFilter[]>([
+        // svelte-ignore state_referenced_locally
+        { id: '627eb0f8-3d35-4a29-9a28-4391364f1f4c', name: t.offers.apartment },
+        // svelte-ignore state_referenced_locally
+        { id: 'a0710797-7ee2-498e-ad6f-bd9ef7687ad4', name: t.offers.house },
+        // svelte-ignore state_referenced_locally
+        { id: '1d04b7c5-6419-40a8-a335-b20652fe6251', name: t.offers.commercial },
+        // svelte-ignore state_referenced_locally
+        { id: '0d9bca53-e6e1-4fe2-99d4-71a83205ff7a', name: t.offers.office },
+        // svelte-ignore state_referenced_locally
+        { id: '6cff1118-a1d6-4ce7-a701-78cfc47c0673', name: t.offers.warehouse },
+        // svelte-ignore state_referenced_locally
+        { id: '551e9efb-530e-4286-a287-82005a210627', name: t.offers.land },
+        // svelte-ignore state_referenced_locally
+        { id: '85e328df-e568-43b4-9c95-bf266fa63dc0', name: t.offers.room }
+    ]);
+
 </script>
 
 <div class="filter-container">
@@ -218,7 +235,7 @@
             <div class="input-group">
                 <label for="propertyTypeSelect" class="input-label">{t.offers.propertyType}</label>
                 <select id="propertyTypeSelect" bind:value={propertyType} class="input-field select-input">
-                    {#each propertyTypes as type}
+                    {#each filterData as type}
                         <option value={type.id}>{type.name}</option>
                     {/each}
                 </select>

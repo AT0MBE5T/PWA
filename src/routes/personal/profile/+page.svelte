@@ -18,7 +18,7 @@
     let userInfo = $derived(personalStore.userDto);
 
     $effect(() => {
-        imagePreview = userInfo?.avatar ?? '';
+        imagePreview = userInfo?.avatarUrl ?? '';
     });
 
     const changeEmailClick = () => {
@@ -223,7 +223,7 @@
     let fileInput = $state<HTMLInputElement>();
     let selectedFileName = $state<string>('');
     // svelte-ignore state_referenced_locally
-    let imagePreview = $state<string>(userInfo?.avatar ?? '');
+    let imagePreview = $state<string>(userInfo?.avatarUrl ?? '');
     let selectedFile = $state<File | null>(null);
 
     function handleFileChange(event: Event): void {

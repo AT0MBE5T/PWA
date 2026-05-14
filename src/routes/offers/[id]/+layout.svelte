@@ -41,52 +41,54 @@
 
 <div class="wrapper">
     <div class="wrapper__container container">
-        <header class="container__header header">
-            <nav class='header__nav' bind:this={navElement}>
-                <button
-                        class="burger"
-                        aria-label="Toggle menu"
-                        onclick={() => (menuOpen = !menuOpen)}>
-                    <div class="line"></div>
-                    <div class="line"></div>
-                    <div class="line"></div>
-                </button>
-                <ul class="header__nav__list {menuOpen ? 'open' : ''}">
-                    <li class='header__nav__list__item'>
-                        <a href="/offers/{data.id}/description" 
-                        class={isActive('/description') ? 'highlighted_page' : ''}>
-                        <img src="/icons/description.svg" height="25" width="25" alt="#"> {t.offers.description}
-                        </a>
-                    </li>
-                    <li class='header__nav__list__item'>
-                        <a href="/offers/{data.id}/comments" 
-                        class={isActive('/comments') ? 'highlighted_page' : ''}>
-                        <img src="/icons/chat.svg" height="25" width="25" alt="#"> {t.offers.comments}
-                        </a>
-                    </li>
-                    <li class='header__nav__list__item'>
-                        <a href="/offers/{data.id}/questions" 
-                        class={isActive('/questions') ? 'highlighted_page' : ''}>
-                        <img src="/icons/question.svg" height="25" width="25" alt="#"> {t.offers.questions}
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </header>
-        <main class="container__main main">
-            {@render children()}
-        </main>
-        {#if offer?.location && settings.online && isActive('/description')}
-            <div class="container__map">
-                <iframe
-                    title="MAP"
-                    loading="lazy"
-                    width="100%"
-                    height="100%"
-                    src='https://www.google.com/maps?q=${formatLocation(offer?.location)}&output=embed'>
-                </iframe>
-            </div>
-        {/if}
+            {#if isActive('/description') || isActive('/comments') || isActive('/questions')}
+                <header class="container__header header">
+                    <nav class='header__nav' bind:this={navElement}>
+                        <button
+                                class="burger"
+                                aria-label="Toggle menu"
+                                onclick={() => (menuOpen = !menuOpen)}>
+                            <div class="line"></div>
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </button>
+                        <ul class="header__nav__list {menuOpen ? 'open' : ''}">
+                            <li class='header__nav__list__item'>
+                                <a href="/offers/{data.id}/description" 
+                                class={isActive('/description') ? 'highlighted_page' : ''}>
+                                <img src="/icons/description.svg" height="25" width="25" alt="#"> {t.offers.description}
+                                </a>
+                            </li>
+                            <li class='header__nav__list__item'>
+                                <a href="/offers/{data.id}/comments" 
+                                class={isActive('/comments') ? 'highlighted_page' : ''}>
+                                <img src="/icons/chat.svg" height="25" width="25" alt="#"> {t.offers.comments}
+                                </a>
+                            </li>
+                            <li class='header__nav__list__item'>
+                                <a href="/offers/{data.id}/questions" 
+                                class={isActive('/questions') ? 'highlighted_page' : ''}>
+                                <img src="/icons/question.svg" height="25" width="25" alt="#"> {t.offers.questions}
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </header>
+            {/if}
+            <main class="container__main main">
+                {@render children()}
+            </main>
+            {#if offer?.location && settings.online && isActive('/description')}
+                <div class="container__map">
+                    <iframe
+                        title="MAP"
+                        loading="lazy"
+                        width="100%"
+                        height="100%"
+                        src='https://www.google.com/maps?q=${formatLocation(offer?.location)}&output=embed'>
+                    </iframe>
+                </div>
+            {/if}
     </div>
 </div>
 

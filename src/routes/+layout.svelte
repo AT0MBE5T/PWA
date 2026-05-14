@@ -11,7 +11,6 @@
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
     import SupportChat from '$lib/components/SupportChat.svelte';
-    import chatState from '$lib/stores/chatStore.svelte';
     let { data, children } = $props();
 
     let menuOpen = $state(false);
@@ -64,6 +63,7 @@
             return;
 
         try{
+            toast.show('Інформаційне повідомлення', 'info', 10000);
             personalStore.loadUserDto($auth.id!);
             personalStore.loadUserStatsDto($auth.id!);
         }catch(error){
@@ -183,7 +183,9 @@
 {/if}
 
 <div class="wrapper">
-    <SupportChat/>
+    {#if $auth.isAuthenticated && settings.online}
+        <SupportChat/>
+    {/if}
     <div class="wrapper__container">
             <header class="container__header">
                 <nav class="header__nav" bind:this={navElement}>

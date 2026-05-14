@@ -385,7 +385,7 @@ export const translations: Record<Language, TranslationKeys> = {
         },
         unauthorized: {
             title: "Доступ обмежено",
-            message: "Вам потрібно увійти, щоб отримати доступ до кабінету агентства",
+            message: "Вам потрібно увійти, щоб отримати доступ до повного функціоналу",
             loginBtn: "Увійти"
         },
         authorized: {

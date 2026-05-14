@@ -350,7 +350,7 @@ let currentIndex = $state(0);
 
 <Modal
         bind:open={showComplaint}
-        title="Complain"
+        title={t.offers.complain}
 >
     <div class="complaint__form">
         <div class="complaint__form__type">

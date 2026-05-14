@@ -1,6 +1,5 @@
 <script lang="ts">
     import { auth } from '$lib';
-    import { goto } from '$app/navigation';
     import { env } from '$env/dynamic/public';
     import { translations } from '$lib/i18n';
     import { settings } from '$lib/stores/settings.svelte';

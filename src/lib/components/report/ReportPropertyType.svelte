@@ -7,6 +7,7 @@
         PropertyTypeStats} from '$lib';
     import { env } from '$env/dynamic/public';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { format } from 'date-fns';
 
     let { data, callBack }: { data: ReportFilterParams, callBack: () => void } = $props();
 
@@ -85,7 +86,7 @@
                 <div class="report__container__item"><strong>{t.reports.price}:</strong> <span>{propertyTypeStats.topDealPrice}</span></div>
                 <div class="report__container__item"><strong>{t.reports.realtor}:</strong> <span>{propertyTypeStats.topDealRealtorName}</span></div>
                 <div class="report__container__item"><strong>{t.reports.customer}:</strong> <span>{propertyTypeStats.topDealCustomerName}</span></div>
-                <div class="report__container__item"><strong>{t.reports.sold}:</strong> <span>{propertyTypeStats.topDealSoldDate}</span></div>
+                <div class="report__container__item"><strong>{t.reports.sold}:</strong> <span>{format(propertyTypeStats.topDealSoldDate, 'MM.dd.yyyy')}</span></div>
             </div>
         </div>
 

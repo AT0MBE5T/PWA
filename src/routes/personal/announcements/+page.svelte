@@ -322,7 +322,7 @@
         cursor: pointer;
         font-size: 1.1rem;
         font-weight: 500;
-        color: white;
+        color: var(--text-main);
         transition: color 0.3s ease;
         font-family: inherit;
     }
