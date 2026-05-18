@@ -42,9 +42,6 @@
     };
 
     onMount(async () => {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js');
-        }
 
         if (browser) {
             const { registerSW } = await import('virtual:pwa-register');
