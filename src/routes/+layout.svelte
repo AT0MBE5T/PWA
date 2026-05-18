@@ -63,7 +63,6 @@
             return;
 
         try{
-            toast.show('Інформаційне повідомлення', 'info', 10000);
             personalStore.loadUserDto($auth.id!);
             personalStore.loadUserStatsDto($auth.id!);
         }catch(error){
