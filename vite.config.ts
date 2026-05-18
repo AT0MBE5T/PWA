@@ -7,20 +7,18 @@ export default defineConfig({
     sveltekit(),
 
     VitePWA({
-      registerType: 'autoUpdate',
+    strategies: 'generateSW',
 
-      strategies: 'generateSW',
+    registerType: 'autoUpdate',
 
-      includeAssets: [
+    includeAssets: [
         'favicon.ico',
         'apple-touch-icon.png',
         'icon512_maskable.png',
-        'icon512_rounded.png',
-        'vite.svg',
-        'react.svg'
-      ],
+        'icon512_rounded.png'
+    ],
 
-      manifest: {
+    manifest: {
         theme_color: '#f4f93c',
         background_color: '#2EC6FE',
 
@@ -31,23 +29,27 @@ export default defineConfig({
         display: 'standalone',
 
         icons: [
-          {
-            src: 'icon512_maskable.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable'
-          },
-          {
-            src: 'icon512_rounded.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
+            {
+                src: 'icon512_maskable.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'maskable'
+            },
+            {
+                src: 'icon512_rounded.png',
+                sizes: '512x512',
+                type: 'image/png'
+            }
         ]
-      },
+    },
 
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}']
-      }
-    })
+    workbox: {
+        navigateFallback: null,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true
+    }
+})
   ]
 })
