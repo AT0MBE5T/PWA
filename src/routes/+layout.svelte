@@ -43,17 +43,14 @@
 
     onMount(async () => {
         if (browser) {
-            const { registerSW } = await import('virtual:pwa-register');
-            registerSW({ 
-                immediate: true,
-                onRegistered(r) {
-                    
-                },
-                onRegisterError(error) {
-                    console.error('[App] SW registration error', error);
-                }
-            });
-        }
+                const { registerSW } = await import('virtual:pwa-register');
+
+                registerSW({
+                    onRegisterError(error) {
+                        console.error(error);
+                    }
+                });
+            }
 
         if (!$auth.isAuthenticated)
             return;
