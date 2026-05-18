@@ -43,6 +43,8 @@
 
     onMount(async () => {
 
+        console.log('test1');
+
         if (browser) {
             const { registerSW } = await import('virtual:pwa-register');
             registerSW({ 
