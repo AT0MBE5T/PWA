@@ -43,7 +43,7 @@
 
     onMount(async () => {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/src/service-worker.js');
+            navigator.serviceWorker.register('/service-worker.js');
         }
 
         if (browser) {
