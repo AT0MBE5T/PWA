@@ -59,7 +59,7 @@
             personalStore.loadUserDto($auth.id!);
             personalStore.loadUserStatsDto($auth.id!);
         }catch(error){
-
+            console.error(error);
         }
     });
 
@@ -215,13 +215,13 @@
                         {#if $auth.isAuthenticated}
                             <li class="header__nav__list__item login-logout-btn">
                                 <button onclick={logout}>
-                                    <img src="/icons/chevron-left.svg" height="25" width="25" alt="#"> {t.header.logout}
+                                    <img src="/icons/logout.svg" height="25" width="25" alt="#"> {t.header.logout}
                                 </button>
                             </li>
                         {:else}
                             <li class="header__nav__list__item login-logout-btn">
                                 <button class={$page.route.id?.startsWith('/login') ? 'active' : ''} onclick={() => goto('/login')}>
-                                    <img src="/icons/chevron-right.svg" height="25" width="25" alt="#"> {t.header.login}
+                                    <img src="/icons/login.svg" height="25" width="25" alt="#"> {t.header.login}
                                 </button>
                             </li>
                         {/if}
@@ -631,7 +631,7 @@
         display: none;
     }
 
-    @media (max-width: 850px) {
+    @media (max-width: 1215px) {
         .burger { display: flex; }
 
         .header__nav__list {

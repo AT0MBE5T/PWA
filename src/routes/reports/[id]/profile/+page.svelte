@@ -47,11 +47,11 @@
 
 
     $effect(() => {
-        imagePreview = userInfo?.avatar ?? '';
+        imagePreview = userInfo?.avatarUrl ?? '';
     });
 
     // svelte-ignore state_referenced_locally
-    let imagePreview = $state<string>(userInfo?.avatar ?? '');
+    let imagePreview = $state<string>(userInfo?.avatarUrl ?? '');
 
     const settingsStore = getContext<SettingsStore>('settings');
     const t = $derived(translations[settingsStore.lang]);
