@@ -3,6 +3,10 @@ import * as signalR from "@microsoft/signalr";
 import { offerFullStore } from "./OfferFullStore.svelte";
 import { env } from "$env/dynamic/public";
 import { settings } from "./settings.svelte";
+import { goto } from "$app/navigation";
+import { toast } from "./toast";
+import type SettingsStore from "./settingsStore.svelte";
+import { translations } from "$lib/i18n";
 
 const commentState = createCommentState();
 export default commentState;
@@ -12,10 +16,12 @@ function createCommentState() {
     let connection = $state<signalR.HubConnection | null>(null);
     let abortController: AbortController | null = null;
 
-async function initSignalR(chatId: string, userName: string) {
+async function initSignalR(chatId: string, userName: string, settingsStore: SettingsStore) {
     if (abortController) abortController.abort();
     abortController = new AbortController();
     const signal = abortController.signal;
+
+    const t = $derived(translations[settingsStore.lang]);
 
     await stopSignalR();
 
@@ -61,6 +67,11 @@ async function initSignalR(chatId: string, userName: string) {
 
         const index = comments.indexOf(existData);
         comments.splice(index, 1);
+    });
+
+    newConnection.on("DeleteOfferFullComment", async () => {
+        toast.show(t.offers.offerHasBeenRemoved, 'info', 5000);
+        await goto('/offers?page=1');
     });
 
     newConnection.onreconnected(async () => {
@@ -136,6 +147,7 @@ async function initSignalR(chatId: string, userName: string) {
             try {
                 connection.off("ReceiveComment");
                 connection.off("DeleteComment");
+                connection.off("DeleteOfferFullComment");
                 await connection.stop();
             } finally {
                 connection = null;

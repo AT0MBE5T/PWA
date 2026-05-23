@@ -7,7 +7,7 @@
     import { goto } from '$app/navigation';
     import Modal from '$lib/modals/Modal.svelte';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte';
-    import { getContext, onMount, tick } from 'svelte';
+    import { getContext, onMount, tick, untrack } from 'svelte';
     import { env } from '$env/dynamic/public';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
     import offerState from '$lib/stores/offerStore.svelte';
@@ -18,6 +18,7 @@
     onMount(async () => {
         settings.isLoading = true;
         await offerFullStore.loadDetails(data.id!);
+
         setTimeout(() =>
         {
             if (offer === undefined){
@@ -30,6 +31,18 @@
 
     const settingsStore = getContext<SettingsStore>('settings');
     const t = $derived(translations[settingsStore.lang]);
+
+$effect(() => {
+        untrack(() => {
+            offerFullStore.initSignalR(data.id, $auth.name!, settingsStore, $auth.id!);
+        });
+
+        return () => {
+            untrack(() => {
+                offerFullStore.stopSignalR();
+            });
+        };
+    });
 
     const onCloseAnnouncementClick = async () => {
         if($auth.id == null){
@@ -144,8 +157,7 @@
                 return;
             }
 
-            toast.show(offer?.isVerified ? t.offers.unverifiedSuccessfully : t.offers.verifiedSuccessfully, 'success');
-            offer!.isVerified = !offer?.isVerified;
+            toast.show(!offer?.isVerified ? t.offers.unverifiedSuccessfully : t.offers.verifiedSuccessfully, 'success');
             offerState.switchVerificationById(offer.id, offer.isVerified);
             settings.online = true;
         }catch{
@@ -511,12 +523,13 @@ let currentIndex = $state(0);
         </button>
     {/if}
 
-    {#if (auth.hasRole(Roles.Admin) || $auth.id === data.authorId) && offer?.closedAt === null}
+    {#if ((auth.hasRole(Roles.Admin) || $auth.id == offer?.authorId) && offer?.closedAt === null)}
         <button class="action warning" onclick={() => goto(`/offers/${data.id}/edit`)}>
             <img src="/icons/pencil.svg" width="25" height="25" alt="#">
             {t.offers.edit}
         </button>
-
+    {/if}
+    {#if (auth.hasRole(Roles.Admin) && offer?.closedAt === null)}
         <button class="action danger" onclick={onCloseAnnouncementClick}>
             <img src="/icons/lock.svg" width="25" height="25" alt="#">
             {t.offers.close}

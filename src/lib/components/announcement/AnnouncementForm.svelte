@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { getContext, onMount, tick } from 'svelte';
+    import { getContext, onMount, tick, untrack } from 'svelte';
     import type {
         PropertyTypeInterface,
         StatementTypeInterface,
@@ -58,6 +58,8 @@
     let propertyTypes = $state<PropertyTypeInterface[]>([]);
     let statementTypes = $state<StatementTypeInterface[]>([]);
 
+    let updatedAt = $state<string | null>(null);
+
     onMount(async () => {
         await getPropertyTypes();
         await getStatementTypes();
@@ -67,7 +69,22 @@
 
         filteredPropertyTypes = propertyTypes;
         filteredStatementTypes = statementTypes;
-    })
+    });
+
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
+
+    $effect(() => {
+        untrack(() => {
+            offerFullStore.initSignalR(announcementId, $auth.name!, settingsStore, $auth.id!);
+        });
+
+        return () => {
+            untrack(() => {
+                offerFullStore.stopSignalR();
+            });
+        };
+    });
 
     const getDataForEdit = async () => {
         try {
@@ -113,7 +130,8 @@
                     propertyTypeId: propType?.id ?? "",
                     statementTypeId: statType?.id ?? "",
                     userId: offlineData.authorId,
-                    photos: offlineData.photos
+                    photos: offlineData.photos,
+                    updatedAt: offlineData.updatedAt
                 };
 
                 applyDataToForm(mappedData);
@@ -136,6 +154,8 @@
         priceInput = data.price;
         roomsInput = data.rooms;
         titleInput = data.title;
+
+        updatedAt = data.updatedAt;
 
         images = data.photos.map(p => ({
             type: 'existing',
@@ -164,9 +184,6 @@
             propertyTypes = await offerFullStore.getPropertyTypes();
         }
     };
-
-    const settingsStore = getContext<SettingsStore>('settings');
-    const t = $derived(translations[settingsStore.lang]);
 
     let propertyTypeNames = $derived<LookupItemFilter[]>([
         // svelte-ignore state_referenced_locally
@@ -562,6 +579,7 @@
             formData.append("Content", contentInput);
             formData.append("Description", descriptionInput);
             formData.append("AnnouncementId", announcementId);
+            formData.append("UpdatedAt", updatedAt ?? "")
 
             try{
                 const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/update-announcement`, {

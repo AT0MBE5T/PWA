@@ -25,13 +25,17 @@
         };
     });
 
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
+
     async function setup(currentId: string) {
         settings.isLoading = true;
         await questionAnswerState.setup(currentId);
         settings.isLoading = false;
         questionAnswerState.initSignalR(
             currentId,
-            data.user?.name || "Guest"
+            data.user?.name || "Guest",
+            settingsStore
         );
     }
 
@@ -109,9 +113,6 @@
                 : addQuestion();
         }
     };
-
-    const settingsStore = getContext<SettingsStore>('settings');
-    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

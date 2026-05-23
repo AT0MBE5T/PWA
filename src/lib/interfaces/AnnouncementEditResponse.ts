@@ -13,4 +13,5 @@ export type AnnouncementEditResponse = {
     content: string;
     description: string;
     userId: string;
+    updatedAt: string | null;
 };

@@ -127,6 +127,8 @@ export interface TranslationKeys {
         loginAlreadyExist: string;
     };
     offers: {
+        offerHasBeenChanged: string;
+        offerHasBeenRemoved: string;
         leaveComment: string;
         verified: string;
         unverified: string;
@@ -316,7 +318,7 @@ export const translations: Record<Language, TranslationKeys> = {
     UA: {
         system: {
             addedSuccessfully: "Успішно додано!",
-            updatedSuccessfully: "Updated successfully!",
+            updatedSuccessfully: "Успішно оновлено!",
             errorOccurred: "Виникла помилка",
             validationError: "Помилка валідації",
             validationErrors: "Помилки валідації",
@@ -434,6 +436,8 @@ export const translations: Record<Language, TranslationKeys> = {
             loginAlreadyExist: "Логін вже існує"
         },
         offers: {
+            offerHasBeenChanged: 'Оголошення було змінено',
+            offerHasBeenRemoved: 'Оголошення було видалено',
             leaveComment: "Залишити коментар",
             verified: "Верифіковано",
             unverified: "Неверифіковано",
@@ -735,6 +739,8 @@ export const translations: Record<Language, TranslationKeys> = {
             loginAlreadyExist: "User with this login already exists"
         },
         offers: {
+            offerHasBeenChanged: 'Offer has been changed',
+            offerHasBeenRemoved: 'Offer has been removed',
             leaveComment: "Leave a Comment",
             verified: "Verified",
             unverified: "Unverified",

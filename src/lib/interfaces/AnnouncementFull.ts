@@ -20,4 +20,5 @@ export type AnnouncementFull = {
     isFavorite: boolean;
     viewsCnt: number;
     closedAt: string | null;
+    updatedAt: string | null;
 };

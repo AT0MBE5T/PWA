@@ -7,6 +7,8 @@ import { translations } from "$lib/i18n";
 import { settings } from "./settings.svelte";
 import { getContext } from "svelte";
 import type SettingsStore from "./settingsStore.svelte";
+import { goto } from "$app/navigation";
+import { toast } from "./toast";
 
 const questionAnswerState = createQuestionAnswerState();
 export default questionAnswerState;
@@ -48,7 +50,7 @@ async function setup(currentId: string) {
     }
 }
 
-async function initSignalR(chatId: string, userName: string) {
+async function initSignalR(chatId: string, userName: string, settingsStore: SettingsStore) {
     if ((connection || isConnecting) && currentChatId === chatId) {
         return;
     }
@@ -61,6 +63,8 @@ async function initSignalR(chatId: string, userName: string) {
         .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
         .withAutomaticReconnect()
         .build();
+
+    const t = $derived(translations[settingsStore.lang]);
 
     newConnection.on("ReceiveQuestion", (announcementId, questionId, userName, message) => {
         const pendingIndex = questionAnswerData.findIndex(
@@ -95,6 +99,11 @@ async function initSignalR(chatId: string, userName: string) {
                 }
             ];
         }
+    });
+
+    newConnection.on("DeleteOfferFullQuestion", async () => {
+        toast.show(t.offers.offerHasBeenRemoved, 'info', 5000);
+        await goto('/offers?page=1');
     });
 
     newConnection.on("ReceiveAnswer", (answerId, questionId, userName, message) => {
@@ -232,6 +241,7 @@ async function stopSignalR() {
             oldConn.off("ReceiveAnswer");
             oldConn.off("DeleteQuestion");
             oldConn.off("DeleteAnswer");
+            oldConn.off("DeleteOfferFullQuestion");
             await oldConn.stop();
         } catch (e) {
 

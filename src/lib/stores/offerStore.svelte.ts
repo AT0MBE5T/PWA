@@ -336,7 +336,8 @@ async function stopSignalR() {
                 description: data.description,
                 floors: Number(data.floors),
                 rooms: Number(data.rooms),
-                closedAt: null
+                closedAt: null,
+                updatedAt: null
             }
             offerDetails = [...offerDetails, full];
             offerFullStore.addNewFullOffer(full);

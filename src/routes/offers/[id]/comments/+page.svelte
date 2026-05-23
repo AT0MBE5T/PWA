@@ -28,6 +28,9 @@
 
     let allComments = $derived(commentState.comments);
 
+    const settingsStore = getContext<SettingsStore>('settings');
+    const t = $derived(translations[settingsStore.lang]);
+
     $effect(() => {
         const currentId = data.id;
         if (!currentId) return;
@@ -38,7 +41,7 @@
             settings.isLoading = true;
             await commentState.setupChat(data.id);
             settings.isLoading = false;
-            await commentState.initSignalR(currentId, userName);
+            await commentState.initSignalR(currentId, userName, settingsStore);
         }
 
         loadData();
@@ -72,9 +75,6 @@
             addComment();
         }
     };
-
-    const settingsStore = getContext<SettingsStore>('settings');
-    const t = $derived(translations[settingsStore.lang]);
 
 </script>
 

@@ -135,16 +135,16 @@ function createChatState() {
         await syncPendingMessages(connection);
         isConnecting = false;
 
-        await connection.invoke("JoinChat", { ChatRoom: userId, UserName: userName });
+        await connection?.invoke("JoinChat", { ChatRoom: userId, UserName: userName });
         try{
-            await connection.invoke("JoinCommonChat", userName);
+            await connection?.invoke("JoinCommonChat", userName);
         }catch(e){
             
         }
     }
 
     if (chatIdd) {
-        await connection.invoke("JoinChat", { ChatRoom: chatIdd, UserName: userName });
+        await connection?.invoke("JoinChat", { ChatRoom: chatIdd, UserName: userName });
     }
 }
 

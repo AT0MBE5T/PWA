@@ -13,6 +13,12 @@ import offerState from './offerStore.svelte';
 import { settings } from './settings.svelte';
 import getCookie from '$lib/utils/cookieData';
 import { getItemsPerPage } from '$lib/utils/pagination';
+import * as signalR from "@microsoft/signalr";
+import { toast } from './toast';
+import { getContext } from 'svelte';
+import type SettingsStore from './settingsStore.svelte';
+import { translations } from '$lib/i18n';
+import { goto } from '$app/navigation';
 
 class OfferState {
     offerDetails = $state<Record<string, AnnouncementFull>>({});
@@ -21,8 +27,100 @@ class OfferState {
     
     searchDataVar = $state<SearchRequestInterface>();
 
+    connection = $state<signalR.HubConnection | null>(null);
+
+    abortController: AbortController | null = null;
+
     DB_NAME = 'OffersDB';
     DB_VERSION = 1;
+
+    public async initSignalR(chatId: string, userName: string, settingsStore: SettingsStore, userId: string) {
+        await this.stopSignalR();
+
+            if (this.abortController) this.abortController.abort();
+    this.abortController = new AbortController();
+    const signal = this.abortController.signal;
+    
+        const newConnection = new signalR.HubConnectionBuilder()
+            .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
+            .withAutomaticReconnect()
+            .build();
+
+        const t = $derived(translations[settingsStore.lang]);
+    
+        newConnection.on("UpdateFullOffer", async (changedById: string, offer: AnnouncementFull) => {
+            const oldFavorite = this.offerDetails[offer.id].isFavorite;
+            this.offerDetails[offer.id] = offer;
+            this.offerDetails[offer.id].isFavorite = oldFavorite;
+
+            if (changedById === userId)
+                toast.show(t.system.updatedSuccessfully, 'success', 5000);
+            else
+                toast.show(t.offers.offerHasBeenChanged, 'info', 5000);
+            await goto(`/offers/${offer.id}/description`);
+        });
+
+        newConnection.on("DeleteFullOffer", async () => {
+            toast.show(t.offers.offerHasBeenRemoved, 'info', 5000);
+            await goto('/offers?page=1');
+        });
+
+            newConnection.onreconnected(async () => {
+                if (newConnection !== this.connection) return;
+        
+                try {
+                    await newConnection.invoke("JoinChatGeneral", {
+                        ChatRoom: chatId,
+                        UserName: userName
+                    });
+
+                } catch (e) {
+                    console.error("[App] Sync error:", e);
+                }
+            });
+
+            try {
+                await newConnection.start();
+
+                if (signal.aborted) {
+                    await newConnection.stop();
+                    return;
+                }
+                
+                if (newConnection.state !== signalR.HubConnectionState.Connected) return;
+        
+                this.connection = newConnection;
+        
+                await this.connection.invoke("JoinChatGeneral", { 
+                    ChatRoom: chatId, 
+                    UserName: userName
+                });
+            } catch (err: any) {
+        if (signal.aborted) return;
+
+        const ignoredErrors = ["connection being closed", "Connection disconnected", "Connection lost"];
+        const errorMessage = err?.message || String(err);
+        
+        if (!ignoredErrors.some(msg => errorMessage.includes(msg))) {
+            console.error("[App] SignalR Critical Error:", err);
+        }
+        }
+    }
+
+    public async stopSignalR() {
+        if (this.connection) {
+            const oldConn = this.connection;
+            this.connection = null;
+            
+            try {
+                oldConn.off("UpdateFullOffer");
+                oldConn.off("DeleteFullOffer");
+                await oldConn.stop();
+            } catch (e) {
+
+            }
+        }
+    }
 
     async setOfferDetails(data: AnnouncementFull[]) {
         const detailsMap = data.reduce((acc, item) => {
