@@ -69,7 +69,7 @@ class OfferState {
                 if (newConnection !== this.connection) return;
         
                 try {
-                    await newConnection.invoke("JoinChatGeneral", {
+                    await newConnection.invoke("JoinRoom", {
                         ChatRoom: chatId,
                         UserName: userName
                     });
@@ -91,7 +91,7 @@ class OfferState {
         
                 this.connection = newConnection;
         
-                await this.connection.invoke("JoinChatGeneral", { 
+                await this.connection.invoke("JoinRoom", { 
                     ChatRoom: chatId, 
                     UserName: userName
                 });

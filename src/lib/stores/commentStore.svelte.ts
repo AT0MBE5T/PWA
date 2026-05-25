@@ -78,7 +78,7 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
         if (newConnection !== connection) return;
         
         try {
-            await newConnection.invoke("JoinChatGeneral", {
+            await newConnection.invoke("JoinRoom", {
                 ChatRoom: chatId,
                 UserName: userName
             });
@@ -110,7 +110,7 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
         if (newConnection.state !== signalR.HubConnectionState.Connected) return;
         connection = newConnection;
 
-        await connection.invoke("JoinChatGeneral", { 
+        await connection.invoke("JoinRoom", { 
             ChatRoom: chatId, 
             UserName: userName
         });

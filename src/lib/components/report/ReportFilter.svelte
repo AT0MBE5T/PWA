@@ -3,15 +3,19 @@
     import { type ReportFilterParams, type PropertyTypeInterface, Roles, translations, settings, toast, type LookupItemFilter } from '$lib';
     import { auth } from '$lib';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { format } from 'date-fns';
     import { getContext, onMount } from 'svelte';
 
     let { callBack }: {callBack: (data: ReportFilterParams, action: Action) => void} = $props();
 
-    let dateFrom = $state<string>('');
-    let dateTo = $state<string>('');
     let clientName = $state<string>('');
     let propertyType = $state<string>('');
     let isInterval = $state<boolean>(false);
+    
+    const currentDate = $state(new Date());
+
+    let dateFrom = $derived<string>(isInterval ? format((new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()).toString()), 'yyyy-MM-dd') : format(currentDate.toString(), 'yyyy-MM-dd'));
+    let dateTo = $derived<string>(isInterval ? format(currentDate.toString(), 'yyyy-MM-dd') : '');
 
     let propertyTypes = $state<PropertyTypeInterface[]>([]);
 
@@ -40,14 +44,14 @@
         await getPropertyTypes();
     });
 
-    type Action = 'General' | 'Client' | 'PropertyType'
+    type Action = 'Client' | 'General' | 'PropertyType'
 
     $effect(() => {
         clearFilter();
         switchElementsByCurrentPage(currentPage);
     });
 
-    let currentPage = $state<Action>('General');
+    let currentPage = $state<Action>('Client');
 
     const validation = (page: Action) => {
         switch(page){
@@ -95,7 +99,7 @@
     }
 
     function clearFilter() {
-        dateFrom = "";
+        dateFrom = format(currentDate.toString(), 'yyyy-MM-dd');
         dateTo = "";
         clientName = "";
         propertyType = "";

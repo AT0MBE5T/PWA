@@ -154,7 +154,7 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
     isSyncing = true;
 
     try {
-        await newConnection.invoke("JoinChatGeneral", {
+        await newConnection.invoke("JoinRoom", {
             ChatRoom: chatId,
             UserName: userName
         });
@@ -186,7 +186,7 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
         connection = newConnection;
         await newConnection.start();
 
-        await connection.invoke("JoinChatGeneral", { 
+        await connection.invoke("JoinRoom", { 
             ChatRoom: chatId, 
             UserName: userName
         });
