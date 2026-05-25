@@ -163,6 +163,9 @@ $effect(() => {
 
 <div class="chat-content">
     <div class="messages-viewport" bind:this={messageContainer}>
+        {#if chat?.chatTypeId === 'c80e92eb-b14d-4258-bf31-e44b1d3e8bc7'}
+            <div class="closed_text">[{chat?.offerTitle}]</div>
+        {/if}
         {#each allMessages as msg}
             <div class="msg-wrapper" class:mine={msg.senderId === $auth.id}>
                 <div class="msg-bubble">

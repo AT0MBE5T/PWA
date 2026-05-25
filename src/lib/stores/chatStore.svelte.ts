@@ -77,6 +77,7 @@ function createChatState() {
                     unreadCount: '1',
                     closedAt: null,
                     offerId: offerId,
+                    offerTitle: '',
                     realtorId: realtorId,
                     lastMessageBy: null,
                     supportId: null,

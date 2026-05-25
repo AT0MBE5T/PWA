@@ -8,6 +8,7 @@ export interface Chat {
     avatarUrl: string;
     closedAt: string | null;
     offerId: string | null;
+    offerTitle: string | null;
     realtorId: string | null;
     chatTypeId: string;
     supportId: string | null;
