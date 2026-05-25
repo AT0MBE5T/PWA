@@ -4,8 +4,6 @@ import * as signalR from "@microsoft/signalr";
 import { chatOfflineState } from "./ChatOfflineStore.svelte";
 import getCookie from "$lib/utils/cookieData";
 import { env } from "$env/dynamic/public";
-import { getContext } from "svelte";
-import type SettingsStore from "./settingsStore.svelte";
 
 const chatState = createChatState();
 export default chatState;
@@ -136,6 +134,7 @@ function createChatState() {
         isConnecting = false;
 
         await connection?.invoke("JoinChat", { ChatRoom: userId, UserName: userName });
+
         try{
             await connection?.invoke("JoinCommonChat", userName);
         }catch(e){

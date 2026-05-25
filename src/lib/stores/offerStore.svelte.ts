@@ -10,7 +10,6 @@ import getCookie from "$lib/utils/cookieData";
 import type { AnnouncementUpdateModel } from "$lib/interfaces/AnnouncementUpdateModel";
 import { env } from "$env/dynamic/public";
 import { settings } from "./settings.svelte";
-import { tick } from "svelte";
 
 const offerState = createOfferState();
 export default offerState;
