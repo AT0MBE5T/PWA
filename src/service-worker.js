@@ -8,7 +8,7 @@ cleanupOutdatedCaches();
 
 const navigationRoute = new NavigationRoute(async ({ event }) => {
     try {
-        const response = (await matchPrecache('/index.html')) || (await matchPrecache('/'));
+        const response = await matchPrecache('/');
         
         if (response) {
             return response;
@@ -26,7 +26,7 @@ registerRoute(navigationRoute);
 
 setCatchHandler(async ({ event }) => {
     if (event.request.mode === 'navigate') {
-        return (await matchPrecache('/index.html')) || (await matchPrecache('/')) || Response.error();
+        return (await matchPrecache('/')) || Response.error();
     }
     return Response.error();
 });
