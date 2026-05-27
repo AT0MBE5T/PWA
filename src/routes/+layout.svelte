@@ -102,10 +102,19 @@
         });
     });
 
-        const onlineCheck = async () => {
+    const onlineCheck = async () => {
+        if (!navigator.onLine) {
+            settings.online = false;
+            return;
+        }
+        
+        try {
             const result = await settings.checkServer();
             settings.online = result;
+        } catch {
+            settings.online = false;
         }
+    };
 
         const goOffline = () => settings.online = false;
 
@@ -124,13 +133,9 @@
         };
     });
 
-    async function handleCheck() {
-        if (settings.isLoading) return;
-        
-        settings.isLoading = true;
-        await settings.checkServer();
-        settings.isLoading = false;
-    }
+    const handleCheck = async () => {
+        await onlineCheck();
+    };
 
     setInterval(async() => {
         await settings.checkServer();
