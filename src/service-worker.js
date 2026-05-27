@@ -1,22 +1,16 @@
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 cleanupOutdatedCaches();
 
-registerRoute(
-    ({ request }) => request.mode === 'navigate',
-    new NetworkFirst({
-        cacheName: 'pages-cache',
-        networkTimeoutSeconds: 3,
-        plugins: [{
-            handlerDidError: async () => {
-                return await caches.match('/')
-            }
-        }]
-    })
-);
+const handler = createHandlerBoundToURL('/');
+const navigationRoute = new NavigationRoute(handler, {
+    denylist: [/^\/api/], 
+});
+registerRoute(navigationRoute);
 
 registerRoute(
     ({ request }) =>
@@ -25,13 +19,13 @@ registerRoute(
         request.destination === 'style' ||
         request.destination === 'script',
     new CacheFirst({
-        cacheName: 'static-cache',
-        plugins: [{
-            expiration: {
+        cacheName: 'static-assets-cache',
+        plugins: [
+            new ExpirationPlugin({
                 maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 24 * 30
-            }
-        }]
+            })
+        ]
     })
 );
 

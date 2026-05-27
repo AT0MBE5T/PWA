@@ -16,9 +16,10 @@ VitePWA({
     base: '/',
 
     injectManifest: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-        globDirectory: '.svelte-kit/output/client',
-        injectionPoint: 'self.__WB_MANIFEST'
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,webmanifest}'],
+        globDirectory: '.svelte-kit/output',
+        injectionPoint: 'self.__WB_MANIFEST',
+        dontCacheBustURLsMatching: /-[a-f0-9]{8}\./
     },
 
     manifest: {
