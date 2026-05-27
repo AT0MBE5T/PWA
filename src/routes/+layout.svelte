@@ -11,6 +11,7 @@
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
     import SupportChat from '$lib/components/SupportChat.svelte';
+    import { redirect } from '@sveltejs/kit';
     let { data, children } = $props();
 
     let menuOpen = $state(false);
@@ -51,6 +52,7 @@
                 const data = await response.json();
 
                 document.cookie = `accessToken=${data.token}; path=/`;
+                redirect(200, '/');
             }
 
         if (browser && 'serviceWorker' in navigator) {
