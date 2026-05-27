@@ -12,6 +12,7 @@
     import type { Language } from '$lib/i18n';
     import SupportChat from '$lib/components/SupportChat.svelte';
     import { redirect } from '@sveltejs/kit';
+    import getCookie from '$lib/utils/cookieData';
     let { data, children } = $props();
 
     let menuOpen = $state(false);
@@ -43,7 +44,10 @@
     };
 
     onMount(async () => {
-        const response = await fetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
+        const accessToken = getCookie('accessToken');
+
+        if (!accessToken){
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
                 method: 'POST',
                 credentials: 'include'
             });
@@ -52,9 +56,10 @@
                 const data = await response.json();
 
                 document.cookie = `accessToken=${data.token}; path=/`;
-                await invalidateAll();
+                window.location.reload();
             }
-
+        }
+        
         if (browser && 'serviceWorker' in navigator) {
         try {
             await navigator.serviceWorker.register('/sw.js', {
