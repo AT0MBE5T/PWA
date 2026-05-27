@@ -14,30 +14,7 @@ registerRoute(
         plugins: [
             {
                 handlerDidError: async () => {
-                    const cachedResponse = await matchPrecache('/');
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-
-                    return new Response(
-                        `<!DOCTYPE html>
-                        <html lang="uk">
-                        <head>
-                            <meta charset="utf-8" />
-                            <meta name="viewport" content="width=device-width, initial-scale=1" />
-                            <title>Realsy Offline</title>
-                        </head>
-                        <body>
-                            <div id="svelte"></div>
-                            <script>
-                                window.addEventListener('online', () => window.location.reload());
-                            </script>
-                        </body>
-                        </html>`,
-                        {
-                            headers: { 'Content-Type': 'text/html; charset=utf-8' }
-                        }
-                    );
+                    return (await matchPrecache('/')) || Response.error();
                 }
             }
         ]
@@ -45,12 +22,27 @@ registerRoute(
 );
 
 registerRoute(
-    ({ request }) =>
+    ({ url }) => url.pathname.includes('__data.json') || url.pathname.startsWith('/api/'),
+    new NetworkFirst({
+        cacheName: 'sveltekit-data-cache',
+        networkTimeoutSeconds: 3,
+        plugins: [
+            new ExpirationPlugin({
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24
+            })
+        ]
+    })
+);
+
+registerRoute(
+    ({ request, url }) =>
         request.destination === 'image' ||
         request.destination === 'font' ||
         request.destination === 'style' ||
-        request.destination === 'script',
-    new CacheFirst({
+        request.destination === 'script' ||
+        url.pathname.endsWith('favicon.ico'),
+    new StaleWhileRevalidate({
         cacheName: 'static-assets-cache',
         plugins: [
             new ExpirationPlugin({ 
