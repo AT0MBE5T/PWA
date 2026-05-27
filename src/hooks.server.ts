@@ -7,7 +7,9 @@ import { jwtDecode } from "jwt-decode";
 
 export const handle: Handle = async ({ event, resolve }) => {
     let token = event.cookies.get('accessToken');
+    console.log(`accessToken: ${token}`);
     let refresh = event.cookies.get('refreshToken');
+    console.log(`refreshToken: ${refresh}`);
 
     if (token) {
         try {
