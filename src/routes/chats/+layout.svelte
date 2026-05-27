@@ -13,13 +13,10 @@
     let allChats = $derived(chatState.chats);
 
     onMount(async () => {
-        // const userId = $auth.id;
-        // console.log(userId);
-
-        // if (!userId){
-        //     await goto('/login');
-        //     return;
-        // }
+        if (!$auth.isAuthenticated){
+            await goto('/login');
+            return;
+        }
 
         settings.isLoading = true;
         await chatState.loadData($auth.id!);
