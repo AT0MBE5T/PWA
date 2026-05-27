@@ -79,12 +79,12 @@ async function tryServerRefresh(svelteFetch: typeof fetch) {
         const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: "POST"
         });
-        if (!response.ok){
-            console.log('1111111111111');
-            return null;
-        }
-        const data = await response.json();
+        // if (!response.ok){
+        //     return null;
+        // }
+        const data = await response.json() as string;
         console.log(data);
+        return;
         settings.online = true;
         return data.token as string;
     }catch{
