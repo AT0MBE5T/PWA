@@ -44,6 +44,22 @@
     };
 
     onMount(async () => {
+        const accessToken = getCookie('accessToken');
+
+        if (!accessToken){
+            const response = await fetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                document.cookie = `accessToken=${data.token}; path=/`;
+                window.location.reload();
+            }
+        }
+
         if (!$auth.isAuthenticated)
             return;
 
