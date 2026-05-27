@@ -13,7 +13,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             const decoded = jwtDecode<JwtPayload>(token);
             
             if (decoded.exp < Date.now() / 1000) {
-                const newToken = await tryServerRefresh(event.fetch, event.cookies);
+                const newToken = await tryServerRefresh(event.fetch);
                 if (newToken) {
                     token = newToken;
                     event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
@@ -28,7 +28,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
     else{
-        const newToken = await tryServerRefresh(event.fetch, event.cookies);
+        const newToken = await tryServerRefresh(event.fetch);
         if (newToken) {
             token = newToken;
             event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
@@ -62,18 +62,15 @@ export const handle: Handle = async ({ event, resolve }) => {
     return await resolve(event);
 };
 
-async function tryServerRefresh(svelteFetch: typeof fetch, cookies: Cookies) {
+async function tryServerRefresh(svelteFetch: typeof fetch) {
     try{
-        console.log(11111);
         const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: "POST",
             credentials: "include"
         });
         if (!response.ok){
-            console.log(222222);
             return null;
         }
-        console.log(333333);
         const data = await response.json();
         settings.online = true;
         return data.token as string;

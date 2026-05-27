@@ -44,7 +44,6 @@
     };
 
     onMount(async () => {
-        console.log(444444);
         const accessToken = getCookie('accessToken');
 
         if (!accessToken){
@@ -58,11 +57,7 @@
 
                 document.cookie = `accessToken=${data.token}; path=/`;
                 window.location.reload();
-
-                console.log(555555);
             }
-
-            console.log(666666);
         }
 
         if (!$auth.isAuthenticated)
