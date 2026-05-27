@@ -10,9 +10,8 @@ class SettingsStore {
 
     public async checkServer() {
         try {
-            const res = await fetch(`${env.PUBLIC_API_URL}/api/accounts/ping`, {
-                cache: 'no-store'
-            });
+            const res = await fetch(`${env.PUBLIC_API_URL}/api/accounts/ping`, { cache: 'no-store' });
+            console.log("ПІНГ РЕЗУЛЬТАТ:", res.status, await res.text());
             this.online = res.ok;
             return res.ok;
         } catch {

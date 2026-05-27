@@ -22,7 +22,13 @@ registerRoute(
 );
 
 registerRoute(
-    ({ url }) => url.pathname.includes('__data.json') || url.pathname.startsWith('/api/'),
+({ url }) => {
+        if (url.pathname.includes('/api/accounts/ping')) {
+            return false; 
+        }
+        
+        return url.pathname.includes('__data.json') || url.pathname.startsWith('/api/');
+    },
     new NetworkFirst({
         cacheName: 'sveltekit-data-cache',
         networkTimeoutSeconds: 3,
