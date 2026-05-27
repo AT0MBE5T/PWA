@@ -107,7 +107,6 @@
         //console.log(`Settings: ${settings.online}`);
         if (!navigator.onLine) {
             settings.online = false;
-            console.log(settings.online);
             return;
         }
         
