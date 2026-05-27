@@ -7,16 +7,30 @@ precacheAndRoute(self.__WB_MANIFEST || []);
 cleanupOutdatedCaches();
 
 const navigationRoute = new NavigationRoute(async ({ event }) => {
-    try {
-        return (await matchPrecache('/index.html')) || (await matchPrecache('/'));
-    } catch (error) {
-        return Response.error();
+    const cacheKey = getCacheKeyForURL('/index.html') || getCacheKeyForURL('/');
+    
+    if (cacheKey) {
+        const cachedResponse = await caches.match(cacheKey);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
     }
+
+    return Response.error();
 }, {
-    denylist: [/^\/api/],
+    denylist: [/^\/api/, /__data.json/],
 });
 
 registerRoute(navigationRoute);
+
+import { setCatchHandler } from 'workbox-routing';
+setCatchHandler(async ({ event }) => {
+    if (event.request.mode === 'navigate') {
+        const cacheKey = getCacheKeyForURL('/index.html') || getCacheKeyForURL('/');
+        if (cacheKey) return caches.match(cacheKey);
+    }
+    return Response.error();
+});
 
 registerRoute(
     ({ request }) =>
