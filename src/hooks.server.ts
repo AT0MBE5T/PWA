@@ -7,16 +7,13 @@ import { jwtDecode } from "jwt-decode";
 
 export const handle: Handle = async ({ event, resolve }) => {
     let token = event.cookies.get('accessToken');
-    console.log(`accessToken: ${token}`);
-    let refresh = event.cookies.get('refreshToken');
-    console.log(`refreshToken: ${refresh}`);
 
     if (token) {
         try {
             const decoded = jwtDecode<JwtPayload>(token);
             
             if (decoded.exp < Date.now() / 1000) {
-                const newToken = await tryServerRefresh(event.fetch, refresh);
+                const newToken = await tryServerRefresh(event.fetch, event.cookies);
                 if (newToken) {
                     token = newToken;
                     event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
@@ -31,7 +28,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
     else{
-        const newToken = await tryServerRefresh(event.fetch, refresh);
+        const newToken = await tryServerRefresh(event.fetch, event.cookies);
         if (newToken) {
             token = newToken;
             event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
