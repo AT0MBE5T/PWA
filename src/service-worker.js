@@ -27,7 +27,7 @@ registerRoute(
             return false; 
         }
         
-        return url.pathname.includes('__data.json') || url.pathname.startsWith('/api/');
+        return url.pathname.includes('__data.json');
     },
     new NetworkFirst({
         cacheName: 'sveltekit-data-cache',
