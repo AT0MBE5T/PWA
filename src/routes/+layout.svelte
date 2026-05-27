@@ -39,8 +39,8 @@
 
     const logout = async () => {
         await personalStore.clearAllData();
-        auth.logout();
-        goto('/login');
+        await auth.logout();
+        await goto('/login');
     };
 
     onMount(async () => {
