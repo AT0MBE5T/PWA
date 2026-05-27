@@ -4,9 +4,9 @@ import { auth, settings, type JwtPayload } from "$lib";
 import { Roles } from "$lib";
 import { redirect, type Handle } from "@sveltejs/kit";
 import { jwtDecode } from "jwt-decode";
-import type { RequestEvent } from "./routes/$types";
 
 export const handle: Handle = async ({ event, resolve }) => {
+    console.log('!!!!Cookie header!!!!:', event.request.headers.get('cookie'));
     let token = event.cookies.get('accessToken');
 
     if (token) {
