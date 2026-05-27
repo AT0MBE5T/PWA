@@ -9,6 +9,7 @@ import { getContext } from "svelte";
 import type SettingsStore from "./settingsStore.svelte";
 import { goto } from "$app/navigation";
 import { toast } from "./toast";
+import getCookie from "$lib/utils/cookieData";
 
 const questionAnswerState = createQuestionAnswerState();
 export default questionAnswerState;
@@ -60,7 +61,9 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
     currentChatId = chatId;
 
     const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
+        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, {
+            accessTokenFactory: () => getCookie('accessToken') ?? ''
+        })
         .withAutomaticReconnect()
         .build();
 

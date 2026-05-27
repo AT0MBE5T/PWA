@@ -42,7 +42,9 @@ class OfferState {
     const signal = this.abortController.signal;
     
         const newConnection = new signalR.HubConnectionBuilder()
-            .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
+            .withUrl(`${env.PUBLIC_API_URL}/messageHub`, {
+                accessTokenFactory: () => getCookie('accessToken') ?? ''
+            })
             .withAutomaticReconnect()
             .build();
 

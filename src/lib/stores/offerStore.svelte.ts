@@ -31,7 +31,9 @@ async function initSignalR(chatId: string, userName: string) {
     await stopSignalR();
 
     const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
+        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, {
+            accessTokenFactory: () => getCookie('accessToken') ?? ''
+        })
         .withAutomaticReconnect()
         .build();
 
