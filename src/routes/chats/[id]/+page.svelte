@@ -24,7 +24,7 @@
         settings.isLoading = false;
     });
 
-onMount(async () => {
+$effect(() => {
     const chatId = data.chatId;
     const userName = `${data.user?.name} ${data.user?.personSurname}`;
 
@@ -34,13 +34,16 @@ onMount(async () => {
     if (offlineMessages) {
         chatState.setMessages(offlineMessages);
     }
-    settings.isLoading = true;
-    await chatState.initSignalR($auth.id!, userName, chatId);
-    settings.isLoading = false;
 });
 
-onDestroy(() => {
-    chatState.stopSignalR();
+onMount(async () => {
+    const chatId = data.chatId;
+    const userName = `${data.user?.name} ${data.user?.personSurname}`;
+    await chatState.initSignalR($auth.id!, userName, chatId);
+});
+
+onDestroy(async () => {
+    await chatState.stopSignalR();
 });
 
     const onCloseAnnouncementClick = async () => {
