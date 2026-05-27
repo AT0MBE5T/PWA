@@ -30,11 +30,11 @@
         }
     }
 
-    onMount(() => {
+    onMount(async () => {
         const userId = $auth.id;
 
         if (!userId){
-            throw redirect(303, '/login');
+            await goto('/login');
         }
     });
 

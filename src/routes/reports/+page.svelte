@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
     import { ReportFilter, ReportUser, ReportPropertyType, ReportGeneral, toast, translations, settings, auth } from '$lib';
     import type { ReportFilterParams } from '$lib';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
@@ -13,11 +14,11 @@
 
     let currentAction = $state<Actions>('General');
 
-    onMount(() => {
+    onMount(async () => {
         const userId = $auth.id;
 
         if (!userId){
-            throw redirect(303, '/login');
+            await goto('/login');
         }
     });
 

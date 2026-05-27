@@ -59,30 +59,21 @@ export const handle: Handle = async ({ event, resolve }) => {
     event.locals.lang = event.cookies.get('lang') ?? 'UA';
     event.locals.theme = event.cookies.get('theme') ?? 'light';
 
-    // if (url.startsWith('/personal') && !user) {
-    //     throw redirect(303, '/login');
-    // }
-
-    // if (url.startsWith('/chats') && !user) {
-    //     throw redirect(303, '/login');
-    // }
-
-    // if (url.startsWith('/reports') && !auth.hasRole(Roles.Admin)) {
-    //     throw redirect(303, '/');
-    // }
-
     return await resolve(event);
 };
 
 async function tryServerRefresh(svelteFetch: typeof fetch, cookies: Cookies) {
     try{
+        console.log(11111);
         const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: "POST",
             credentials: "include"
         });
         if (!response.ok){
+            console.log(222222);
             return null;
         }
+        console.log(333333);
         const data = await response.json();
         settings.online = true;
         return data.token as string;

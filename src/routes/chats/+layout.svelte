@@ -1,4 +1,5 @@
 <script lang='ts'>
+    import { goto } from '$app/navigation';
     import { page } from '$app/state';
     import { auth, settings, translations } from '$lib';
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
@@ -13,9 +14,11 @@
 
     onMount(async () => {
         const userId = $auth.id;
+        console.log(userId);
 
         if (!userId){
-            throw redirect(303, '/login');
+            await goto('/login');
+            return;
         }
 
         settings.isLoading = true;
