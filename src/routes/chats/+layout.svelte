@@ -15,7 +15,6 @@
     onMount(async () => {
         settings.isLoading = true;
         await chatState.loadData($auth.id!);
-        await chatState.initSignalR($auth.id!, `${$auth.name} ${$auth.personSurname}`);
         settings.isLoading = false;
     });
 
@@ -23,6 +22,7 @@
         const chats = chatOfflineState.chats[$auth.id!];
         if (chats) {
             chatState.setChats(chats);
+            chatState.initSignalR($auth.id!, `${$auth.name} ${$auth.personSurname}`);
         }
     });
 

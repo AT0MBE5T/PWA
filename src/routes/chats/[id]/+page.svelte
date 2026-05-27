@@ -1,7 +1,7 @@
 <script lang='ts'>
     import { format } from 'date-fns';
     import { auth, ConfirmModal, Roles, settings, toast, translations, type BuyRequest } from '$lib';
-    import { getContext, tick } from 'svelte';
+    import { getContext, onDestroy, onMount, tick } from 'svelte';
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
     import { offerFullStore } from '$lib/stores/OfferFullStore.svelte.js';
@@ -24,7 +24,7 @@
         settings.isLoading = false;
     });
 
-$effect(() => {
+onMount(async () => {
     const chatId = data.chatId;
     const userName = `${data.user?.name} ${data.user?.personSurname}`;
 
@@ -34,12 +34,13 @@ $effect(() => {
     if (offlineMessages) {
         chatState.setMessages(offlineMessages);
     }
+    settings.isLoading = true;
+    await chatState.initSignalR($auth.id!, userName, chatId);
+    settings.isLoading = false;
+});
 
-    chatState.initSignalR($auth.id!, userName, chatId);
-
-    return () => {
-        chatState.stopSignalR();
-    };
+onDestroy(() => {
+    chatState.stopSignalR();
 });
 
     const onCloseAnnouncementClick = async () => {
