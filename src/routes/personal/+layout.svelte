@@ -1,9 +1,10 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { settings, translations } from '$lib';
+    import { auth, settings, translations } from '$lib';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
-    import { getContext } from 'svelte';
+    import { redirect } from '@sveltejs/kit';
+    import { getContext, onMount } from 'svelte';
 
     let { children } = $props();
 
@@ -28,6 +29,14 @@
             menuOpen = false;
         }
     }
+
+    onMount(() => {
+        const userId = $auth.id;
+
+        if (!userId){
+            throw redirect(303, '/login');
+        }
+    });
 
 $effect(() => {
     document.addEventListener('click', handleOutsideClick);

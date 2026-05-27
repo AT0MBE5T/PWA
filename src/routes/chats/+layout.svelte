@@ -4,6 +4,7 @@
     import { chatOfflineState } from '$lib/stores/ChatOfflineStore.svelte.js';
     import chatState from '$lib/stores/chatStore.svelte.js';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
+    import { redirect } from '@sveltejs/kit';
     import { format } from 'date-fns';
     import { getContext, onMount } from 'svelte';
     const { children } = $props();
@@ -13,8 +14,9 @@
     onMount(async () => {
         const userId = $auth.id;
 
-        if (!userId)
-            return;
+        if (!userId){
+            throw redirect(303, '/login');
+        }
 
         settings.isLoading = true;
         await chatState.loadData($auth.id!);

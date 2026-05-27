@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { ReportFilter, ReportUser, ReportPropertyType, ReportGeneral, toast, translations, settings } from '$lib';
+    import { ReportFilter, ReportUser, ReportPropertyType, ReportGeneral, toast, translations, settings, auth } from '$lib';
     import type { ReportFilterParams } from '$lib';
     import type SettingsStore from '$lib/stores/settingsStore.svelte';
-    import { getContext } from 'svelte';
+    import { redirect } from '@sveltejs/kit';
+    import { getContext, onMount } from 'svelte';
 
     let isChosen = $state<boolean>(false);
 
@@ -11,6 +12,14 @@
     type Actions = 'General' | 'Client' | 'PropertyType'
 
     let currentAction = $state<Actions>('General');
+
+    onMount(() => {
+        const userId = $auth.id;
+
+        if (!userId){
+            throw redirect(303, '/login');
+        }
+    });
 
     const filterData = (dataRet: ReportFilterParams, action: Actions) => {
         data = dataRet;
