@@ -49,7 +49,8 @@ function createAuthStore() {
         },
 
         login: async (token: string) => {
-            document.cookie = `accessToken=${token}; path=/; SameSite=Strict;`;
+            const isSecure = location.protocol === 'https:' ? '; Secure' : '';
+            document.cookie = `accessToken=${token}; path=/; SameSite=Strict${isSecure}`;
             await goto('/');
             window.location.reload();
         },

@@ -4,6 +4,7 @@ import { auth, settings, type JwtPayload } from "$lib";
 import { Roles } from "$lib";
 import { redirect, type Handle } from "@sveltejs/kit";
 import { jwtDecode } from "jwt-decode";
+import type { RequestEvent } from "./routes/$types";
 
 export const handle: Handle = async ({ event, resolve }) => {
     let token = event.cookies.get('accessToken');
@@ -13,10 +14,10 @@ export const handle: Handle = async ({ event, resolve }) => {
             const decoded = jwtDecode<JwtPayload>(token);
             
             if (decoded.exp < Date.now() / 1000) {
-                const newToken = await tryServerRefresh(event.fetch);
+                const newToken = await tryServerRefresh(event.fetch, event.request.headers.get('cookie') ?? '');
                 if (newToken) {
                     token = newToken;
-                    event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
+                    event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict', secure: true });
                 } else {
                     token = undefined;
                 }
@@ -28,10 +29,10 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
     else{
-        const newToken = await tryServerRefresh(event.fetch);
+        const newToken = await tryServerRefresh(event.fetch, event.request.headers.get('cookie') ?? '');
         if (newToken) {
             token = newToken;
-            event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
+            event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict', secure: true });
         } else {
             token = undefined;
         }
@@ -74,10 +75,13 @@ export const handle: Handle = async ({ event, resolve }) => {
     return await resolve(event);
 };
 
-async function tryServerRefresh(svelteFetch: typeof fetch) {
+async function tryServerRefresh(svelteFetch: typeof fetch, cookieHeader: string) {
     try{
         const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
-            method: "POST"
+            method: "POST",
+                headers: {
+                    'Cookie': cookieHeader
+                }
         });
         if (!response.ok) return null;
         const data = await response.json();
