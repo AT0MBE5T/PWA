@@ -7,13 +7,14 @@ import { jwtDecode } from "jwt-decode";
 
 export const handle: Handle = async ({ event, resolve }) => {
     let token = event.cookies.get('accessToken');
+    let refresh = event.cookies.get('refreshToken');
 
     if (token) {
         try {
             const decoded = jwtDecode<JwtPayload>(token);
             
             if (decoded.exp < Date.now() / 1000) {
-                const newToken = await tryServerRefresh(event.fetch);
+                const newToken = await tryServerRefresh(event.fetch, refresh);
                 if (newToken) {
                     token = newToken;
                     event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
@@ -28,7 +29,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
     else{
-        const newToken = await tryServerRefresh(event.fetch);
+        const newToken = await tryServerRefresh(event.fetch, refresh);
         if (newToken) {
             token = newToken;
             event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
@@ -74,12 +75,13 @@ export const handle: Handle = async ({ event, resolve }) => {
     return await resolve(event);
 };
 
-async function tryServerRefresh(svelteFetch: typeof fetch) {
+async function tryServerRefresh(svelteFetch: typeof fetch, cookies: Cookies) {
     try{
+        const refreshToken = cookies.get('refreshToken');
         const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: "POST",
             headers: {
-                cookie: event.request.headers.get('cookie') ?? ''
+                cookie: `refreshToken=${refreshToken}`
             }
         });
         if (!response.ok){
