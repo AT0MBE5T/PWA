@@ -2,7 +2,7 @@ import { env } from "$env/dynamic/public";
 import type { UserDto } from "$lib";
 import { auth, settings, type JwtPayload } from "$lib";
 import { Roles } from "$lib";
-import { redirect, type Handle } from "@sveltejs/kit";
+import { redirect, type Cookies, type Handle } from "@sveltejs/kit";
 import { jwtDecode } from "jwt-decode";
 
 export const handle: Handle = async ({ event, resolve }) => {

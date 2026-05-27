@@ -2,6 +2,7 @@ import { writable } from "svelte/store";
 import { settings, type AuthState } from '$lib';
 import { goto } from "$app/navigation";
 import { env } from "$env/dynamic/public";
+import getCookie from "$lib/utils/cookieData";
 
 function createAuthStore() {
     const initialState: AuthState = {
@@ -54,6 +55,19 @@ function createAuthStore() {
         },
 
         logout: async () => {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+
+            await fetch(`${env.PUBLIC_API_URL}/api/notifications/unsubscribe`, {
+                method: "POST",
+                credentials: "include",
+                headers:{
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${initialState.accessToken}`
+                },
+                body: JSON.stringify(subscription?.endpoint)
+            });
+
             set(initialState);
             document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
             try {
@@ -65,6 +79,7 @@ function createAuthStore() {
             }catch{
                 settings.online = false;
             } finally {
+                window.location.reload();
                 goto('/login');
             }
         }

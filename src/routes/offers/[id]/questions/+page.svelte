@@ -49,6 +49,7 @@
         if (!textInput.trim()) return;
         await questionAnswerState.sendAnswer(`${$auth.personName} ${$auth.personSurname}`, data.id!, textInput, currentQuestionId);
         textInput = "";
+        switchToCommentBack();
     }
 
     async function deleteAnswer(answerId: string | null) {
