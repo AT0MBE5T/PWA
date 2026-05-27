@@ -44,21 +44,26 @@ export default defineConfig({
     },
 
     workbox: {
-        runtimeCaching: [
-            {
-                urlPattern: ({ request }) => request.mode === 'navigate',
-                handler: 'NetworkFirst',
-                options: {
-                    cacheName: 'pages-cache',
-                    networkTimeoutSeconds: 3,
-                }
+    navigateFallback: null,
+    navigateFallbackAllowlist: undefined,
+    navigateFallbackDenylist: undefined,
+
+    runtimeCaching: [
+        {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+                cacheName: 'pages-cache',
+                networkTimeoutSeconds: 3,
             }
-        ],
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
-    }
+        }
+    ],
+
+    globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+    cleanupOutdatedCaches: true,
+    clientsClaim: true,
+    skipWaiting: true,
+}
     })
   ],
   base: '/'
