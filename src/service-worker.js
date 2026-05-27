@@ -7,26 +7,26 @@ precacheAndRoute(self.__WB_MANIFEST || []);
 cleanupOutdatedCaches();
 
 const navigationRoute = new NavigationRoute(async ({ event }) => {
-    const cacheKey = getCacheKeyForURL('/index.html') || getCacheKeyForURL('/');
-    
-    if (cacheKey) {
-        const cachedResponse = await caches.match(cacheKey);
-        if (cachedResponse) {
-            return cachedResponse;
+    try {
+        const response = (await matchPrecache('/index.html')) || (await matchPrecache('/'));
+        
+        if (response) {
+            return response;
         }
+        
+        return await fetch(event.request);
+    } catch (error) {
+        return Response.error();
     }
-
-    return Response.error();
 }, {
     denylist: [/^\/api/, /__data.json/], 
 });
 
 registerRoute(navigationRoute);
 
-setCacheHandler(async ({ event }) => {
+setCatchHandler(async ({ event }) => {
     if (event.request.mode === 'navigate') {
-        const cacheKey = getCacheKeyForURL('/index.html') || getCacheKeyForURL('/');
-        if (cacheKey) return caches.match(cacheKey);
+        return (await matchPrecache('/index.html')) || (await matchPrecache('/')) || Response.error();
     }
     return Response.error();
 });
