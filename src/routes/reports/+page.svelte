@@ -14,14 +14,6 @@
 
     let currentAction = $state<Actions>('General');
 
-    onMount(async () => {
-        const userId = $auth.id;
-
-        if (!userId){
-            await goto('/login');
-        }
-    });
-
     const filterData = (dataRet: ReportFilterParams, action: Actions) => {
         data = dataRet;
         currentAction = action;

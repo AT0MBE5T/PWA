@@ -30,14 +30,6 @@
         }
     }
 
-    onMount(async () => {
-        const userId = $auth.id;
-
-        if (!userId){
-            await goto('/login');
-        }
-    });
-
 $effect(() => {
     document.addEventListener('click', handleOutsideClick);
 
