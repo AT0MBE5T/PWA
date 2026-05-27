@@ -11,20 +11,15 @@ VitePWA({
     srcDir: 'src',
     filename: 'service-worker.js',
     registerType: 'autoUpdate',
-    
     scope: '/',
     base: '/',
 
     injectManifest: {
-        globPatterns: [
-                'client/**/*.{js,css,ico,png,svg,webp,webmanifest}',
-                'prerendered/pages/**/*.html'
-            ],
-        globDirectory: '.svelte-kit/output',
+        globDirectory: '.svelte-kit/output/client',
+        globPatterns: ['**/*.{js,css,ico,png,svg,webp,webmanifest}'],
         injectionPoint: 'self.__WB_MANIFEST',
-        dontCacheBustURLsMatching: /-[a-f0-9]{8}\./,
         templatedURLs: {
-            '/': ['client/index.html']
+            '/': 'offline-app-shell'
         }
     },
 

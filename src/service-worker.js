@@ -6,30 +6,20 @@ import { ExpirationPlugin } from 'workbox-expiration';
 precacheAndRoute(self.__WB_MANIFEST || []);
 cleanupOutdatedCaches();
 
-const navigationRoute = new NavigationRoute(async ({ event }) => {
-    try {
-        const response = await matchPrecache('/');
-        
-        if (response) {
-            return response;
-        }
-        
-        return await fetch(event.request);
-    } catch (error) {
-        return Response.error();
-    }
-}, {
-    denylist: [/^\/api/, /__data.json/], 
-});
-
-registerRoute(navigationRoute);
-
-setCatchHandler(async ({ event }) => {
-    if (event.request.mode === 'navigate') {
-        return (await matchPrecache('/')) || Response.error();
-    }
-    return Response.error();
-});
+registerRoute(
+    ({ request }) => request.mode === 'navigate',
+    new NetworkFirst({
+        cacheName: 'pages-cache',
+        networkTimeoutSeconds: 3,
+        plugins: [
+            {
+                handlerDidError: async () => {
+                    return await matchPrecache('/');
+                }
+            }
+        ]
+    })
+);
 
 registerRoute(
     ({ request }) =>
