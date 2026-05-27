@@ -52,7 +52,7 @@
                 const data = await response.json();
 
                 document.cookie = `accessToken=${data.token}; path=/`;
-                redirect(200, '/');
+                document.location.href = '/';
             }
 
         if (browser && 'serviceWorker' in navigator) {
