@@ -103,8 +103,8 @@
     });
 
     const onlineCheck = async () => {
-        console.log(`Navigator: ${navigator.onLine}`);
-        console.log(`Settings: ${settings.online}`);
+        //console.log(`Navigator: ${navigator.onLine}`);
+        //console.log(`Settings: ${settings.online}`);
         if (!navigator.onLine) {
             settings.online = false;
             console.log(settings.online);
