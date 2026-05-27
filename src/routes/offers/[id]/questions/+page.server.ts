@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 
   if (userId === null)
     return {
-      id: '',
+      id: id,
       authorId: authorId
     };
 
