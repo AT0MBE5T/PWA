@@ -174,8 +174,8 @@
 
             if(response.ok){
                 await personalStore.clearAllData();
-                const res = await response.json() as { id: string, login: string, accessToken: string };
-                auth.login(res.accessToken);
+                const res = await response.json() as { id: string, login: string, accessToken: string, refreshToken: string };
+                await auth.login(res.accessToken, res.refreshToken);
                 successCallback();
                 return;
             }

@@ -62,8 +62,8 @@
             switch(response.status){
                 case 200:
                     await personalStore.clearAllData();
-                    const res = await response.json() as { id: string, login: string, accessToken: string };
-                    auth.login(res.accessToken);
+                    const res = await response.json() as { id: string, login: string, accessToken: string, refreshToken: string };
+                    await auth.login(res.accessToken, res.refreshToken);
                     toast.show(t.system.success, 'success');
                     break;
                 case 401:
