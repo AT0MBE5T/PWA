@@ -59,17 +59,17 @@ export const handle: Handle = async ({ event, resolve }) => {
     event.locals.lang = event.cookies.get('lang') ?? 'UA';
     event.locals.theme = event.cookies.get('theme') ?? 'light';
 
-    if (url.startsWith('/personal') && !user) {
-        throw redirect(303, '/login');
-    }
+    // if (url.startsWith('/personal') && !user) {
+    //     throw redirect(303, '/login');
+    // }
 
-    if (url.startsWith('/chats') && !user) {
-        throw redirect(303, '/login');
-    }
+    // if (url.startsWith('/chats') && !user) {
+    //     throw redirect(303, '/login');
+    // }
 
-    if (url.startsWith('/reports') && !auth.hasRole(Roles.Admin)) {
-        throw redirect(303, '/');
-    }
+    // if (url.startsWith('/reports') && !auth.hasRole(Roles.Admin)) {
+    //     throw redirect(303, '/');
+    // }
 
     return await resolve(event);
 };
