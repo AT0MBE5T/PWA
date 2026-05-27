@@ -5,8 +5,9 @@
     import { auth, Roles, settings, translations } from '$lib';
     import { getContext, tick } from 'svelte';
     import type SettingsStore from '$lib/stores/settingsStore.svelte.js';
+    import type { PageData } from './$types';
 
-    let { data } = $props();
+  let { data }: { data: PageData } = $props();
 
     let questionContainer: HTMLElement;
 
