@@ -14,6 +14,7 @@ VitePWA({
 
     injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        injectionPoint: 'self.__WB_MANIFEST'
     },
 
     manifest: {
