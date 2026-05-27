@@ -1,7 +1,7 @@
 <script lang="ts">
     import { auth, Roles, toast, Toast, translations } from '$lib';
     import { page } from '$app/stores';
-    import { goto } from '$app/navigation';
+    import { goto, invalidateAll } from '$app/navigation';
     import { browser } from '$app/environment';
     import { settings } from '$lib';
     import '../app.css';
@@ -52,7 +52,7 @@
                 const data = await response.json();
 
                 document.cookie = `accessToken=${data.token}; path=/`;
-                document.location.href = '/';
+                await invalidateAll();
             }
 
         if (browser && 'serviceWorker' in navigator) {
