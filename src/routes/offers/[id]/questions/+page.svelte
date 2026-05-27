@@ -15,7 +15,6 @@
     let questionAnswers = $derived(questionAnswerState.questionAnswerData);
 
     $effect(() => {
-        console.log(data);
         const currentId = data.id;
         if (!currentId) return;
 

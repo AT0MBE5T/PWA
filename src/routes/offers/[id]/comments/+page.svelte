@@ -32,7 +32,6 @@
     const t = $derived(translations[settingsStore.lang]);
 
     $effect(() => {
-        console.log(data);
         const currentId = data.id;
         if (!currentId) return;
 
