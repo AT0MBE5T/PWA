@@ -11,9 +11,13 @@ VitePWA({
     srcDir: 'src',
     filename: 'service-worker.js',
     registerType: 'autoUpdate',
+    
+    scope: '/',
+    base: '/',
 
     injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        globDirectory: '.svelte-kit/output/client',
         injectionPoint: 'self.__WB_MANIFEST'
     },
 
@@ -23,6 +27,7 @@ VitePWA({
         name: 'Realsy',
         short_name: 'Rsy',
         start_url: '/',
+        scope: '/',
         display: 'standalone',
         icons: [
             {
