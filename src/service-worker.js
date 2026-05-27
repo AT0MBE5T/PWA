@@ -11,30 +11,17 @@ const navigationRoute = new NavigationRoute(handler, {
     denylist: [/^\/api/], 
 });
 
-registerRoute(
-    ({ url }) => url.pathname.startsWith('/api/') || url.search.includes('__data.json'),
-    new NetworkFirst({
-        cacheName: 'api-data-cache',
-        networkTimeoutSeconds: 5
-    })
-);
+const navigationRoute = new NavigationRoute(async ({ event }) => {
+    try {
+        return (await matchPrecache('/index.html')) || (await matchPrecache('/'));
+    } catch (error) {
+        return Response.error();
+    }
+}, {
+    denylist: [/^\/api/],
+});
 
-registerRoute(
-    ({ request }) =>
-        request.destination === 'image' ||
-        request.destination === 'font' ||
-        request.destination === 'style' ||
-        request.destination === 'script',
-    new CacheFirst({
-        cacheName: 'static-assets-cache',
-        plugins: [
-            new ExpirationPlugin({
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30
-            })
-        ]
-    })
-);
+registerRoute(navigationRoute);
 
 self.addEventListener('push', function(event) {
     if (!event.data) return;
