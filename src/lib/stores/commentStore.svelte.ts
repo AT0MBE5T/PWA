@@ -7,6 +7,7 @@ import { goto } from "$app/navigation";
 import { toast } from "./toast";
 import type SettingsStore from "./settingsStore.svelte";
 import { translations } from "$lib/i18n";
+import getCookie from "$lib/utils/cookieData";
 
 const commentState = createCommentState();
 export default commentState;
@@ -26,7 +27,9 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
     await stopSignalR();
 
     const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, { withCredentials: true })
+        .withUrl(`${env.PUBLIC_API_URL}/messageHub`, {
+            accessTokenFactory: () => getCookie('accessToken') ?? ''
+        })
         .withAutomaticReconnect()
         .build();
 
