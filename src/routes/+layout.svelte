@@ -121,6 +121,9 @@
         onMount(async () => {
             const result = await settings.checkServer();
             settings.online = result && navigator.onLine;
+            console.log(result);
+            console.log(navigator.onLine);
+            console.log(settings.online);
         });
 
     onMount(() => {
