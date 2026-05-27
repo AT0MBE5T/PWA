@@ -1,10 +1,8 @@
-import { base } from '$service-worker';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/',
   plugins: [
     sveltekit(),
 
@@ -51,6 +49,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true
     }
-})
-  ]
+    })
+  ],
+  base: '/'
 })
