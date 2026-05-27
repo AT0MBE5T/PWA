@@ -76,20 +76,19 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 async function tryServerRefresh(svelteFetch: typeof fetch, cookies: Cookies) {
     try{
-        // const refreshToken = cookies.get('refreshToken');
-        // const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
-        //     method: "POST",
-        //     headers: {
-        //         cookie: `refreshToken=${refreshToken}`
-        //     }
-        // });
-        // if (!response.ok){
-        //     return null;
-        // }
-        // const data = await response.json();
+        const refreshToken = cookies.get('refreshToken');
+        const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
+            method: "POST",
+            headers: {
+                cookie: `refreshToken=${refreshToken}`
+            }
+        });
+        if (!response.ok){
+            return null;
+        }
+        const data = await response.json();
         settings.online = true;
-        //return data.token as string;
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30';
+        return data.token as string;
     }catch{
         settings.online = false;
     }
