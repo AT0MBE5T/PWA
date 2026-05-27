@@ -14,7 +14,30 @@ registerRoute(
         plugins: [
             {
                 handlerDidError: async () => {
-                    return (await matchPrecache('/')) || Response.error();
+                    const cachedResponse = await matchPrecache('/');
+                    if (cachedResponse) {
+                        return cachedResponse;
+                    }
+
+                    return new Response(
+                        `<!DOCTYPE html>
+                        <html lang="uk">
+                        <head>
+                            <meta charset="utf-8" />
+                            <meta name="viewport" content="width=device-width, initial-scale=1" />
+                            <title>Realsy Offline</title>
+                        </head>
+                        <body>
+                            <div id="svelte"></div>
+                            <script>
+                                window.addEventListener('online', () => window.location.reload());
+                            </script>
+                        </body>
+                        </html>`,
+                        {
+                            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+                        }
+                    );
                 }
             }
         ]
