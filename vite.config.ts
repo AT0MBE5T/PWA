@@ -6,28 +6,23 @@ export default defineConfig({
   plugins: [
     sveltekit(),
 
-    VitePWA({
-    strategies: 'generateSW',
-
+VitePWA({
+    strategies: 'injectManifest',
+    srcDir: 'src',
+    filename: 'service-worker.js',
     registerType: 'autoUpdate',
 
-    includeAssets: [
-        'favicon.ico',
-        'apple-touch-icon.png',
-        'icon512_maskable.png',
-        'icon512_rounded.png'
-    ],
+    injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+    },
 
     manifest: {
         theme_color: '#f4f93c',
         background_color: '#2EC6FE',
-
         name: 'Realsy',
         short_name: 'Rsy',
-
         start_url: '/',
         display: 'standalone',
-
         icons: [
             {
                 src: 'icon512_maskable.png',
@@ -41,30 +36,8 @@ export default defineConfig({
                 type: 'image/png'
             }
         ]
-    },
-
-    workbox: {
-    navigateFallback: null,
-    navigateFallbackAllowlist: undefined,
-    navigateFallbackDenylist: undefined,
-
-    runtimeCaching: [
-        {
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
-            options: {
-                cacheName: 'pages-cache',
-                networkTimeoutSeconds: 3,
-            }
-        }
-    ],
-
-    globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-    cleanupOutdatedCaches: true,
-    clientsClaim: true,
-    skipWaiting: true,
-}
-    })
+    }
+})
   ],
   base: '/'
 })
