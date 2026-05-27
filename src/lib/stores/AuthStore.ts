@@ -79,8 +79,8 @@ function createAuthStore() {
             }catch{
                 settings.online = false;
             } finally {
-                //window.location.reload();
-                //await goto('/login');
+                window.location.reload();
+                await goto('/login');
             }
         }
     };
