@@ -42,16 +42,15 @@
     };
 
     onMount(async () => {
-        if (browser) {
-                const { registerSW } = await import('virtual:pwa-register');
-
-                registerSW({
-                    immediate: true,
-                    onRegisterError(error) {
-                        console.error(error);
-                    }
-                });
-            }
+        if (browser && 'serviceWorker' in navigator) {
+        try {
+            await navigator.serviceWorker.register('/sw.js', {
+                scope: '/'
+            });
+        } catch (error) {
+            console.error('SW registration error:', error);
+        }
+    }
 
         if (!$auth.isAuthenticated)
             return;
