@@ -1,5 +1,5 @@
 import { precacheAndRoute, cleanupOutdatedCaches, matchPrecache } from 'workbox-precaching';
-import { registerRoute, NavigationRoute } from 'workbox-routing';
+import { registerRoute, NavigationRoute, setCatchHandler } from 'workbox-routing';
 import { CacheFirst, NetworkFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
@@ -18,13 +18,12 @@ const navigationRoute = new NavigationRoute(async ({ event }) => {
 
     return Response.error();
 }, {
-    denylist: [/^\/api/, /__data.json/],
+    denylist: [/^\/api/, /__data.json/], 
 });
 
 registerRoute(navigationRoute);
 
-import { setCatchHandler } from 'workbox-routing';
-setCatchHandler(async ({ event }) => {
+setCacheHandler(async ({ event }) => {
     if (event.request.mode === 'navigate') {
         const cacheKey = getCacheKeyForURL('/index.html') || getCacheKeyForURL('/');
         if (cacheKey) return caches.match(cacheKey);
