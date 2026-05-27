@@ -14,7 +14,7 @@ registerRoute(
         plugins: [
             {
                 handlerDidError: async () => {
-                    return await matchPrecache('/');
+                    return (await matchPrecache('/')) || Response.error();
                 }
             }
         ]

@@ -14,14 +14,26 @@ VitePWA({
     scope: '/',
     base: '/',
 
-    injectManifest: {
-        globDirectory: '.svelte-kit/output/client',
-        globPatterns: ['**/*.{js,css,ico,png,svg,webp,webmanifest}'],
-        injectionPoint: 'self.__WB_MANIFEST',
-        templatedURLs: {
-            '/': 'offline-app-shell'
+injectManifest: {
+    globDirectory: '.svelte-kit/output/client',
+    globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,webmanifest}'],
+    injectionPoint: 'self.__WB_MANIFEST',
+
+    manifestTransforms: [
+        async (manifestEntries) => {
+            const hasIndex = manifestEntries.some(e => e.url === 'index.html' || e.url === 'fallback.html');
+            
+            if (hasIndex) {
+                manifestEntries.push({
+                    url: '/',
+                    revision: Date.now().toString(),
+                    size: 0
+                });
+            }
+            return { manifest: manifestEntries };
         }
-    },
+    ]
+},
 
     manifest: {
         theme_color: '#f4f93c',
