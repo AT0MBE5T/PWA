@@ -46,7 +46,10 @@
                 const { registerSW } = await import('virtual:pwa-register');
 
                 registerSW({
-                    immediate: true
+                    immediate: true,
+                    onRegisterError(error) {
+                        console.error(error);
+                    }
                 });
             }
 

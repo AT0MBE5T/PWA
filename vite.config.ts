@@ -9,7 +9,7 @@ export default defineConfig({
     VitePWA({
     strategies: 'generateSW',
 
-    registerType: 'prompt',
+    registerType: 'autoUpdate',
 
     includeAssets: [
         'favicon.ico',
