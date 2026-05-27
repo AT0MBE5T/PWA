@@ -2,81 +2,91 @@ import { env } from "$env/dynamic/public";
 import type { UserDto } from "$lib";
 import { auth, settings, type JwtPayload } from "$lib";
 import { Roles } from "$lib";
-import { redirect, type Cookies, type Handle } from "@sveltejs/kit";
+import { redirect, type Handle } from "@sveltejs/kit";
 import { jwtDecode } from "jwt-decode";
 
 export const handle: Handle = async ({ event, resolve }) => {
     let token = event.cookies.get('accessToken');
 
-    const tryRefresh = async () => {
-        const refreshToken = event.cookies.get('refreshToken');
-
-        if (!refreshToken) return null;
-
-        const response = await event.fetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
-            method: "POST",
-            credentials: "include"
-        });
-
-        if (!response.ok) return null;
-
-        const data = await response.json();
-
-        event.cookies.set('accessToken', data.token, {
-            path: '/',
-            httpOnly: false,
-            sameSite: 'strict'
-        });
-
-        return data.token;
-    };
-
     if (token) {
         try {
             const decoded = jwtDecode<JwtPayload>(token);
-
-            const isExpired = decoded.exp < Date.now() / 1000;
-
-            if (isExpired) {
-                token = await tryRefresh();
+            
+            if (decoded.exp < Date.now() / 1000) {
+                const newToken = await tryServerRefresh(event.fetch);
+                if (newToken) {
+                    token = newToken;
+                    event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
+                } else {
+                    token = undefined;
+                }
             }
-
+            settings.online = true;
         } catch {
-            token = await tryRefresh();
+            settings.online = false;
+            token = undefined;
         }
     }
-
-    if (!token) {
-        token = await tryRefresh();
+    else{
+        const newToken = await tryServerRefresh(event.fetch);
+        if (newToken) {
+            token = newToken;
+            event.cookies.set('accessToken', token, { path: '/', httpOnly: false, sameSite: 'strict' });
+        } else {
+            token = undefined;
+        }
     }
 
     if (token) {
-        try {
-            const decoded = jwtDecode<JwtPayload>(token);
-            const userDto = await getUserDto(token);
-
-            event.locals.user = {
-                id: decoded.sub,
-                name: decoded.name ?? null,
-                roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.roles],
-                avatarUrl: userDto?.avatarUrl ?? null,
-                personName: decoded.name,
-                personSurname: decoded.surname
-            };
-
-            event.locals.token = token;
-        } catch {
-            event.locals.user = null;
-        }
+        const decoded = jwtDecode<JwtPayload>(token);
+        const userDto = await getUserDto(token);
+        event.locals.user = {
+            id: decoded.sub,
+            name: decoded.name ?? null,
+            roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.roles],
+            avatarUrl: userDto?.avatarUrl ?? null,
+            personName: decoded.name,
+            personSurname: decoded.surname
+        };
+        event.locals.token = token;
     } else {
         event.locals.user = null;
     }
 
+    const user = event.locals.user;
+    const url = event.url.pathname;
+
     event.locals.lang = event.cookies.get('lang') ?? 'UA';
     event.locals.theme = event.cookies.get('theme') ?? 'light';
 
-    return resolve(event);
+    if (url.startsWith('/personal') && !user) {
+        throw redirect(303, '/login');
+    }
+
+    if (url.startsWith('/chats') && !user) {
+        throw redirect(303, '/login');
+    }
+
+    if (url.startsWith('/reports') && !auth.hasRole(Roles.Admin)) {
+        throw redirect(303, '/');
+    }
+
+    return await resolve(event);
 };
+
+async function tryServerRefresh(svelteFetch: typeof fetch) {
+    try{
+        const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
+            method: "POST"
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        settings.online = true;
+        return data.token as string;
+    }catch{
+        settings.online = false;
+    }
+}
 
 const getUserDto = async (token: string): Promise<UserDto | null> => {
     try{
