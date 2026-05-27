@@ -89,7 +89,7 @@ async function tryServerRefresh(svelteFetch: typeof fetch, cookies: Cookies) {
         // const data = await response.json();
         settings.online = true;
         //return data.token as string;
-        return 'asdasdasdsadsada';
+        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30';
     }catch{
         settings.online = false;
     }
