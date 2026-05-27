@@ -10,7 +10,14 @@ const handler = createHandlerBoundToURL('/');
 const navigationRoute = new NavigationRoute(handler, {
     denylist: [/^\/api/], 
 });
-registerRoute(navigationRoute);
+
+registerRoute(
+    ({ url }) => url.pathname.startsWith('/api/') || url.search.includes('__data.json'),
+    new NetworkFirst({
+        cacheName: 'api-data-cache',
+        networkTimeoutSeconds: 5
+    })
+);
 
 registerRoute(
     ({ request }) =>
