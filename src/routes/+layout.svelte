@@ -119,8 +119,13 @@
         const goOffline = () => settings.online = false;
 
         onMount(async () => {
+            console.log(5);
             const result = await settings.checkServer();
             settings.online = result && navigator.onLine;
+
+            console.log(`Settings: ${settings.online}`);
+            console.log(`Navigator: ${navigator.onLine}`);
+            console.log(`Result: ${result}`);
         });
 
     onMount(() => {
