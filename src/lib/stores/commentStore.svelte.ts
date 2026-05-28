@@ -8,6 +8,7 @@ import { toast } from "./toast";
 import type SettingsStore from "./settingsStore.svelte";
 import { translations } from "$lib/i18n";
 import getCookie from "$lib/utils/cookieData";
+import { syncAllPendingData } from "./globalSync.svelte";
 
 const commentState = createCommentState();
 export default commentState;
@@ -86,17 +87,19 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
                 UserName: userName
             });
 
-            const pending = await offerFullStore.getPendingComments();
+            await syncAllPendingData(newConnection);
 
-            for (const msg of pending) {
-                await newConnection.invoke("LeaveComment", chatId, msg.text, userName);
-                await offerFullStore.removePendingComment(msg.id);
+            // const pending = await offerFullStore.getPendingComments();
 
-                const index = comments.findIndex(x => x.text === msg.text);
-                comments[index].isPending = false;
-            }
+            // for (const msg of pending) {
+            //     await newConnection.invoke("LeaveComment", chatId, msg.text, userName);
+            //     await offerFullStore.removePendingComment(msg.id);
 
-            comments = comments.filter(x => !x.isPending);
+            //     const index = comments.findIndex(x => x.text === msg.text);
+            //     comments[index].isPending = false;
+            // }
+
+            // comments = comments.filter(x => !x.isPending);
         } catch (e) {
             console.error("[App] Sync error:", e);
         }
@@ -118,21 +121,23 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
             UserName: userName
         });
 
-        const pending = await offerFullStore.getPendingComments();
+        await syncAllPendingData(connection);
 
-        const sortedPending = [...pending].sort((a, b) => {
-            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        });
+        // const pending = await offerFullStore.getPendingComments();
 
-        for (const msg of sortedPending) {
-            await newConnection.invoke("LeaveComment", chatId, msg.text, userName);
-            await offerFullStore.removePendingComment(msg.id);
+        // const sortedPending = [...pending].sort((a, b) => {
+        //     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        // });
 
-            const index = comments.findIndex(x => x.text === msg.text);
-            comments[index].isPending = false;
-        }
+        // for (const msg of sortedPending) {
+        //     await newConnection.invoke("LeaveComment", chatId, msg.text, userName);
+        //     await offerFullStore.removePendingComment(msg.id);
 
-        comments = comments.filter(x => !x.isPending);
+        //     const index = comments.findIndex(x => x.text === msg.text);
+        //     comments[index].isPending = false;
+        // }
+
+        // comments = comments.filter(x => !x.isPending);
     } catch (err: any) {
         if (signal.aborted) return;
 

@@ -10,6 +10,7 @@ import type SettingsStore from "./settingsStore.svelte";
 import { goto } from "$app/navigation";
 import { toast } from "./toast";
 import getCookie from "$lib/utils/cookieData";
+import { syncAllPendingData } from "./globalSync.svelte";
 
 const questionAnswerState = createQuestionAnswerState();
 export default questionAnswerState;
@@ -162,19 +163,21 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
             UserName: userName
         });
 
-        const pending = await offerFullStore.getPendingQuestions();
+        await syncAllPendingData(newConnection);
 
-        for (const msg of pending) {
-            if (msg.answerId === null){
-                await newConnection.invoke("SendQuestion", chatId, msg.textQuestion, userName);
-            } else {
-                await newConnection.invoke("SendAnswer", chatId, msg.questionId, msg.textAnswer, userName);
-            }
+        // const pending = await offerFullStore.getPendingQuestions();
 
-            await offerFullStore.removePendingQuestion(msg.questionId);
-        }
+        // for (const msg of pending) {
+        //     if (msg.answerId === null){
+        //         await newConnection.invoke("SendQuestion", chatId, msg.textQuestion, userName);
+        //     } else {
+        //         await newConnection.invoke("SendAnswer", chatId, msg.questionId, msg.textAnswer, userName);
+        //     }
 
-        questionAnswerData = questionAnswerData.filter(x => !x.isQuestionPending);
+        //     await offerFullStore.removePendingQuestion(msg.questionId);
+        // }
+
+        // questionAnswerData = questionAnswerData.filter(x => !x.isQuestionPending);
     } finally {
         isSyncing = false;
     }
@@ -194,26 +197,28 @@ async function initSignalR(chatId: string, userName: string, settingsStore: Sett
             UserName: userName
         });
 
-        const pending = await offerFullStore.getPendingQuestions();
+        await syncAllPendingData(connection);
 
-        const sortedPending = [...pending].sort((a, b) => {
-            return new Date(a.createdAtQuestion).getTime() - new Date(b.createdAtQuestion).getTime();
-        });
+        // const pending = await offerFullStore.getPendingQuestions();
 
-        for (const msg of sortedPending) {
-            if (msg.answerId === null){
-                await newConnection.invoke("SendQuestion", chatId, msg.textQuestion, userName);
-            } else {
-                await newConnection.invoke("SendAnswer", chatId, msg.questionId, msg.textAnswer, userName);
-            }
+        // const sortedPending = [...pending].sort((a, b) => {
+        //     return new Date(a.createdAtQuestion).getTime() - new Date(b.createdAtQuestion).getTime();
+        // });
 
-            await offerFullStore.removePendingQuestion(msg.questionId);
-            const index = questionAnswerData.findIndex(x => x.textQuestion === msg.textQuestion);
-            questionAnswerData[index].isAnswerPending = false;
-            questionAnswerData[index].isQuestionPending = false;
-        }
+        // for (const msg of sortedPending) {
+        //     if (msg.answerId === null){
+        //         await newConnection.invoke("SendQuestion", chatId, msg.textQuestion, userName);
+        //     } else {
+        //         await newConnection.invoke("SendAnswer", chatId, msg.questionId, msg.textAnswer, userName);
+        //     }
 
-        questionAnswerData = questionAnswerData.filter(x => !x.isQuestionPending);
+        //     await offerFullStore.removePendingQuestion(msg.questionId);
+        //     const index = questionAnswerData.findIndex(x => x.textQuestion === msg.textQuestion);
+        //     questionAnswerData[index].isAnswerPending = false;
+        //     questionAnswerData[index].isQuestionPending = false;
+        // }
+
+        // questionAnswerData = questionAnswerData.filter(x => !x.isQuestionPending);
     } catch (err: any) {
         const ignoredErrors = [
             "Invocation canceled due to the underlying connection being closed",

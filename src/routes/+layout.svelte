@@ -1,7 +1,7 @@
 <script lang="ts">
     import { auth, Roles, toast, Toast, translations } from '$lib';
     import { page } from '$app/stores';
-    import { goto, invalidateAll } from '$app/navigation';
+    import { goto } from '$app/navigation';
     import { browser } from '$app/environment';
     import { settings } from '$lib';
     import '../app.css';
@@ -11,8 +11,6 @@
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
     import SupportChat from '$lib/components/SupportChat.svelte';
-    import { redirect } from '@sveltejs/kit';
-    import getCookie from '$lib/utils/cookieData';
     let { data, children } = $props();
 
     let menuOpen = $state(false);

@@ -19,6 +19,7 @@ import { getContext } from 'svelte';
 import type SettingsStore from './settingsStore.svelte';
 import { translations } from '$lib/i18n';
 import { goto } from '$app/navigation';
+import { syncAllPendingData } from './globalSync.svelte';
 
 class OfferState {
     offerDetails = $state<Record<string, AnnouncementFull>>({});
@@ -76,6 +77,8 @@ class OfferState {
                         UserName: userName
                     });
 
+                    await syncAllPendingData(newConnection);
+
                 } catch (e) {
                     console.error("[App] Sync error:", e);
                 }
@@ -97,6 +100,8 @@ class OfferState {
                     ChatRoom: chatId, 
                     UserName: userName
                 });
+
+                await syncAllPendingData(this.connection);
             } catch (err: any) {
         if (signal.aborted) return;
 

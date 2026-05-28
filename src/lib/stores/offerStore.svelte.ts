@@ -10,6 +10,7 @@ import getCookie from "$lib/utils/cookieData";
 import type { AnnouncementUpdateModel } from "$lib/interfaces/AnnouncementUpdateModel";
 import { env } from "$env/dynamic/public";
 import { settings } from "./settings.svelte";
+import { syncAllPendingData } from "./globalSync.svelte";
 
 const offerState = createOfferState();
 export default offerState;
@@ -84,57 +85,59 @@ async function initSignalR(chatId: string, userName: string) {
                 UserName: userName
             });
 
-        const pendingUpdate = await offerFullStore.getPendingOffersUpdate();
+            await syncAllPendingData(newConnection);
 
-        for (const offer of pendingUpdate) {
-            const formData = new FormData();
+        // const pendingUpdate = await offerFullStore.getPendingOffersUpdate();
 
-            offer.images
-                .filter(i => i.type === 'new')
-                .forEach(img => formData.append("NewPhotos", img.file));
+        // for (const offer of pendingUpdate) {
+        //     const formData = new FormData();
 
-            offer.deletedImageIds.forEach(id => formData.append("DeletedImageIds", id));
+        //     offer.images
+        //         .filter(i => i.type === 'new')
+        //         .forEach(img => formData.append("NewPhotos", img.file));
 
-            offer.images.forEach(img => {
-                formData.append("ExistingImageOrder", img.type === 'existing' ? img.id : 'new');
-            });
+        //     offer.deletedImageIds.forEach(id => formData.append("DeletedImageIds", id));
 
-            formData.append("PropertyTypeId", offer.propertyTypeId);
-            formData.append("StatementTypeId", offer.statementTypeId);
-            formData.append("Location", offer.location);
-            formData.append("Area", offer.area.toString());
-            formData.append("Floors", offer.floors.toString());
-            formData.append("Rooms", offer.rooms.toString());
-            formData.append("Title", offer.title);
-            formData.append("Price", offer.price.toString());
-            formData.append("Content", offer.content);
-            formData.append("Description", offer.description);
-            formData.append("AnnouncementId", offer.id);
+        //     offer.images.forEach(img => {
+        //         formData.append("ExistingImageOrder", img.type === 'existing' ? img.id : 'new');
+        //     });
 
-            try {
-                const token = getCookie('accessToken');
-                const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/update-announcement`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
+        //     formData.append("PropertyTypeId", offer.propertyTypeId);
+        //     formData.append("StatementTypeId", offer.statementTypeId);
+        //     formData.append("Location", offer.location);
+        //     formData.append("Area", offer.area.toString());
+        //     formData.append("Floors", offer.floors.toString());
+        //     formData.append("Rooms", offer.rooms.toString());
+        //     formData.append("Title", offer.title);
+        //     formData.append("Price", offer.price.toString());
+        //     formData.append("Content", offer.content);
+        //     formData.append("Description", offer.description);
+        //     formData.append("AnnouncementId", offer.id);
 
-                if (response.ok) {
-                    await offerFullStore.removePendingOffersUpdate(offer.id);
+        //     try {
+        //         const token = getCookie('accessToken');
+        //         const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/update-announcement`, {
+        //             method: 'POST',
+        //             body: formData,
+        //             headers: { "Authorization": `Bearer ${token}` }
+        //         });
+
+        //         if (response.ok) {
+        //             await offerFullStore.removePendingOffersUpdate(offer.id);
                     
-                    const index = offers.findIndex(x => x.id === offer.id);
-                    if (index !== -1) {
-                        offers[index].isPending = false;
-                    }
-                }
-                settings.online = true;
-            } catch (e) {
-                settings.online = false;
-                console.error("[App] Failed to sync update for offer", offer.id, e);
-            }
-        }
+        //             const index = offers.findIndex(x => x.id === offer.id);
+        //             if (index !== -1) {
+        //                 offers[index].isPending = false;
+        //             }
+        //         }
+        //         settings.online = true;
+        //     } catch (e) {
+        //         settings.online = false;
+        //         console.error("[App] Failed to sync update for offer", offer.id, e);
+        //     }
+        // }
 
-        offers = offers.filter(x => !x.isPending);
+        // offers = offers.filter(x => !x.isPending);
         } catch (e) {
             console.error("[App] Sync error:", e);
         }
@@ -152,101 +155,103 @@ async function initSignalR(chatId: string, userName: string) {
             UserName: userName
         });
 
-        const pending = await offerFullStore.getPendingOffers();
+        await syncAllPendingData(connection);
 
-        for (const offer of pending) {
-            const formData = new FormData();
-            offer.images
-                .filter(i => i.type === 'new')
-                .forEach(img => {
-                    formData.append("Photos", img.file);
-                });
-            formData.append("PropertyType", offer.propertyTypeId);
-            formData.append("StatementType", offer.statementTypeId);
-            formData.append("Location", offer.location);
-            formData.append("Area", offer.area);
-            formData.append("Floors", offer.floors);
-            formData.append("Rooms", offer.rooms);
-            formData.append("Title", offer.title);
-            formData.append("Price", offer.price);
-            formData.append("Content", offer.content);
-            formData.append("Description", offer.description);
+        // const pending = await offerFullStore.getPendingOffers();
 
-            const token = getCookie('accessToken');
+        // for (const offer of pending) {
+        //     const formData = new FormData();
+        //     offer.images
+        //         .filter(i => i.type === 'new')
+        //         .forEach(img => {
+        //             formData.append("Photos", img.file);
+        //         });
+        //     formData.append("PropertyType", offer.propertyTypeId);
+        //     formData.append("StatementType", offer.statementTypeId);
+        //     formData.append("Location", offer.location);
+        //     formData.append("Area", offer.area);
+        //     formData.append("Floors", offer.floors);
+        //     formData.append("Rooms", offer.rooms);
+        //     formData.append("Title", offer.title);
+        //     formData.append("Price", offer.price);
+        //     formData.append("Content", offer.content);
+        //     formData.append("Description", offer.description);
 
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/add-announcement`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                },
-                credentials: "include"
-            });
+        //     const token = getCookie('accessToken');
 
-            await offerFullStore.removePendingOffers(offer.id);
-            await offerFullStore.removeOffer(offer.id);
-            await offerFullStore.removeOfferFull(offer.id);
+        //     const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/add-announcement`, {
+        //         method: 'POST',
+        //         body: formData,
+        //         headers: {
+        //             "Authorization": `Bearer ${token}`
+        //         },
+        //         credentials: "include"
+        //     });
 
-            const index = offers.findIndex(x => x.title === offer.title);
+        //     await offerFullStore.removePendingOffers(offer.id);
+        //     await offerFullStore.removeOffer(offer.id);
+        //     await offerFullStore.removeOfferFull(offer.id);
 
-            if (index !== -1)
-                offers[index].isPending = false;
-        }
+        //     const index = offers.findIndex(x => x.title === offer.title);
 
-        const pendingUpdate = await offerFullStore.getPendingOffersUpdate();
+        //     if (index !== -1)
+        //         offers[index].isPending = false;
+        // }
 
-        for (const offer of pendingUpdate) {
-                        const formData = new FormData();
+        // const pendingUpdate = await offerFullStore.getPendingOffersUpdate();
 
-            offer.images
-                .filter(i => i.type === 'new')
-                .forEach(img => {
-                    formData.append("NewPhotos", img.file);
-                });
+        // for (const offer of pendingUpdate) {
+        //                 const formData = new FormData();
 
-            offer.deletedImageIds.forEach(id => {
-                formData.append("DeletedImageIds", id);
-            });
+        //     offer.images
+        //         .filter(i => i.type === 'new')
+        //         .forEach(img => {
+        //             formData.append("NewPhotos", img.file);
+        //         });
 
-            offer.images.forEach(img => {
-                if (img.type === 'existing') {
-                    formData.append("ExistingImageOrder", img.id);
-                } else {
-                    formData.append("ExistingImageOrder", 'new');
-                }
-            });
+        //     offer.deletedImageIds.forEach(id => {
+        //         formData.append("DeletedImageIds", id);
+        //     });
+
+        //     offer.images.forEach(img => {
+        //         if (img.type === 'existing') {
+        //             formData.append("ExistingImageOrder", img.id);
+        //         } else {
+        //             formData.append("ExistingImageOrder", 'new');
+        //         }
+        //     });
             
-            formData.append("PropertyType", offer.propertyTypeId);
-            formData.append("StatementType", offer.statementTypeId);
-            formData.append("Location", offer.location);
-            formData.append("Area", offer.area);
-            formData.append("Floors", offer.floors);
-            formData.append("Rooms", offer.rooms);
-            formData.append("Title", offer.title);
-            formData.append("Price", offer.price);
-            formData.append("Content", offer.content);
-            formData.append("Description", offer.description);
-            formData.append("AnnouncementId", offer.id);
+        //     formData.append("PropertyType", offer.propertyTypeId);
+        //     formData.append("StatementType", offer.statementTypeId);
+        //     formData.append("Location", offer.location);
+        //     formData.append("Area", offer.area);
+        //     formData.append("Floors", offer.floors);
+        //     formData.append("Rooms", offer.rooms);
+        //     formData.append("Title", offer.title);
+        //     formData.append("Price", offer.price);
+        //     formData.append("Content", offer.content);
+        //     formData.append("Description", offer.description);
+        //     formData.append("AnnouncementId", offer.id);
 
-            const token = getCookie('accessToken');
+        //     const token = getCookie('accessToken');
 
-            const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/update-announcement`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                },
-                credentials: "include"
-            });
+        //     const response = await fetch(`${env.PUBLIC_API_URL}/api/announcements/update-announcement`, {
+        //         method: 'POST',
+        //         body: formData,
+        //         headers: {
+        //             "Authorization": `Bearer ${token}`
+        //         },
+        //         credentials: "include"
+        //     });
 
-            await offerFullStore.removePendingOffersUpdate(offer.id);
+        //     await offerFullStore.removePendingOffersUpdate(offer.id);
 
-            const index = offers.findIndex(x => x.id === offer.id);
-            if (index !== -1)
-                offers[index].isPending = false;
-        }
+        //     const index = offers.findIndex(x => x.id === offer.id);
+        //     if (index !== -1)
+        //         offers[index].isPending = false;
+        // }
 
-        offers = offers.filter(x => !x.isPending);
+        // offers = offers.filter(x => !x.isPending);
         settings.online = true;
     } catch (err) {
         settings.online = false;
