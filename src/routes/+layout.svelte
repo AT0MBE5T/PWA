@@ -170,7 +170,7 @@
 {/if}
 
 <div class="wrapper">
-    {#if $auth.isAuthenticated && settings.online}
+    {#if $auth.isAuthenticated && settings.online && !$page.route.id?.startsWith('/chats')}
         <SupportChat/>
     {/if}
     <div class="wrapper__container">
@@ -227,11 +227,11 @@
                             onclick={handleCheck}
                             disabled={settings.isLoading}
                         >
-                            <span class="status-dot {settings.online ? 'pulse' : ''} {settings.online ? '' : 'status-dot-offline'}"></span>
-                            {settings.online ? t.authorized.online : t.authorized.offline}
+                            <p class="status-dot {settings.online ? 'pulse' : ''} {settings.online ? '' : 'status-dot-offline'}"></p>
+                            <span>{settings.online ? t.authorized.online : t.authorized.offline} </span>
                         </button>
                         <button class="control-btn" onclick={() => settingsStore.toggleLang()} title="{ t.system.changeLang }">
-                            <img src="/icons/globe.svg" height="25" width="25" alt="#"> {settingsStore.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}
+                            <img src="/icons/globe.svg" height="25" width="25" alt="#"> <span>{settingsStore.lang === 'EN' ? t.header.lang_en : t.header.lang_ua}</span>
                         </button>
                         
                         <button class="control-btn" onclick={() => settingsStore.toggleTheme()} title="{ t.system.changeTheme }">
@@ -240,7 +240,7 @@
                             {:else}
                                 <img src="/icons/sun.svg" height="25" width="25" alt="#">
                             {/if}
-                            {settingsStore.theme === 'dark' ? t.header.theme_dark : t.header.theme_light}
+                            <span>{settingsStore.theme === 'dark' ? t.header.theme_dark : t.header.theme_light}</span>
                         </button>
 
                         <div class="divider"></div>
@@ -550,7 +550,7 @@
     .burger {
         display: none;
         flex-direction: column;
-        gap: 5px;
+        gap: 2px;
         background: none;
         border: none;
         cursor: pointer;
@@ -626,7 +626,7 @@
         display: none;
     }
 
-    @media (max-width: 1215px) {
+    @media (max-width: 1240px) {
         .burger { display: flex; }
 
         .header__nav__list {
@@ -648,4 +648,91 @@
         .divider, .logout-btn, .login-btn { display: none; }
         .login-logout-btn { display:block; }
     }
+
+    @media (max-width: 600px) {
+    span {
+        display: none;
+    }
+
+    .container__header {
+        padding: 0 0.8rem;
+    }
+
+    .header__controls {
+        gap: 0.5rem;
+    }
+
+    .control-btn, .status-badge {
+        padding: 0.4rem 0.5rem;
+    }
+
+    .profile-name {
+        display: none;
+    }
+
+    .profile-container {
+        padding: 0;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .avatar-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .burger { 
+        display: flex; 
+    }
+
+    .header__nav__list {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: calc(100vh - 60px);
+        flex-direction: column;
+        background: #2d1b4e;
+        padding: 2rem 1rem;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        display: none;
+        box-sizing: border-box;
+        justify-content: flex-start;
+        gap: 1.5rem;
+    }
+
+    .header__nav__list.open {
+        display: flex;
+    }
+
+    .header__nav__list__item {
+        width: 100%;
+    }
+
+    .header__nav__list__item button {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .divider, .logout-btn, .login-btn { 
+        display: none; 
+    }
+    
+    .login-logout-btn { 
+        display: block; 
+        width: 100%;
+    }
+}
 </style>

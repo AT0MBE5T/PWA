@@ -312,4 +312,121 @@
             font-size: 0.85rem;
         }
     }
+
+@media (max-width: 700px) {
+    .complaints-container {
+        margin: 1rem auto;
+        margin-bottom: 6rem;
+    }
+
+    .complaints-header h2 {
+        font-size: 1.4rem;
+    }
+
+    table thead {
+        display: none;
+    }
+
+    table, tbody, tr {
+        display: block;
+        width: 100%;
+    }
+
+    tr {
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        padding: 1rem;
+        box-sizing: border-box;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease;
+    }
+
+    :global([data-theme="dark"]) tr {
+        background: rgba(30, 41, 59, 0.9);
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    tr[class^="status-"] {
+        border-left: 5px solid transparent !important;
+    }
+    .status-resolved { border-left-color: #22c55e !important; }
+    .status-rejected { border-left-color: #ef4444 !important; }
+    .status-pending { border-left-color: #eab308 !important; }
+
+    td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        font-size: 0.9rem;
+    }
+
+    :global([data-theme="dark"]) td {
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+    }
+
+    td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    td:first-child {
+        padding-top: 0;
+    }
+
+    .note-container {
+        max-width: 180px; 
+        text-align: right;
+    }
+
+    .admin-decision {
+        align-items: flex-end;
+    }
+    
+    td:nth-child(1)::before { content: "Дата:"; font-weight: 600; color: #9ca3af; }
+    td:nth-child(2)::before { content: "Оголошення:"; font-weight: 600; color: #9ca3af; }
+    td:nth-child(3)::before { content: "Тип:"; font-weight: 600; color: #9ca3af; }
+    td:nth-child(4)::before { content: "Коментар:"; font-weight: 600; color: #9ca3af; }
+    td:nth-child(5)::before { content: "Статус:"; font-weight: 600; color: #9ca3af; }
+    td:nth-child(6)::before { content: "Рішення:"; font-weight: 600; color: #9ca3af; }
+
+    .empty-state {
+        padding: 2rem 0;
+    }
+    td.empty-state::before {
+        display: none;
+    }
+    .empty-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media (max-width: 360px) {
+    .complaints-container {
+        padding: 0 0.5rem;
+    }
+
+    tr {
+        padding: 0.75rem;
+    }
+
+    td {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+
+    .note-container {
+        max-width: 130px;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
 </style>

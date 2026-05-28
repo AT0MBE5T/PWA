@@ -222,6 +222,10 @@
     }
 
     @media (max-width: 1300px) {
+        .wrapper{
+            margin-bottom: 5rem;
+        }
+
         .wrapper__container {
             flex-direction: column;
         }
@@ -246,6 +250,10 @@
             width: 100%;
         }
 
+        .header__nav__list__item {
+            width: 100px;
+        }
+
         .header__nav__list__item a {
             flex-direction: column;
             font-size: 1rem;
@@ -262,6 +270,10 @@
 
         .container__map iframe {
             border-radius: 21px;
+        }
+
+        .container__main{
+            padding: 0;
         }
     }
 </style>

@@ -261,7 +261,6 @@ let filterData = $derived<LookupItemFilter[]>([
 <style>
     .filter-container {
         max-width: 600px;
-        min-width: 420px;
         margin: 0 auto;
         background: var(--filter-bg);
         border-radius: 16px;
@@ -677,5 +676,17 @@ let filterData = $derived<LookupItemFilter[]>([
 
     .hidden {
         display: none;
+    }
+
+    @media (max-width: 470px) {
+        .container__header{
+            padding: 0;
+        }
+
+        .header__nav__list{
+            gap: 0;
+            justify-content: center;
+            height: 3rem;
+        }
     }
 </style>

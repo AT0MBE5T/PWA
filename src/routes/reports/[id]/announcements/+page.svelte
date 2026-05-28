@@ -241,23 +241,23 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
             <li class='header__nav__list__item'>
                 <button class={currentAction === 'Favorite' ? 'highlighted_page' : ''} onclick={() => {
                     pageClicked('Favorite');
-                    }}><img src="/icons/star.svg" height="25" width="25" alt="#"> {t.personal.favorite}</button>
+                    }}><img src="/icons/star.svg" height="25" width="25" alt="#"> <span>{t.personal.favorite}</span></button>
             </li>
             <li class='header__nav__list__item'>
                 <button class={currentAction === 'Bought' ? 'highlighted_page' : ''} onclick={() => {
                     pageClicked('Bought');
-                    }}><img src="/icons/cart.svg" height="25" width="25" alt="#"> {t.personal.bought}</button>
+                    }}><img src="/icons/cart.svg" height="25" width="25" alt="#"> <span>{t.personal.bought}</span></button>
             </li>
             {#if $auth.roles.includes(Roles.Realtor) || $auth.roles.includes(Roles.Admin)}
                 <li class='header__nav__list__item'>
                     <button class={currentAction === 'Sold' ? 'highlighted_page' : ''} onclick={() => {
                         pageClicked('Sold');
-                        }}><img src="/icons/dollar.svg" height="25" width="25" alt="#"> {t.personal.sold}</button>
+                        }}><img src="/icons/dollar.svg" height="25" width="25" alt="#"> <span>{t.personal.sold}</span></button>
                 </li>
                 <li class='header__nav__list__item'>
                     <button class={currentAction === 'Placed' ? 'highlighted_page' : ''} onclick={() => {
                         pageClicked('Placed');
-                        }}><img src="/icons/tag.svg" height="25" width="25" alt="#"> {t.personal.placed}</button>
+                        }}><img src="/icons/tag.svg" height="25" width="25" alt="#"> <span>{t.personal.placed}</span></button>
                 </li>
             {/if}
         </ul>
@@ -359,7 +359,6 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
     }
 
     .pagination-btn {
-        padding: 0.5rem 1rem;
         border: 2px solid #e2e8f0;
         background-color: white;
         color: #374151;
@@ -367,6 +366,12 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
         cursor: pointer;
         font-weight: 500;
         transition: all 0.3s ease;
+        font-size: 1rem;
+        width: 44px;
+        height: 37.5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .pagination-btn.active {
@@ -431,7 +436,7 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
         cursor: pointer;
         font-size: 1.1rem;
         font-weight: 500;
-        color: white;
+        color: var(--text-main);
         transition: color 0.3s ease;
         font-family: inherit;
     }
@@ -455,6 +460,10 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
     }
 
     .highlighted_page {
+        color: #ffaa00 !important;
+    }
+
+    :global([data-theme="dark"]) .highlighted_page {
         color: #ffd580 !important;
     }
 
@@ -487,6 +496,10 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
     }
 
     @media (max-width: 768px) {
+        .container{
+            margin-bottom: 4rem;
+        }
+
         .shop__items {
             grid-template-columns: 1fr;
         }
@@ -498,41 +511,12 @@ const getSold = async (userId: string, page: number): Promise<AnnouncementsRespo
             top: 20px;
         }
 
-        .header__nav__list {
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            flex-direction: column;
-            align-items: start;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 10px;
-            padding: 1rem 2rem;
-            gap: 1rem;
-            transform: translateY(-20px);
-            opacity: 0;
-            pointer-events: none;
+        .header__nav__list{
+            gap: 0;
         }
 
-        .header__nav__list.open {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-            z-index: 55;
-        }
-
-        .header__nav__list__item{
-            width: 100%;
-        }
-
-        .header__nav__list__item button {
-            padding: 0.5rem 1rem;
-            width: 100%;
-            text-align: start;
-        }
-
-        .header__nav__list__item button::after {
-            left: 50%;
-            transform: translateX(-50%);
+        span{
+            font-size: 10px;
         }
     }
 </style>

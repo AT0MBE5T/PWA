@@ -771,6 +771,17 @@
             <div class="announcement__form__sides">
                 <div class="announcement__form-left">
                     <div class="announcement__form__item">
+                        <label for="title">{t.offers.title}</label>
+                        <input
+                                bind:value={titleInput}
+                                oninput={handleTitleInputChange}
+                                name="title"
+                                type="text"
+                        />
+                        <div class="error-text">{titleErrorText}</div>
+                    </div>
+
+                    <div class="announcement__form__item">
                         <label for="propertyType">{t.offers.propertyType}</label>
                         <div class="lookup-container">
                             <input
@@ -846,17 +857,6 @@
                                 type="number"
                         />
                         <div class="error-text">{roomsErrorText}</div>
-                    </div>
-
-                    <div class="announcement__form__item">
-                        <label for="title">{t.offers.title}</label>
-                        <input
-                                bind:value={titleInput}
-                                oninput={handleTitleInputChange}
-                                name="title"
-                                type="text"
-                        />
-                        <div class="error-text">{titleErrorText}</div>
                     </div>
 
                     <div class="announcement__form__item">

@@ -56,10 +56,6 @@
                 <div class="logo-icon"><img src="/icons/houses.svg" height="25" width="25" alt="#"></div>
                 <h1 class="company-name">{t.authorization.realEstate}</h1>
             </div>
-            <div class="status-badge authenticated">
-                <span class="status-dot"></span>
-                {t.authorized.online}
-            </div>
         </div>
 
         <div class="user-info">
@@ -216,30 +212,6 @@
         letter-spacing: -0.02em;
     }
 
-    .status-badge {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-
-    .status-badge.authenticated {
-        background: rgba(34, 197, 94, 0.1);
-        color: #16a34a;
-        border: 1px solid rgba(34, 197, 94, 0.2);
-    }
-
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        background: #22c55e;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-    }
-
     .user-info {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -290,6 +262,33 @@
         color: #1f2937;
     }
 
+    :global([data-theme="dark"]) .greeting-authenticated {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    :global([data-theme="dark"]) .info-card {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    :global([data-theme="dark"]) .info-value {
+        color: #f8fafc;
+    }
+
+    :global([data-theme="dark"]) .info-title {
+        color: #94a3b8;
+    }
+
+    :global([data-theme="dark"]) .logo-icon {
+        filter: drop-shadow(0 4px 12px rgba(122, 66, 244, 0.4));
+    }
+
+    :global([data-theme="dark"]) .greeting-authenticated::before {
+        background: linear-gradient(90deg, #818cf8, #a855f7, #fb7185, #818cf8);
+        background-size: 300% 100%;
+    }
+
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -328,47 +327,16 @@
         75% { transform: translateX(5px); }
     }
 
-:global([data-theme="dark"]) .greeting-authenticated {
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-:global([data-theme="dark"]) .info-card {
-    background: rgba(30, 41, 59, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-:global([data-theme="dark"]) .info-value {
-    color: #f8fafc;
-}
-
-:global([data-theme="dark"]) .info-title {
-    color: #94a3b8;
-}
-
-:global([data-theme="dark"]) .status-badge.authenticated {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border-color: rgba(74, 222, 128, 0.3);
-}
-
-:global([data-theme="dark"]) .logo-icon {
-    filter: drop-shadow(0 4px 12px rgba(122, 66, 244, 0.4));
-}
-
-:global([data-theme="dark"]) .greeting-authenticated::before {
-    background: linear-gradient(90deg, #818cf8, #a855f7, #fb7185, #818cf8);
-    background-size: 300% 100%;
-}
-
-
     @media (max-width: 768px) {
         .greeting-container {
-            width: 90%;
+            margin: 1rem;
+            width: 80%;
         }
 
         .greeting-authenticated {
             padding: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 5rem;
         }
 
         .greeting-header {
@@ -383,6 +351,11 @@
 
         .user-info {
             grid-template-columns: 1fr;
+        }
+
+        .user-info > :last-child {
+            grid-column: span 1;
+            justify-content: start;
         }
 
         .info-card__wide {

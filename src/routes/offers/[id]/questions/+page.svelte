@@ -544,6 +544,7 @@
         .question_answer__block {
             padding: 1rem;
             border-radius: 12px;
+            width: 100%;
         }
 
         .question_answer__item__question,

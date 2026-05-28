@@ -166,6 +166,16 @@ onDestroy(async () => {
 <ConfirmModal bind:this={confirmModal} />
 
 <div class="chat-content">
+    <div class="mobile-chat-header">
+        <a href="/chats" class="back-btn">
+            <span>←</span> {t.chats.myChats}
+        </a>
+        {#if chat?.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
+            <span class="active-chat-name">{t.chats.common}</span>
+        {:else}
+            <span class="active-chat-name">{chat?.chatName || ''}</span>
+        {/if}
+    </div>
     <div class="messages-viewport" bind:this={messageContainer}>
         {#if chat?.chatTypeId === 'c80e92eb-b14d-4258-bf31-e44b1d3e8bc7'}
             <div class="closed_text">[{chat?.offerTitle}]</div>
@@ -388,4 +398,79 @@ onDestroy(async () => {
     :global([data-theme="dark"]) .messages-viewport::-webkit-scrollbar-thumb {
         background: #334155;
     }
+
+.mobile-chat-header {
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-bottom: 1px solid #eee;
+}
+
+.back-btn {
+    text-decoration: none;
+    color: #7a42f4;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.active-chat-name {
+    font-weight: 700;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+:global([data-theme="dark"]) .mobile-chat-header {
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    color: #f8fafc;
+}
+
+@media (max-width: 700px) {
+    .mobile-chat-header {
+        display: flex;
+    }
+
+    .messages-viewport {
+        padding: 1rem;
+    }
+
+    .msg-bubble {
+        max-width: 85%;
+        padding: 0.7rem 0.9rem;
+    }
+
+    .closed_text {
+        font-size: 1.3rem;
+        text-align: center;
+    }
+
+    .input-area {
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .msg-bubble {
+        max-width: 90%; 
+        font-size: 0.9rem;
+    }
+
+    textarea {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    button {
+        width: 40px;
+        height: 40px;
+    }
+}
 </style>

@@ -1438,7 +1438,7 @@ let currentIndex = $state(0);
 
     @media (max-width: 480px) {
         .description__item {
-            margin: 0.5rem;
+            margin: 0.5rem 0;
             border-radius: 12px;
         }
 

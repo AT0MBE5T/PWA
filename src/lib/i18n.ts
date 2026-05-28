@@ -281,6 +281,7 @@ export interface TranslationKeys {
         bought: string;
         favorite: string;
         oldPassword: string;
+        password: string;
         newPassword: string;
         changePassword: string;
         newEmail: string;
@@ -588,6 +589,7 @@ export const translations: Record<Language, TranslationKeys> = {
             bought: "Придбано",
             favorite: 'Обране',
             oldPassword: "Старий пароль",
+            password: "Пароль",
             newPassword: "Новий пароль",
             changePassword: "Змінити пароль",
             newEmail: "Нова пошта",
@@ -892,6 +894,7 @@ export const translations: Record<Language, TranslationKeys> = {
             bought: "Bought",
             favorite: 'Favorite',
             oldPassword: "Old password",
+            password: "Password",
             newPassword: "New password",
             changePassword: "Change password",
             newEmail: "New email",

@@ -374,4 +374,12 @@
             left: 95%;
         }
     }
+
+    @media (max-width: 480px) {
+        .comments__block {
+            padding: 1rem;
+            border-radius: 12px;
+            width: 100%;
+        }
+    }
 </style>

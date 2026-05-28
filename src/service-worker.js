@@ -3,6 +3,8 @@ import { registerRoute, NavigationRoute, setCatchHandler } from 'workbox-routing
 import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
+self.__WB_DISABLE_DEV_LOGS = true;
+
 precacheAndRoute(self.__WB_MANIFEST || []);
 cleanupOutdatedCaches();
 

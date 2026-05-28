@@ -12,6 +12,8 @@
 
     let allChats = $derived(chatState.chats);
 
+    let isSidebarExpanded = $state(true);
+
     onMount(async () => {
         settings.isLoading = true;
         await chatState.loadData($auth.id!);
@@ -45,6 +47,17 @@ function toggleSection(sectionId: string) {
     }
 }
 
+const sideBarChanged = async () => {
+    if (!isSidebarExpanded){
+        isSidebarExpanded = true;
+        if (window.innerWidth < 700)
+            await goto('/chats');
+    }
+    else{
+        isSidebarExpanded = false;
+    }
+};
+
 const sections = $derived([
     { id: 'common', title: t.chats.common, items: groupedChats.common },
     { id: 'support', title: t.chats.support, items: groupedChats.support },
@@ -54,58 +67,68 @@ const sections = $derived([
 
 <div class="chat-wrapper">
     <aside class="contacts-sidebar">
-        <div class="sidebar-header">
-            <h3>{t.chats.myChats}</h3>
-        </div>
-        <div class="contacts-list">
-{#each sections as section}
-        {#if section.items.length > 0}
         <button 
-                class="section-header" 
-                onclick={() => toggleSection(section.id)}
-                aria-expanded={expandedSections.includes(section.id)}
-            >
-                <span class="chevron" class:rotated={expandedSections.includes(section.id)}>
-                    <img src="/icons/chevron-right.svg" alt="" width="12" />
-                </span>
-                {section.title}
-                <span class="count">{section.items.length}</span>
-            </button>
-{#if expandedSections.includes(section.id)}
-                <div class="section-content">
-            {#each section.items as chat}
-                <a 
-                    href="/chats/{chat.chatId}" 
-                    class="contact-item" 
-                    class:active={page.params.id === chat.chatId}
-                >
-                    <div class="avatar-wrapper">
-                        {#if chat.avatarUrl}
-                            <img 
-                                src={chat.avatarUrl} 
-                                alt="User Avatar" 
-                                class="avatar-img" 
-                            />
-                        {:else}
-                            <div class="default-avatar"><img src="/icons/user.svg" height="35" width="35" alt="#"></div>
-                        {/if}
-                    </div>
-                    <div class="contact-info">
-                        {#if chat.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
-                            <span class="contact-name">{t.chats.common}</span>
-                        {:else}
-                            <span class="contact-name">{chat.chatName}</span>
-                        {/if}
-                        <span class="contact-role">{chat.closedAt !== null ? `[${t.chats.closed}]` : chat.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f' ? `${chat.lastMessageBy} | ${chat.lastMessage}` : chat.lastMessage}</span>
-                        <span class="contact-role">{chat.closedAt !== null ? format(new Date(chat.closedAt), format(chat.closedAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm') : (chat.lastMessageAt === null ? '' : format(new Date(chat.lastMessageAt), format(chat.lastMessageAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm'))}</span>
-                    </div>
-                </a>
-                    {/each}
-                </div>
-            {/if}
+            class="sidebar-toggle-header" 
+            onclick={sideBarChanged}
+            aria-expanded={isSidebarExpanded}
+        >
+            <span class="chevron main-chevron" class:rotated={isSidebarExpanded}>
+                <img src="/icons/chevron-right.svg" alt="" width="14" />
+            </span>
+            <h3>{t.chats.myChats}</h3>
+        </button>
+        {#if isSidebarExpanded}
+                <div class="contacts-list">
+        {#each sections as section}
+                {#if section.items.length > 0}
+                <button 
+                        class="section-header" 
+                        onclick={() => toggleSection(section.id)}
+                        aria-expanded={expandedSections.includes(section.id)}
+                    >
+                        <span class="chevron" class:rotated={expandedSections.includes(section.id)}>
+                            <img src="/icons/chevron-right.svg" alt="" width="12" />
+                        </span>
+                        {section.title}
+                        <span class="count">{section.items.length}</span>
+                    </button>
+        {#if expandedSections.includes(section.id)}
+                        <div class="section-content">
+                    {#each section.items as chat}
+                        <a 
+                            onclick={() => { if (window.innerWidth < 700) isSidebarExpanded = false }}
+                            href="/chats/{chat.chatId}" 
+                            class="contact-item" 
+                            class:active={page.params.id === chat.chatId}
+                        >
+                            <div class="avatar-wrapper">
+                                {#if chat.avatarUrl}
+                                    <img 
+                                        src={chat.avatarUrl} 
+                                        alt="User Avatar" 
+                                        class="avatar-img" 
+                                    />
+                                {:else}
+                                    <div class="default-avatar"><img src="/icons/user.svg" height="35" width="35" alt="#"></div>
+                                {/if}
+                            </div>
+                            <div class="contact-info">
+                                {#if chat.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f'}
+                                    <span class="contact-name">{t.chats.common}</span>
+                                {:else}
+                                    <span class="contact-name">{chat.chatName}</span>
+                                {/if}
+                                <span class="contact-role">{chat.closedAt !== null ? `[${t.chats.closed}]` : chat.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f' ? `${chat.lastMessageBy} | ${chat.lastMessage}` : chat.lastMessage}</span>
+                                <span class="contact-role">{chat.closedAt !== null ? format(new Date(chat.closedAt), format(chat.closedAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm') : (chat.lastMessageAt === null ? '' : format(new Date(chat.lastMessageAt), format(chat.lastMessageAt, 'MM.dd.yyyy') === format(new Date(), 'MM.dd.yyyy') ? 'HH:mm' : 'dd.MM.yyyy HH:mm'))}</span>
+                            </div>
+                        </a>
+                            {/each}
+                        </div>
+                    {/if}
+                {/if}
+            {/each}
+        </div>
         {/if}
-    {/each}
-</div>
     </aside>
 
     <main class="chat-main">
@@ -131,6 +154,7 @@ const sections = $derived([
         border-right: 1px solid #eee;
         display: flex;
         flex-direction: column;
+        overflow-y: auto;
     }
 
     .sidebar-header {
@@ -190,7 +214,7 @@ const sections = $derived([
 }
 
 .chevron.rotated {
-    transform: rotate(90deg); /* Поворот стрелки вниз при открытии */
+    transform: rotate(90deg);
 }
 
 .count {
@@ -207,7 +231,6 @@ const sections = $derived([
     flex-direction: column;
 }
 
-/* Темная тема */
 :global([data-theme="dark"]) .section-header {
     background: #1e293b;
     color: #94a3b8;
@@ -326,12 +349,61 @@ const sections = $derived([
         color: #64748b;
     }
 
+.sidebar-toggle-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: white;
+    border: none;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-toggle-header:hover {
+    background-color: #f8f9fa;
+}
+
+.sidebar-toggle-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.main-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.main-chevron.rotated {
+    transform: rotate(90deg);
+}
+
+:global([data-theme="dark"]) .sidebar-toggle-header {
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+}
+
+:global([data-theme="dark"]) .sidebar-toggle-header:hover {
+    background-color: #334155;
+}
+
+:global([data-theme="dark"]) .sidebar-toggle-header h3 {
+    color: #f8fafc;
+}
+
     @media (max-width: 900px) {
         .chat-wrapper {
             grid-template-columns: 2fr 4fr;
 
             height: 80vh;
-            border-radius: 0;
+            border-radius: 20px;
         }
 
         .contact-item{
@@ -350,8 +422,91 @@ const sections = $derived([
             padding: 0.5rem;
             justify-content: center;
         }
-        .chevron, .count {
-            display: none;
-        }
     }
+
+@media (max-width: 700px) {
+    .sidebar-toggle-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .chat-wrapper {
+        grid-template-columns: 1fr;
+        height: calc(100vh - 60px);
+        margin: 0;
+        border-radius: 0;
+        width: 100%;
+    }
+
+    .chat-wrapper:not(:has(.chat-content)) .chat-main {
+        display: none;
+    }
+    .chat-wrapper:not(:has(.chat-content)) .contacts-sidebar {
+        display: flex;
+        width: 100%;
+    }
+
+    .chat-wrapper:has(.chat-content) .contacts-sidebar {
+        display: none;
+    }
+    .chat-wrapper:has(.chat-content) .chat-main {
+        display: flex;
+        width: 100%;
+    }
+
+    .contact-item {
+        flex-direction: row !important;
+        justify-content: flex-start !important;
+        padding: 1rem !important;
+        gap: 1rem !important;
+    }
+
+    .section-header {
+        padding: 1rem !important;
+        justify-content: flex-start !important;
+    }
+
+    .chevron, .count {
+        display: flex !important;
+    }
+
+    .contact-info {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
+@media (max-width: 360px) {
+    .sidebar-toggle-header {
+        padding: 0.85rem 1rem;
+    }
+    .sidebar-toggle-header h3 {
+        font-size: 1rem;
+    }
+
+    .sidebar-header {
+        padding: 1rem;
+    }
+
+    .sidebar-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .contact-item {
+        padding: 0.75rem !important;
+        gap: 0.75rem !important;
+    }
+
+    .contact-name {
+        font-size: 0.9rem;
+    }
+
+    .contact-role {
+        font-size: 0.75rem;
+    }
+    
+    .avatar-wrapper {
+        width: 2.2rem;
+        height: 2.2rem;
+    }
+}
 </style>

@@ -13,7 +13,7 @@
 
     let propertyTypeStats = $state<PropertyTypeStats>();
 
-    const getPropertyTypeStats = async (): Promise<void> => {
+    const getPropertyTypeStats = async () => {
         if($auth.id === null){
             return;
         }
@@ -46,7 +46,7 @@
         }
     };
 
-    onMount(async (): Promise<void> => {
+    onMount(async () => {
         await getPropertyTypeStats();
     });
 
@@ -86,7 +86,7 @@
                 <div class="report__container__item"><strong>{t.reports.price}:</strong> <span>{propertyTypeStats.topDealPrice}</span></div>
                 <div class="report__container__item"><strong>{t.reports.realtor}:</strong> <span>{propertyTypeStats.topDealRealtorName}</span></div>
                 <div class="report__container__item"><strong>{t.reports.customer}:</strong> <span>{propertyTypeStats.topDealCustomerName}</span></div>
-                <div class="report__container__item"><strong>{t.reports.sold}:</strong> <span>{format(propertyTypeStats.topDealSoldDate, 'MM.dd.yyyy')}</span></div>
+                <div class="report__container__item"><strong>{t.reports.sold}:</strong> <span>{propertyTypeStats.topDealSoldDate !== '' ? format(propertyTypeStats.topDealSoldDate, 'MM.dd.yyyy') : ''}</span></div>
             </div>
         </div>
 
