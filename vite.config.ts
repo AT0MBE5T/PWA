@@ -32,8 +32,8 @@ injectManifest: {
 },
 
     manifest: {
-        theme_color: '#f4f93c',
-        background_color: '#2EC6FE',
+        theme_color: '#764ba2',
+        background_color: '#667eea',
         name: 'Realsy',
         short_name: 'Rsy',
         start_url: '/',
