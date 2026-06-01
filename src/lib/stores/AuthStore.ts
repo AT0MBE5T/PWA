@@ -48,12 +48,15 @@ function createAuthStore() {
             }
         },
 
-        login: async (token: string, refresh: string) => {
-            document.cookie = `accessToken=${token}; path=/; SameSite=Strict; Secure; Max-Age=900`;
-            document.cookie = `refreshToken=${refresh}; path=/; SameSite=Strict; Secure; HttpOnly; Max-Age=2592000`;
-            await goto('/');
-            window.location.reload();
-        },
+login: async (token: string, refresh: string) => {
+    const domain = window.location.hostname; 
+
+    document.cookie = `accessToken=${token}; path=/; domain=${domain}; SameSite=Strict; Secure; Max-Age=900`;
+    document.cookie = `refreshToken=${refresh}; path=/; domain=${domain}; SameSite=Strict; Secure; Max-Age=2592000`;
+    
+    await goto('/');
+    window.location.reload();
+},
 
         logout: async () => {
             const registration = await navigator.serviceWorker.ready;
