@@ -215,7 +215,7 @@
                             </li>
                         {:else}
                             <li class="header__nav__list__item login-logout-btn">
-                                <button class={$page.route.id?.startsWith('/login') ? 'active' : ''} onclick={() => goto('/login')}>
+                                <button class={$page.route.id?.startsWith('/login') ? 'active' : ''} onclick={() => {menuOpen = false; goto('/login');}}>
                                     <img src="/icons/login.svg" height="25" width="25" alt="#"> {t.header.login}
                                 </button>
                             </li>

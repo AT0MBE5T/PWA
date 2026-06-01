@@ -442,7 +442,6 @@
     }
     @media (max-width: 768px) {
         .greeting-container {
-            margin: 2rem 0;
             width: 90%;
         }
 

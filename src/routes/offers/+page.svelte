@@ -161,7 +161,8 @@
         // svelte-ignore state_referenced_locally
         { id: '551e9efb-530e-4286-a287-82005a210627', name: t.offers.land },
         // svelte-ignore state_referenced_locally
-        { id: '85e328df-e568-43b4-9c95-bf266fa63dc0', name: t.offers.room }
+        { id: '85e328df-e568-43b4-9c95-bf266fa63dc0', name: t.offers.room },
+        { id: 'Favorites', name: t.offers.favorite }
     ]);
 
     const goToPage = (page: number, isClicked: boolean) => {

@@ -611,7 +611,6 @@
     
     @media (max-width: 768px) {
         .register__form__container{
-            width: 80%;
             margin: 2rem auto;
         }
 
