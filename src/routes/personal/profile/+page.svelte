@@ -127,13 +127,6 @@
                 return false;
             }
 
-            const responseData = await response.json();
-
-            if (responseData.errors !== undefined){
-                newEmail = userInfo!.email;
-                return false;
-            }
-
             await personalStore.updateEmail($auth.id, newEmail);
             settings.online = true;
             return true;
@@ -187,18 +180,7 @@
                 body: JSON.stringify(requestData)
             });
 
-            console.log(1);
-
             if(!response.ok){
-                newPhone = userInfo!.phoneNumber;
-                return false;
-            }
-
-            console.log(2);
-
-            const responseData = await response.json();
-
-            if (responseData.errors !== undefined){
                 newPhone = userInfo!.phoneNumber;
                 return false;
             }
@@ -207,7 +189,6 @@
             settings.online = true;
             return true;
         }catch (error){
-            console.log(error);
             settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             newPhone = userInfo!.phoneNumber;
