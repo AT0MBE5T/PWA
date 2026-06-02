@@ -8,6 +8,9 @@ import { jwtDecode } from "jwt-decode";
 export const handle: Handle = async ({ event, resolve }) => {
     let token = event.cookies.get('accessToken');
 
+    const rawCookies = event.request.headers.get('cookie');
+    console.log("=== ВСЕ КУКИ ИЗ БРАУЗЕРА ===", rawCookies);
+
     if (token) {
         try {
             const decoded = jwtDecode<JwtPayload>(token);
