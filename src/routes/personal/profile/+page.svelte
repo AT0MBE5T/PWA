@@ -189,7 +189,6 @@
             settings.online = true;
             return true;
         }catch (error){
-            console.log(error);
             settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             newPhone = userInfo!.phoneNumber;
@@ -391,7 +390,7 @@
                 <div class="info-icon"><img src="/icons/mail.svg" height="25" width="25" alt="#"></div>
                 <div class="info-content">
                     <h3 class="info-title">{t.authorization.email}</h3>
-                    <p class="info-value">{userInfo?.email}</p>
+                    <p class="info-value" title={userInfo?.email}>{userInfo?.email}</p>
                     <button onclick={changeEmailClick}>{t.personal.change}</button>
                 </div>
             </div>
@@ -450,7 +449,8 @@
     }
 
     .info-content{
-        width: 100%;
+        flex: 1;
+        min-width: 0;
     }
 
     .login__form__login,
@@ -544,7 +544,7 @@
 
     .user-info {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
@@ -595,6 +595,10 @@
         font-size: 1.125rem;
         font-weight: 600;
         color: #1f2937;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
     }
 
     .roles-container {
@@ -800,7 +804,7 @@
         }
 
         .user-info {
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
         }
 
         .user-info > :last-child {

@@ -656,6 +656,7 @@
 
     .container__header {
         padding: 0 0.8rem;
+        border-radius: 0;
     }
 
     .header__controls {
