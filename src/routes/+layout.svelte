@@ -78,38 +78,21 @@ async function clientRefresh() {
             const data = await response.json();
             return data.token;
         }
+
+        if (response.status === 400) {
+            return null;
+        }
     } catch (e) {
-        console.error("Рефреш не удался", e);
-    }
-    return null;
-}
-
-const getUserDto = async (token: string): Promise<UserDto | null> => {
-    try{
-        const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/get-user-dto`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-        const userData = response.ok ? await response.json() as UserDto : null;
-        settings.online = true;
-        return userData;
-    }catch(error){
-        settings.online = false;
+        console.error(e);
     }
     return null;
 }
 
 onMount(async () => {
-    console.log(1);
     if (!$auth.accessToken){
         const accessToken = await clientRefresh();
-        console.log(accessToken);
-        await auth.login(accessToken);
-        console.log(2);
+        if (accessToken)
+            await auth.login(accessToken);
     }
 });
 
