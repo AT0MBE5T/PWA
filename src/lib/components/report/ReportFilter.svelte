@@ -49,6 +49,7 @@
 
     $effect(() => {
         clearFilter();
+        clientName = $auth.login!;
         switchElementsByCurrentPage(currentPage);
     });
 

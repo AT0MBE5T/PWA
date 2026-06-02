@@ -258,7 +258,7 @@
 
             <div class="register__form__login">
                 <label for="login">{t.authorization.login}</label>
-                <input bind:value={loginInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={loginInput} oninput={() => {
                     loginError = false;
                 }} name="login" type="text" />
                 <div>{loginErrorText}</div>
@@ -266,7 +266,7 @@
 
             <div class="register__form__name">
                 <label for="name">{t.authorization.name}</label>
-                <input bind:value={nameInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={nameInput} oninput={() => {
                     nameError = false;
                 }} name="name" type="text" />
                 <div>{nameErrorText}</div>
@@ -274,7 +274,7 @@
 
             <div class="register__form__surname">
                 <label for="surname">{t.authorization.surname}</label>
-                <input bind:value={surnameInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={surnameInput} oninput={() => {
                     surnameError = false;
                 }} name="name" type="text" />
                 <div>{surnameErrorText}</div>
@@ -282,14 +282,14 @@
 
             <div class="register__form__email">
                 <label for="email">{t.authorization.email}</label>
-                <input bind:value={emailInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={emailInput} oninput={() => {
                     emailError = false;
                 }} name="email" type="email" />
                 <div>{emailErrorText}</div>
             </div>
             <div class="register__form__phone">
                 <label for="phone">{t.authorization.phoneNumber}</label>
-                <input bind:value={phoneNumberInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={phoneNumberInput} oninput={() => {
                     phoneNumberError = false;
                 }} name="phone" type="text" />
                 <div>{phoneNumberErrorText}</div>
@@ -297,7 +297,7 @@
 
             <div class="register__form__age">
                 <label for="age">{t.authorization.age}</label>
-                <input bind:value={ageInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={ageInput} oninput={() => {
                     ageError = false;
                 }} name="age" type="number" />
                 <div>{ageErrorText}</div>
@@ -305,7 +305,7 @@
 
             <div class="register__form__password">
                 <label for="password">{t.authorization.password}</label>
-                <input bind:value={passwordInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={passwordInput} oninput={() => {
                     passwordError = false;
                 }} name="password" type="password" />
                 <div>{passwordErrorText}</div>
@@ -313,7 +313,7 @@
 
             <div class="register__form__repeat-password">
                 <label for="repeat-password">{t.authorization.repeatPassword}</label>
-                <input bind:value={repeatPasswordInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={repeatPasswordInput} oninput={() => {
                     repeatPasswordError = false;
                 }} name="repeat-password" type="password" />
                 <div>{repeatPasswordErrorText}</div>
@@ -321,7 +321,7 @@
         </div>
 
         <div class="register__form__confirm">
-            <button onkeydown={handleKeydown} onclick={confirmClicked}>{t.authorization.registerConfirmBtn}</button>
+            <button onclick={confirmClicked}>{t.authorization.registerConfirmBtn}</button>
         </div>
         <div class="footer__register">
             <div class="register__form__login-form">{t.authorization.alreadyHaveAcc}</div>

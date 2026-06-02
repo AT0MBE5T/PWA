@@ -126,20 +126,20 @@
         <div class="login__form">
             <div class="login__form__login">
                 <label for="login">{t.authorization.login}</label>
-                <input bind:value={loginInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={loginInput} oninput={() => {
                 loginError = false;
             }} name="login" type="text" />
                 <div>{loginErrorText}</div>
             </div>
             <div class="login__form__password">
                 <label for="password">{t.authorization.password}</label>
-                <input bind:value={passwordInput} oninput={() => {
+                <input onkeydown={handleKeydown} bind:value={passwordInput} oninput={() => {
                 passwordError = false;
             }} name="password" type="password" />
                 <div>{passwordErrorText}</div>
             </div>
             <div class="login__form__confirm">
-                <button onkeydown={handleKeydown} onclick={confirmClicked}>{t.authorization.loginConfirmBtn}</button>
+                <button onclick={confirmClicked}>{t.authorization.loginConfirmBtn}</button>
             </div>
         </div>
         <div class="footer__login">
