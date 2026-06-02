@@ -80,7 +80,8 @@ async function tryServerRefresh(svelteFetch: typeof fetch, cookieHeader: string)
             method: "POST",
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Cookie': cookieHeader
             }
         });
         if (!response.ok) return null;
