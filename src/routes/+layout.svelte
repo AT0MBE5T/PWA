@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { auth, Roles, toast, Toast, translations } from '$lib';
+    import { auth, Roles, toast, Toast, translations, type UserDto } from '$lib';
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
     import { browser } from '$app/environment';
@@ -52,6 +52,75 @@
             console.error(error);
         }
     });
+
+
+
+
+
+
+
+
+
+
+
+async function clientRefresh() {
+    try {
+        const response = await fetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.token;
+        }
+    } catch (e) {
+        console.error("Рефреш не удался", e);
+    }
+    return null;
+}
+
+const getUserDto = async (token: string): Promise<UserDto | null> => {
+    try{
+        const response = await fetch(`${env.PUBLIC_API_URL}/api/accounts/get-user-dto`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+        const userData = response.ok ? await response.json() as UserDto : null;
+        settings.online = true;
+        return userData;
+    }catch(error){
+        settings.online = false;
+    }
+    return null;
+}
+
+onMount(async () => {
+    console.log(1);
+    if (!$auth.accessToken){
+        const accessToken = await clientRefresh();
+        $auth.accessToken = accessToken;
+        console.log(2);
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
 
     async function requestNotificationPermission() {
         if (!("Notification" in window)) {
