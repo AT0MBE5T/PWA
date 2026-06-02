@@ -8,7 +8,7 @@
 
     let { callBack }: {callBack: (data: ReportFilterParams, action: Action) => void} = $props();
 
-    let clientName = $derived<string>(!auth.hasRole(Roles.Admin) ? $auth.login ?? '' : '');
+    let clientName = $state<string>('');
     let propertyType = $state<string>('');
     let isInterval = $state<boolean>(false);
     
@@ -41,6 +41,7 @@
     };
 
     onMount(async () => {
+        clientName = !auth.hasRole(Roles.Admin) ? $auth.login ?? '' : '';
         await getPropertyTypes();
     });
 
