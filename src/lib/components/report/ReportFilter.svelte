@@ -41,8 +41,7 @@
     };
 
     onMount(async () => {
-        console.log($auth);
-        clientName = !auth.hasRole(Roles.Admin) ? $auth.login ?? '' : '';
+        clientName = $auth.login!;
         await getPropertyTypes();
     });
 

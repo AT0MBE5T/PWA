@@ -96,6 +96,13 @@
         toast.show(t.system.errorOccurred, 'error');
     };
 
+    const handleKeydown = async (e: KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            await confirmClicked();
+        }
+    };
+
 </script>
 
 <div class="main__login login">
@@ -132,7 +139,7 @@
                 <div>{passwordErrorText}</div>
             </div>
             <div class="login__form__confirm">
-                <button onclick={confirmClicked}>{t.authorization.loginConfirmBtn}</button>
+                <button onkeydown={handleKeydown} onclick={confirmClicked}>{t.authorization.loginConfirmBtn}</button>
             </div>
         </div>
         <div class="footer__login">

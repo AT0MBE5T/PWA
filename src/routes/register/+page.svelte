@@ -195,6 +195,13 @@
 
     let errors = $state<string[]>([]);
 
+    const handleKeydown = async (e: KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            await confirmClicked();
+        }
+    };
+
 </script>
 
 <div class="main__register register">
@@ -314,7 +321,7 @@
         </div>
 
         <div class="register__form__confirm">
-            <button onclick={confirmClicked}>{t.authorization.registerConfirmBtn}</button>
+            <button onkeydown={handleKeydown} onclick={confirmClicked}>{t.authorization.registerConfirmBtn}</button>
         </div>
         <div class="footer__register">
             <div class="register__form__login-form">{t.authorization.alreadyHaveAcc}</div>
