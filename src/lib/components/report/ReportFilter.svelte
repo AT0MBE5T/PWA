@@ -41,7 +41,6 @@
     };
 
     onMount(async () => {
-        clientName = $auth.login!;
         await getPropertyTypes();
     });
 
