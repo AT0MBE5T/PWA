@@ -6,9 +6,7 @@ import { redirect, type Handle } from "@sveltejs/kit";
 import { jwtDecode } from "jwt-decode";
 
 export const handle: Handle = async ({ event, resolve }) => {
-    console.log(123);
     let token = event.cookies.get('accessToken');
-    console.log(token);
 
     if (token) {
         try {
