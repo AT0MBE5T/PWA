@@ -187,26 +187,27 @@
                 body: JSON.stringify(requestData)
             });
 
+            console.log(1);
+
             if(!response.ok){
                 newPhone = userInfo!.phoneNumber;
                 return false;
             }
 
+            console.log(2);
+
             const responseData = await response.json();
 
             if (responseData.errors !== undefined){
                 newPhone = userInfo!.phoneNumber;
-                console.log(1);
                 return false;
             }
 
-            console.log(2);
             await personalStore.updatePhone($auth.id, newPhone);
-            console.log(3);
             settings.online = true;
             return true;
-        }catch{
-            console.log(4);
+        }catch (error){
+            console.log(error);
             settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             newPhone = userInfo!.phoneNumber;
