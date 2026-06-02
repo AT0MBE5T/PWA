@@ -946,6 +946,7 @@ export const translations: Record<Language, TranslationKeys> = {
             'Warehouse': translations[lang].offers.warehouse,
             'Land': translations[lang].offers.land,
             'Room': translations[lang].offers.room,
+            '': translations[lang].system.noData
         };
 
         return translation[type] ?? type;
