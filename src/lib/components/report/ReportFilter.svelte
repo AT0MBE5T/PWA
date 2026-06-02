@@ -8,7 +8,7 @@
 
     let { callBack }: {callBack: (data: ReportFilterParams, action: Action) => void} = $props();
 
-    let clientName = $state<string>('');
+    let clientName = $derived<string>(!auth.hasRole(Roles.Admin) ? $auth.login ?? '' : '');
     let propertyType = $state<string>('');
     let isInterval = $state<boolean>(false);
     
@@ -214,25 +214,14 @@ let filterData = $derived<LookupItemFilter[]>([
         <div class="form-group" class:hidden={!clientVisible}>
             <div class="input-group">
                 <label for="clientNameInput" class="input-label">{t.reports.clientLogin}</label>
-                {#if !auth.hasRole(Roles.Admin)}
-                    <input
-                            id="clientNameInput"
-                            type="text"
-                            readonly={true}
-                            value={$auth.login}
-                            placeholder="Test"
-                            class="input-field text-input"
-                    />
-                {:else}
-                    <input
-                            id="clientNameInput"
-                            type="text"
-                            readonly={false}
-                            bind:value={clientName}
-                            placeholder="Test"
-                            class="input-field text-input"
-                    />
-                {/if}
+                <input
+                        id="clientNameInput"
+                        type="text"
+                        readonly={!auth.hasRole(Roles.Admin)}
+                        bind:value={clientName}
+                        placeholder="Test"
+                        class="input-field text-input"
+                />
             </div>
         </div>
         <div class="form-group" class:hidden={!propertyTypeVisible}>
