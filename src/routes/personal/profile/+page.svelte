@@ -189,6 +189,7 @@
             settings.online = true;
             return true;
         }catch (error){
+            console.log(error);
             settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             newPhone = userInfo!.phoneNumber;
