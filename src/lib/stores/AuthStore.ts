@@ -48,7 +48,7 @@ function createAuthStore() {
             }
         },
 
-        login: async (token: string, refresh: string) => {
+        login: async (token: string) => {
             document.cookie = `accessToken=${token}; path=/; SameSite=Strict; Secure; Max-Age=900`;
             await goto('/');
             window.location.reload();
