@@ -134,7 +134,7 @@
                 return false;
             }
 
-            personalStore.updateEmail($auth.id, newEmail);
+            await personalStore.updateEmail($auth.id, newEmail);
             settings.online = true;
             return true;
         }catch{
@@ -196,13 +196,17 @@
 
             if (responseData.errors !== undefined){
                 newPhone = userInfo!.phoneNumber;
+                console.log(1);
                 return false;
             }
 
-            personalStore.updateEmail($auth.id, newEmail);
+            console.log(2);
+            await personalStore.updatePhone($auth.id, newPhone);
+            console.log(3);
             settings.online = true;
             return true;
         }catch{
+            console.log(4);
             settings.online = false;
             toast.show(t.system.errorOccurred, 'error');
             newPhone = userInfo!.phoneNumber;

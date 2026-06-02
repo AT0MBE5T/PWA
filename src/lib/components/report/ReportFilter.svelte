@@ -48,7 +48,6 @@
 
     $effect(() => {
         clearFilter();
-        clientName = $auth.login!;
         switchElementsByCurrentPage(currentPage);
     });
 
@@ -102,7 +101,7 @@
     function clearFilter() {
         dateFrom = format(currentDate.toString(), 'yyyy-MM-dd');
         dateTo = "";
-        clientName = "";
+        clientName = $auth.login!;
         propertyType = "";
     }
 
