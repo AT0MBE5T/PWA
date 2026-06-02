@@ -75,7 +75,7 @@ class PersonalState {
 
         if (data) {
             data.phoneNumber = phone;
-            await store.put($state.snapshot(data));
+            await store.put($state.snapshot(data), userId);
         }
 
         await tx.done;
