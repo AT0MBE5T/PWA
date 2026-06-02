@@ -76,7 +76,7 @@
 
     $effect(() => {
         untrack(() => {
-            offerFullStore.initSignalR(announcementId, $auth.name!, settingsStore, $auth.id!);
+            offerFullStore.initSignalR(announcementId, $auth.login!, settingsStore, $auth.id!);
         });
 
         return () => {
@@ -516,7 +516,7 @@
                     showToast = true;
 
                     await offerState.addOffer(dataToAdd);
-                    await offerState.addFullOffer(dataToAdd, $auth.id!, `${$auth.name} ${$auth.personSurname}`);
+                    await offerState.addFullOffer(dataToAdd, $auth.id!, `${$auth.personName} ${$auth.personSurname}`);
                     await offerFullStore.syncAnnouncements(offerFullStore.searchDataVar!);
                 }
                 else{
@@ -531,7 +531,7 @@
                 settings.online = false;
                 await offerFullStore.savePendingOffer(dataToAdd);
                 await offerState.addOffer(dataToAdd);
-                await offerState.addFullOffer(dataToAdd, $auth.id!, `${$auth.name} ${$auth.personSurname}`);
+                await offerState.addFullOffer(dataToAdd, $auth.id!, `${$auth.personName} ${$auth.personSurname}`);
 
                 await goto('/offers?page=1');
             } finally {

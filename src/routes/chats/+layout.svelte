@@ -24,7 +24,7 @@
         const chats = chatOfflineState.chats[$auth.id!];
         if (chats) {
             chatState.setChats(chats);
-            chatState.initSignalR($auth.id!, `${$auth.name} ${$auth.personSurname}`);
+            chatState.initSignalR($auth.id!, `${$auth.personName} ${$auth.personSurname}`);
         }
     });
 

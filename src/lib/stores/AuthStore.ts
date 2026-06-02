@@ -7,7 +7,7 @@ import getCookie from "$lib/utils/cookieData";
 function createAuthStore() {
     const initialState: AuthState = {
         id: null,
-        name: null,
+        login: null,
         avatarUrl: null,
         roles: [],
         isAuthenticated: false,
@@ -31,11 +31,11 @@ function createAuthStore() {
             return currentRoles.includes(role);
         },
         
-        sync: (user: { id: string | null, name: string | null, avatarUrl: string | null, roles: string[], personName: string | null, personSurname: string | null } | null, token: string | null) => {
+        sync: (user: { id: string | null, login: string | null, avatarUrl: string | null, roles: string[], personName: string | null, personSurname: string | null } | null, token: string | null) => {
             if (user && token) {
                 set({
                     id: user.id,
-                    name: user.name,
+                    login: user.login,
                     avatarUrl: user.avatarUrl,
                     roles: user.roles,
                     isAuthenticated: true,

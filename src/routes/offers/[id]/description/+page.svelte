@@ -34,7 +34,7 @@
 
 $effect(() => {
         untrack(() => {
-            offerFullStore.initSignalR(data.id, $auth.name!, settingsStore, $auth.id!);
+            offerFullStore.initSignalR(data.id, $auth.login!, settingsStore, $auth.id!);
         });
 
         return () => {

@@ -1,6 +1,6 @@
 export interface AuthState {
     id: string | null;
-    name: string | null;
+    login: string | null;
     avatarUrl: string | null;
     roles: string[];
     isAuthenticated: boolean;

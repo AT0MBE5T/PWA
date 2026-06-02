@@ -21,7 +21,7 @@
             <div class="welcome-section">
                 <div class="welcome-content">
                     <h2 class="welcome-message">
-                        {t.authorized.hello} <span class="user-name">{$auth.personName}</span>!
+                        {t.authorized.hello}, <span class="user-name">{$auth.personName}</span>!
                         <span class="welcome-emoji"><img src="/icons/party-popper.svg" width="40rem" height="40rem" class="icon-accent bounce" alt="#"></span>
                     </h2>
                     <p class="welcome-subtitle">{t.authorized.welcome}</p>
@@ -39,7 +39,7 @@
                     {/if}
                     <div class="info-content">
                         <h3 class="info-title">{t.authorized.name}</h3>
-                        <p class="info-value">{$auth.name}</p>
+                        <p class="info-value">{$auth.personName}</p>
                     </div>
                 </div>
                 <div class="info-card">

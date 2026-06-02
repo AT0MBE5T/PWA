@@ -34,7 +34,7 @@
         settings.isLoading = false;
         questionAnswerState.initSignalR(
             currentId,
-            data.user?.name || "Guest",
+            data.user?.login || "Guest",
             settingsStore
         );
     }

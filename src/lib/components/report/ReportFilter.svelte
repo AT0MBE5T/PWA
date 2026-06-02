@@ -219,7 +219,7 @@ let filterData = $derived<LookupItemFilter[]>([
                             id="clientNameInput"
                             type="text"
                             readonly={true}
-                            value={$auth.personName}
+                            value={$auth.login}
                             placeholder="Test"
                             class="input-field text-input"
                     />

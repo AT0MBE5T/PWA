@@ -26,7 +26,7 @@
 
 $effect(() => {
     const chatId = data.chatId;
-    const userName = `${data.user?.name} ${data.user?.personSurname}`;
+    const userName = `${data.user?.personName} ${data.user?.personSurname}`;
 
     if (!chatId || !userName) return;
 
@@ -38,7 +38,7 @@ $effect(() => {
 
 onMount(async () => {
     const chatId = data.chatId;
-    const userName = `${data.user?.name} ${data.user?.personSurname}`;
+    const userName = `${data.user?.personName} ${data.user?.personSurname}`;
     await chatState.initSignalR($auth.id!, userName, chatId);
 });
 
@@ -127,9 +127,9 @@ onDestroy(async () => {
     async function sendMessage() {
         if (!textInput.trim()) return;
         if (data.chatId === '74679c97-aa14-444e-b3ae-9a6d8d01399f'){
-            await chatState.sendMessageInCommon(data.chatId, $auth.id!, `${$auth.name} ${$auth.personSurname}`, textInput);
+            await chatState.sendMessageInCommon(data.chatId, $auth.id!, `${$auth.personName} ${$auth.personSurname}`, textInput);
         }else{
-            await chatState.sendMessage($auth.id!, `${$auth.name} ${$auth.personSurname}`, data.chatId, textInput, chat?.offerId ?? null, chat?.realtorId!);
+            await chatState.sendMessage($auth.id!, `${$auth.personName} ${$auth.personSurname}`, data.chatId, textInput, chat?.offerId ?? null, chat?.realtorId!);
         }
         textInput = "";
     }

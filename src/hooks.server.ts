@@ -42,7 +42,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         const userDto = await getUserDto(token);
         event.locals.user = {
             id: decoded.sub,
-            name: decoded.name ?? null,
+            login: decoded.login,
             roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.roles],
             avatarUrl: userDto?.avatarUrl ?? null,
             personName: decoded.name,

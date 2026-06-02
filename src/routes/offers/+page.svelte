@@ -267,7 +267,7 @@
     $effect(() => {
         untrack(() => {
             offerState.setOffers(data);
-            offerState.initSignalR('offers_global', $auth.name!);
+            offerState.initSignalR('offers_global', $auth.login!);
         });
 
         return () => {

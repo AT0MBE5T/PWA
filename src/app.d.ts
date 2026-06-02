@@ -3,7 +3,7 @@ declare global {
 		interface Locals {
 			user: {
                 id: string | null;
-                name: string | null;
+                login: string | null;
                 roles: string[];
 				avatarUrl: string | null;
 				personName: string | null;

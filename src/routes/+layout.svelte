@@ -258,7 +258,7 @@
                                         <div class="default-avatar"><img src="/icons/user.svg" height="40" width="40" alt="#"></div>
                                     {/if}
                                 </div>
-                                <h3 class="profile-name">{$auth.name}</h3>
+                                <h3 class="profile-name">{$auth.personName}</h3>
                             </button>
                             <button class="logout-btn" onclick={logout}>{t.header.logout}</button>
                         {:else}

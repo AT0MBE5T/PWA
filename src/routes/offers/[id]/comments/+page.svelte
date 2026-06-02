@@ -35,7 +35,7 @@
         const currentId = data.id;
         if (!currentId) return;
 
-        const userName = untrack(() => data.user?.name || 'Guest');
+        const userName = untrack(() => data.user?.login || 'Guest');
 
         async function loadData() {
             settings.isLoading = true;
