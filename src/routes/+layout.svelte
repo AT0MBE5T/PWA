@@ -11,6 +11,7 @@
     import SettingsStore from '$lib/stores/settingsStore.svelte';
     import type { Language } from '$lib/i18n';
     import SupportChat from '$lib/components/SupportChat.svelte';
+    import { DefaultHttpClient } from '@microsoft/signalr';
     let { data, children } = $props();
 
     let menuOpen = $state(false);
@@ -106,7 +107,8 @@ onMount(async () => {
     console.log(1);
     if (!$auth.accessToken){
         const accessToken = await clientRefresh();
-        $auth.accessToken = accessToken;
+        console.log(accessToken);
+        await auth.login(accessToken);
         console.log(2);
     }
 });
