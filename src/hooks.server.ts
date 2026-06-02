@@ -75,6 +75,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 async function tryServerRefresh(svelteFetch: typeof fetch, cookieHeader: string) {
+    console.log(cookieHeader);
     try{
         const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: "POST",
