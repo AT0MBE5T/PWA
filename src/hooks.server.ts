@@ -6,7 +6,9 @@ import { redirect, type Handle } from "@sveltejs/kit";
 import { jwtDecode } from "jwt-decode";
 
 export const handle: Handle = async ({ event, resolve }) => {
+    console.log(123);
     let token = event.cookies.get('accessToken');
+    console.log(token);
 
     if (token) {
         try {
@@ -75,7 +77,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 async function tryServerRefresh(svelteFetch: typeof fetch, cookieHeader: string) {
-    console.log(cookieHeader);
     try{
         const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: "POST",
