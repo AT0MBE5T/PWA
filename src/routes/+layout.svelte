@@ -54,17 +54,7 @@
         }
     });
 
-
-
-
-
-
-
-
-
-
-
-async function clientRefresh() {
+    async function clientRefresh() {
     try {
         const response = await fetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: 'POST',
@@ -95,17 +85,6 @@ onMount(async () => {
             await auth.login(accessToken);
     }
 });
-
-
-
-
-
-
-
-
-
-
-
 
     async function requestNotificationPermission() {
         if (!("Notification" in window)) {
