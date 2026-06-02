@@ -78,9 +78,10 @@ async function tryServerRefresh(svelteFetch: typeof fetch, cookieHeader: string)
     try{
         const response = await svelteFetch(`${env.PUBLIC_API_URL}/api/refreshes/refresh`, {
             method: "POST",
-                headers: {
-                    'Cookie': cookieHeader
-                }
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
         if (!response.ok) return null;
         const data = await response.json();
