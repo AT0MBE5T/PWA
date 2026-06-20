@@ -449,7 +449,7 @@
             isValid = false;
         }
 
-        if (contentInput.length > 255) {
+        if (contentInput.length > 2550) {
             contentError = true;
             contentErrorText = t.validation.contentLength;
             isValid = false;
@@ -461,7 +461,7 @@
             isValid = false;
         }
 
-        if (descriptionInput.length > 500) {
+        if (descriptionInput.length > 5000) {
             descriptionError = true;
             descriptionErrorText = t.validation.descriptionLength;
             isValid = false;
