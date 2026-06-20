@@ -659,6 +659,7 @@
             toastType = 'error';
             toastText = t.system.validationError;
             showToast = true;
+            settings.isLoading = false;
         }
     }
 
@@ -839,17 +840,6 @@
                         />
                         <div class="error-text">{areaErrorText}</div>
                     </div>
-
-                    <div class="announcement__form__item">
-                        <label for="floors">{t.offers.floors}</label>
-                        <input
-                                bind:value={floorsInput}
-                                oninput={handleFloorsInputChange}
-                                name="floors"
-                                type="number"
-                        />
-                        <div class="error-text">{floorsErrorText}</div>
-                    </div>
                 </div>
 
                 <div class="announcement__form-right">
@@ -894,6 +884,17 @@
                             {/if}
                         </div>
                         <div class="error-text">{statementTypeErrorText}</div>
+                    </div>
+
+                    <div class="announcement__form__item">
+                        <label for="floors">{t.offers.floors}</label>
+                        <input
+                                bind:value={floorsInput}
+                                oninput={handleFloorsInputChange}
+                                name="floors"
+                                type="number"
+                        />
+                        <div class="error-text">{floorsErrorText}</div>
                     </div>
 
                     <div class="announcement__form__item">
