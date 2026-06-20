@@ -3,6 +3,8 @@ import type { PhotoInterface } from "./PhotoInterface";
 export type AnnouncementFull = {
     id: string;
     title: string;
+    statementTypeId: string;
+    propertyTypeId: string;
     statementTypeName: string;
     propertyTypeName: string;
     price: number;

@@ -139,12 +139,17 @@
         }
     };
 
+    $effect(() => {
+        propertyTypeSearch = propertyTypeNames.find(t => t.id === propertyTypeId)?.name ?? "";
+        statementTypeSearch = statementTypeNames.find(t => t.id === statementTypeId)?.name ?? ""; 
+    });
+
     function applyDataToForm(data: AnnouncementEditResponse) {
         propertyTypeId = data.propertyTypeId;
         statementTypeId = data.statementTypeId;
         
-        propertyTypeSearch = propertyTypes.find(t => t.id === data.propertyTypeId)?.name ?? "";
-        statementTypeSearch = statementTypes.find(t => t.id === data.statementTypeId)?.name ?? "";
+        propertyTypeSearch = propertyTypeNames.find(t => t.id === data.propertyTypeId)?.name ?? "";
+        statementTypeSearch = statementTypeNames.find(t => t.id === data.statementTypeId)?.name ?? "";
 
         areaInput = data.area;
         contentInput = data.content;
@@ -568,8 +573,8 @@
                 }
             });
 
-            formData.append("PropertyType", propertyTypeId);
-            formData.append("StatementType", statementTypeId);
+            formData.append("PropertyTypeId", propertyTypeId);
+            formData.append("StatementTypeId", statementTypeId);
             formData.append("Location", locationInput);
             formData.append("Area", areaInput.toString());
             formData.append("Floors", floorsInput.toString());

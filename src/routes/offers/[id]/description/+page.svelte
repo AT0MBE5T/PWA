@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { ConfirmModal, toast, translations, settings, Roles, type BuyRequest, type AnnouncementShort } from '$lib';
+    import { ConfirmModal, toast, translations, settings, Roles, type BuyRequest, type AnnouncementShort, type LookupItemFilter } from '$lib';
     import { auth } from '$lib';
     import {format} from "date-fns";
     import type { PageData } from './$types';
@@ -263,6 +263,35 @@ let currentIndex = $state(0);
         if (e.key === 'ArrowLeft') prevPhoto();
     }
 
+        let propertyTypeNames = $derived<LookupItemFilter[]>([
+        // svelte-ignore state_referenced_locally
+        { id: '627eb0f8-3d35-4a29-9a28-4391364f1f4c', name: t.offers.apartment },
+        // svelte-ignore state_referenced_locally
+        { id: 'a0710797-7ee2-498e-ad6f-bd9ef7687ad4', name: t.offers.house },
+        // svelte-ignore state_referenced_locally
+        { id: '1d04b7c5-6419-40a8-a335-b20652fe6251', name: t.offers.commercial },
+        // svelte-ignore state_referenced_locally
+        { id: '0d9bca53-e6e1-4fe2-99d4-71a83205ff7a', name: t.offers.office },
+        // svelte-ignore state_referenced_locally
+        { id: '6cff1118-a1d6-4ce7-a701-78cfc47c0673', name: t.offers.warehouse },
+        // svelte-ignore state_referenced_locally
+        { id: '551e9efb-530e-4286-a287-82005a210627', name: t.offers.land },
+        // svelte-ignore state_referenced_locally
+        { id: '85e328df-e568-43b4-9c95-bf266fa63dc0', name: t.offers.room }
+    ]);
+
+    let statementTypeNames = $derived<LookupItemFilter[]>([
+        // svelte-ignore state_referenced_locally
+        { id: '0f7641fc-ccad-4919-b0bc-507664cfa55e', name: t.offers.rent },
+        // svelte-ignore state_referenced_locally
+        { id: 'eb37848c-6a60-4099-a40d-d7adf340892b', name: t.offers.lease },
+        // svelte-ignore state_referenced_locally
+        { id: '66860f07-db53-4f46-b861-90e999b8f516', name: t.offers.sale }
+    ]);
+
+    let propertyTypeName = $derived(propertyTypeNames.find(t => t.id === offer?.propertyTypeId)?.name ?? "");
+    let statementTypeName = $derived(statementTypeNames.find(t => t.id === offer?.statementTypeId)?.name ?? "");
+
     const typeData = [
         {
             id: 'af50d369-2a08-4530-9ef7-6eab9535bb28',
@@ -453,8 +482,8 @@ let currentIndex = $state(0);
                     </div>
                     <div class="description__item__right__main_info_block">
                         <div class="description__item__right__main_info_block__item"><img src="/icons/money.svg" height="25" width="25" alt="#"> {t.offers.price}: {offer?.price} ₴</div>
-                        <div class="description__item__right__main_info_block__item"><img src="/icons/lock.svg" height="25" width="25" alt="#"> {t.offers.statementType}: {offer?.statementTypeName}</div>
-                        <div class="description__item__right__main_info_block__item"><img src="/icons/house.svg" height="25" width="25" alt="#"> {t.offers.propertyType}: {offer?.propertyTypeName}</div>
+                        <div class="description__item__right__main_info_block__item"><img src="/icons/lock.svg" height="25" width="25" alt="#"> {t.offers.statementType}: {statementTypeName}</div>
+                        <div class="description__item__right__main_info_block__item"><img src="/icons/house.svg" height="25" width="25" alt="#"> {t.offers.propertyType}: {propertyTypeName}</div>
                         <div class="description__item__right__main_info_block__item"><img src="/icons/eye.svg" height="25" width="25" alt="#"> {t.offers.viewsCnt}: {offer?.viewsCnt}</div>
                     </div>    
                 </div>
