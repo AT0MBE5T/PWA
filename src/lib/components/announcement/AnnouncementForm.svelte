@@ -419,7 +419,7 @@
             isValid = false;
         }
 
-        if (titleInput.length > 100) {
+        if (titleInput.length > 128) {
             titleError = true;
             titleErrorText = t.validation.titleLength;
             isValid = false;
@@ -449,7 +449,7 @@
             isValid = false;
         }
 
-        if (contentInput.length > 2550) {
+        if (contentInput.length > 1024) {
             contentError = true;
             contentErrorText = t.validation.contentLength;
             isValid = false;
@@ -461,7 +461,7 @@
             isValid = false;
         }
 
-        if (descriptionInput.length > 5000) {
+        if (descriptionInput.length > 1024) {
             descriptionError = true;
             descriptionErrorText = t.validation.descriptionLength;
             isValid = false;
